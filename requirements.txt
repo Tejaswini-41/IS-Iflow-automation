@@ -1,0 +1,7 @@
+numpy
+pandas
+lxml
+beautifulsoup4
+jsonschema
+pytest
+jinja2

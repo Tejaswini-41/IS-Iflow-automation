@@ -1,0 +1,1149 @@
+================================================================================
+SAP CPI iFlow - Flow Tree Visualization
+================================================================================
+
+├── Sender: External_call
+│   📝 Entry point via EndpointSender adapter
+├── Sender: JMSCommonflow
+│   📝 Entry point via EndpointSender adapter
+├── Sender: JMScommonflow_2
+│   📝 Entry point via EndpointSender adapter
+├── Receiver: SalesforceQuery
+│   📝 Participant using EndpointRecevier adapter
+├── Receiver: QueryStatusInSFDC
+│   📝 Participant using EndpointRecevier adapter
+├── Receiver: AGIIS
+│   📝 Participant using EndpointRecevier adapter
+├── Receiver: CropEdge
+│   📝 Participant using EndpointRecevier adapter
+├── Receiver: cropEdge2
+│   📝 Participant using EndpointRecevier adapter
+├── Receiver: cropEdge3
+│   📝 Participant using EndpointRecevier adapter
+├── Receiver: cropedge4
+│   📝 Participant using EndpointRecevier adapter
+├── Receiver: JMS_Async
+│   📝 Participant using EndpointRecevier adapter
+├── Receiver: JMS_Async
+│   📝 Participant using EndpointRecevier adapter
+├── Receiver: calltoapex
+│   📝 Participant using EndpointRecevier adapter
+├── Receiver: SFDCMailReceiver
+│   📝 Participant using EndpointRecevier adapter
+├── Receiver: create_KeyCop_ProductBooking
+│   📝 Participant using Integration Process adapter
+├── Receiver: Integration Process
+│   📝 Participant using Integration Process adapter
+├── Receiver: getGLNNumber
+│   📝 Participant using Integration Process adapter
+├── Receiver: RR dynamicquery
+│   📝 Participant using Integration Process adapter
+├── Receiver: check sales validation
+│   📝 Participant using Integration Process adapter
+├── Receiver: Async M2M log flow2
+│   📝 Participant using Integration Process adapter
+├── Receiver: RR Composite query
+│   📝 Participant using Integration Process adapter
+├── Receiver: Advance OrderChange
+│   📝 Participant using Integration Process adapter
+├── Receiver: salesforce-Authorization
+│   📝 Participant using Integration Process adapter
+├── Receiver: Validate_OrderFlow(1)
+│   📝 Participant using Integration Process adapter
+├── Receiver: Check Error Business Process
+│   📝 Participant using Integration Process adapter
+├── Receiver: Business process exception handler
+│   📝 Participant using Integration Process adapter
+├── Receiver: CreateGrower
+│   📝 Participant using Integration Process adapter
+├── Receiver: ValidationAGIIS
+│   📝 Participant using Integration Process adapter
+├── Receiver: Async flow for error
+│   📝 Participant using Integration Process adapter
+├── Receiver: async flow for errr handler
+│   📝 Participant using Integration Process adapter
+├── Receiver: Async M2M flow
+│   📝 Participant using Integration Process adapter
+├── Receiver: Email notification
+│   📝 Participant using Integration Process adapter
+├── Receiver: Validate_Agvance_Order
+│   📝 Participant using Integration Process adapter
+├── StartEvent: Error Start 
+│   📝 Entry point of create_KeyCop_ProductBooking
+│   └── ContentModifier: Set Error Parameters 
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: notify email
+│           📝 Calls reusable subflow: Process_96162317
+│           └── CallActivity: call to check error business process
+│               📝 Calls reusable subflow: Process_62520130
+│               └── EndEvent: End 
+│                   📝 End of create_KeyCop_ProductBooking
+├── StartEvent: Start 
+│   📝 Entry point of create_KeyCop_ProductBooking
+│   └── GroovyScript: set Variables for key crop pb
+│       📝 Executes custom logic: sets 8 property/properties
+│          Writes: growerGLN, GTIN, GTINSeperatedCommas
+│       └── GroovyScript: set Error variable
+│           📝 Executes custom logic: sets 1 property/properties, modifies body
+│              Writes: ErrorCodes
+│           └── GroovyScript: Validate Year
+│               📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties
+│                  Writes: isValidMarketYear
+│                  Reads: seedYear
+│               └── Router: isValid
+│                   📝 Routes message based on 1 condition(s)
+│                      Routes: 1
+│                   ├── ContentModifier: InvalidYearError
+│                   │   📝 Modifies message: sets 1 header(s), sets body using expression
+│                   │      Properties: No properties set
+│                   │      Headers: CamelHTTPResponseCode = 500
+│                   │   └── CallActivity: call async error flow
+│                   │       📝 Calls reusable subflow: Process_96162241
+│                   │       └── ContentModifier: Removeasyn header
+│                   │           📝 Modifies message: sets 3 header(s), sets body to constant
+│                   │              Properties: No properties set
+│                   │              Headers: [Delete] $name=InputPayload = (dynamic), [Delete] $name=partnerIdentifier = (dynamic), [Delete] $name=RequiredField = (dynamic)
+│                   │           └── CallActivity: call to check error business process
+│                   │               📝 Calls reusable subflow: Process_62520130
+│                   │               └── EndEvent: End 
+│                   │                   📝 End of create_KeyCop_ProductBooking
+│                   └── Router: businessProcess [Valid]
+│                       📝 Routes message based on 1 condition(s)
+│                       🔀 Condition: ${property.isValidMarketYear} = 'true'
+│                          Routes: 1
+│                       ├── GroovyScript: checkError
+│                       │   📝 Executes custom logic: sets 1 property/properties, modifies body
+│                       │      Writes: checkError
+│                       │   └── GroovyScript: set Error List
+│                       │       📝 Executes custom logic: sets 1 property/properties, reads 2 property/properties, modifies body
+│                       │          Writes: setErrorList
+│                       │          Reads: ErrorCodes, checkError
+│                       │       └── CallActivity: call getGLN number
+│                       │           📝 Calls reusable subflow: Process_62520170
+│                       │           └── Router: IsValid?
+│                       │               📝 Routes message based on 1 condition(s)
+│                       │                  Routes: 1
+│                       │               ├── EndEvent: End  [Invalid]
+│                       │               │   📝 End of create_KeyCop_ProductBooking
+│                       │               │   🔀 Condition: ${header.CamelHTTPResponseCode} = '500'
+│                       │               └── CallActivity: call to validate_agvance_order
+│                       │                   📝 Calls reusable subflow: Process_62520207
+│                       │                   └── Router: isValid?
+│                       │                       📝 Routes message based on 1 condition(s)
+│                       │                          Routes: 1
+│                       │                       ├── ContentModifier: call the formatted input payload 
+│                       │                       │   📝 Modifies message: sets body using expression
+│                       │                       │      Properties: No properties set
+│                       │                       │      Headers: No headers set
+│                       │                       │   └── Router: businessprocess
+│                       │                       │       📝 Routes message based on 1 condition(s)
+│                       │                       │          Routes: 1
+│                       │                       │       ├── GroovyScript: sf Request
+│                       │                       │       │   📝 Executes custom logic: sets 1 property/properties, modifies body
+│                       │                       │       │      Writes: sfRequest
+│                       │                       │       │   └── GroovyScript: sfRequest(2) 
+│                       │                       │       │       📝 Executes custom logic: sets 1 property/properties, modifies body
+│                       │                       │       │          Writes: sfRequest
+│                       │                       │       │       └── RequestReply: cropEdge call
+│                       │                       │       │           📝 Calls external system via Salesforce - GET Unknown
+│                       │                       │       │              Target: cropedge4
+│                       │                       │       │           └── ContentModifier: set sfResponse as property
+│                       │                       │       │               📝 Modifies message: sets body to constant
+│                       │                       │       │                  Properties: No properties set
+│                       │                       │       │                  Headers: No headers set
+│                       │                       │       │               └── GroovyScript: Flatten SF Response
+│                       │                       │       │                   📝 Executes custom logic: reads 1 property/properties, modifies body
+│                       │                       │       │                      Reads: sfresponse
+│                       │                       │       │                   └── CallActivity: JSON to XML Converter 
+│                       │                       │       │                       📝 Calls reusable subflow: JSON to XML Converter 
+│                       │                       │       │                       └── ContentModifier: set the xml into property 
+│                       │                       │       │                           📝 Modifies message: sets 1 header(s), sets body using expression
+│                       │                       │       │                              Properties: No properties set
+│                       │                       │       │                              Headers: Content-Type = application/xml
+│                       │                       │       │                           └── GroovyScript: format the xml
+│                       │                       │       │                               📝 Executes custom logic: modifies body
+│                       │                       │       │                               └── Router: BusinessProcess
+│                       │                       │       │                                   📝 Routes message based on 1 condition(s)
+│                       │                       │       │                                      Routes: 1
+│                       │                       │       │                                   ├── CallActivity: ProductBookingWS53 Response [ProductBookingWS53 ]
+│                       │                       │       │                                   │   📝 Calls reusable subflow: ProductBookingWS53 Response
+│                       │                       │       │                                   │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS53'
+│                       │                       │       │                                   │   └── GroovyScript: final Response
+│                       │                       │       │                                   │       📝 Executes custom logic: sets 1 header(s), modifies body
+│                       │                       │       │                                   │       └── ContentModifier: set ResponseLog 
+│                       │                       │       │                                   │           📝 Modifies message: sets body to constant
+│                       │                       │       │                                   │              Properties: No properties set
+│                       │                       │       │                                   │              Headers: No headers set
+│                       │                       │       │                                   │           └── CallActivity: Call async m2m flow
+│                       │                       │       │                                   │               📝 Calls reusable subflow: Process_96162206
+│                       │                       │       │                                   │               └── ContentModifier: Remove async headers
+│                       │                       │       │                                   │                   📝 Modifies message: sets 6 header(s), sets body to constant
+│                       │                       │       │                                   │                      Properties: No properties set
+│                       │                       │       │                                   │                      Headers: [Delete] $name=SFDC_Org = (dynamic), [Delete] $name=BinaryInput = (dynamic), [Delete] $name=BinaryResponse = (dynamic)
+│                       │                       │       │                                   │                   └── EndEvent: End 
+│                       │                       │       │                                   │                       📝 End of create_KeyCop_ProductBooking
+│                       │                       │       │                                   └── CallActivity: ProductBookingWS54 mapping
+│                       │                       │       │                                       📝 Calls reusable subflow: ProductBookingWS54 mapping
+│                       │                       │       │                                       └── GroovyScript: final Response
+│                       │                       │       │                                           📝 Executes custom logic: sets 1 header(s), modifies body
+│                       │                       │       │                                           └── ContentModifier: set ResponseLog 
+│                       │                       │       │                                               📝 Modifies message: sets body to constant
+│                       │                       │       │                                                  Properties: No properties set
+│                       │                       │       │                                                  Headers: No headers set
+│                       │                       │       │                                               └── CallActivity: Call async m2m flow
+│                       │                       │       │                                                   📝 Calls reusable subflow: Process_96162206
+│                       │                       │       │                                                   └── ContentModifier: Remove async headers
+│                       │                       │       │                                                       📝 Modifies message: sets 6 header(s), sets body to constant
+│                       │                       │       │                                                          Properties: No properties set
+│                       │                       │       │                                                          Headers: [Delete] $name=SFDC_Org = (dynamic), [Delete] $name=BinaryInput = (dynamic), [Delete] $name=BinaryResponse = (dynamic)
+│                       │                       │       │                                                       └── EndEvent: End 
+│                       │                       │       │                                                           📝 End of create_KeyCop_ProductBooking
+│                       │                       │       └── GroovyScript: sf Request [ProductBookingWS or Pro-ProductBookingWS]
+│                       │                       │           📝 Executes custom logic: sets 1 property/properties, modifies body
+│                       │                       │           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'
+│                       │                       │              Writes: sfRequest
+│                       │                       │           └── GroovyScript: sfRequest(2) 
+│                       │                       │               📝 Executes custom logic: sets 1 property/properties, modifies body
+│                       │                       │                  Writes: sfRequest
+│                       │                       │               └── RequestReply: cropEdge call 
+│                       │                       │                   📝 Calls external system via Salesforce - GET Unknown
+│                       │                       │                      Target: cropEdge3
+│                       │                       │                   └── ContentModifier: set sfResponse as property 
+│                       │                       │                       📝 Modifies message: sets body to constant
+│                       │                       │                          Properties: No properties set
+│                       │                       │                          Headers: No headers set
+│                       │                       │                       └── GroovyScript: flatten  SF Response
+│                       │                       │                           📝 Executes custom logic: reads 1 property/properties, modifies body
+│                       │                       │                              Reads: sfresponse
+│                       │                       │                           └── CallActivity: JSON to XML Converter 
+│                       │                       │                               📝 Calls reusable subflow: JSON to XML Converter 
+│                       │                       │                               └── ContentModifier: set the xml into property
+│                       │                       │                                   📝 Modifies message: sets 1 header(s), sets body using expression
+│                       │                       │                                      Properties: No properties set
+│                       │                       │                                      Headers: Content-Type = application/xml
+│                       │                       │                                   └── GroovyScript: format the xml
+│                       │                       │                                       📝 Executes custom logic: modifies body
+│                       │                       │                                       └── CallActivity: ProductBookin Response
+│                       │                       │                                           📝 Calls reusable subflow: ProductBookin Response
+│                       │                       │                                           └── CallActivity: XML Validator 
+│                       │                       │                                               📝 Calls reusable subflow: XML Validator 
+│                       │                       │                                               └── Router: IsValid?
+│                       │                       │                                                   📝 Routes message based on 1 condition(s)
+│                       │                       │                                                      Routes: 1
+│                       │                       │                                                   ├── GroovyScript: final response
+│                       │                       │                                                   │   📝 Executes custom logic: sets 1 header(s), modifies body
+│                       │                       │                                                   │   └── ContentModifier: set ResponseLog 
+│                       │                       │                                                   │       📝 Modifies message: sets body to constant
+│                       │                       │                                                   │          Properties: No properties set
+│                       │                       │                                                   │          Headers: No headers set
+│                       │                       │                                                   │       └── CallActivity: call to async m2m flow
+│                       │                       │                                                   │           📝 Calls reusable subflow: Process_96162206
+│                       │                       │                                                   │           └── ContentModifier: Remove async headers
+│                       │                       │                                                   │               📝 Modifies message: sets 6 header(s), sets body to constant
+│                       │                       │                                                   │                  Properties: No properties set
+│                       │                       │                                                   │                  Headers: [Delete] $name=SFDC_Org = (dynamic), [Delete] $name=BinaryInput = (dynamic), [Delete] $name=BinaryResponse = (dynamic)
+│                       │                       │                                                   │               └── EndEvent: End 
+│                       │                       │                                                   │                   📝 End of create_KeyCop_ProductBooking
+│                       │                       │                                                   └── ContentModifier: Schema Error [Invalid]
+│                       │                       │                                                       📝 Modifies message: sets 1 header(s), sets body to constant
+│                       │                       │                                                       🔀 Condition: ${property.SAP_XmlValidationResult} != null
+│                       │                       │                                                          Properties: No properties set
+│                       │                       │                                                          Headers: CamelHTTPResponseCode = 500
+│                       │                       │                                                       └── CallActivity: call to check error business process
+│                       │                       │                                                           📝 Calls reusable subflow: Process_62520130
+│                       │                       │                                                           └── EndEvent: End 
+│                       │                       │                                                               📝 End of create_KeyCop_ProductBooking
+│                       │                       └── EndEvent: End  [Invalid]
+│                       │                           📝 End of create_KeyCop_ProductBooking
+│                       │                           🔀 Condition: ${header.CamelHTTPResponseCode} = '500'
+│                       └── GroovyScript: check error [ProductBookingWS or Pro-ProductBookingWS]
+│                           📝 Executes custom logic: sets 1 property/properties, modifies body
+│                           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'
+│                              Writes: checkError
+│                           └── GroovyScript: set Error List
+│                               📝 Executes custom logic: sets 1 property/properties, reads 2 property/properties, modifies body
+│                                  Writes: setErrorList
+│                                  Reads: ErrorCodes, checkError
+│                               └── CallActivity: call getGLN number
+│                                   📝 Calls reusable subflow: Process_62520170
+│                                   └── Router: IsValid?
+│                                       📝 Routes message based on 1 condition(s)
+│                                          Routes: 1
+│                                       ├── EndEvent: End  [Invalid]
+│                                       │   📝 End of create_KeyCop_ProductBooking
+│                                       │   🔀 Condition: ${header.CamelHTTPResponseCode} = '500'
+│                                       └── CallActivity: call to validate_agvance_order
+│                                           📝 Calls reusable subflow: Process_62520207
+│                                           └── Router: isValid?
+│                                               📝 Routes message based on 1 condition(s)
+│                                                  Routes: 1
+│                                               ├── ContentModifier: call the formatted input payload 
+│                                               │   📝 Modifies message: sets body using expression
+│                                               │      Properties: No properties set
+│                                               │      Headers: No headers set
+│                                               │   └── Router: businessprocess
+│                                               │       📝 Routes message based on 1 condition(s)
+│                                               │          Routes: 1
+│                                               │       ├── GroovyScript: sf Request
+│                                               │       │   📝 Executes custom logic: sets 1 property/properties, modifies body
+│                                               │       │      Writes: sfRequest
+│                                               │       │   └── GroovyScript: sfRequest(2) 
+│                                               │       │       📝 Executes custom logic: sets 1 property/properties, modifies body
+│                                               │       │          Writes: sfRequest
+│                                               │       │       └── RequestReply: cropEdge call
+│                                               │       │           📝 Calls external system via Salesforce - GET Unknown
+│                                               │       │              Target: cropedge4
+│                                               │       │           └── ContentModifier: set sfResponse as property
+│                                               │       │               📝 Modifies message: sets body to constant
+│                                               │       │                  Properties: No properties set
+│                                               │       │                  Headers: No headers set
+│                                               │       │               └── GroovyScript: Flatten SF Response
+│                                               │       │                   📝 Executes custom logic: reads 1 property/properties, modifies body
+│                                               │       │                      Reads: sfresponse
+│                                               │       │                   └── CallActivity: JSON to XML Converter 
+│                                               │       │                       📝 Calls reusable subflow: JSON to XML Converter 
+│                                               │       │                       └── ContentModifier: set the xml into property 
+│                                               │       │                           📝 Modifies message: sets 1 header(s), sets body using expression
+│                                               │       │                              Properties: No properties set
+│                                               │       │                              Headers: Content-Type = application/xml
+│                                               │       │                           └── GroovyScript: format the xml
+│                                               │       │                               📝 Executes custom logic: modifies body
+│                                               │       │                               └── Router: BusinessProcess
+│                                               │       │                                   📝 Routes message based on 1 condition(s)
+│                                               │       │                                      Routes: 1
+│                                               │       │                                   ├── CallActivity: ProductBookingWS53 Response [ProductBookingWS53 ]
+│                                               │       │                                   │   📝 Calls reusable subflow: ProductBookingWS53 Response
+│                                               │       │                                   │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS53'
+│                                               │       │                                   │   └── GroovyScript: final Response
+│                                               │       │                                   │       📝 Executes custom logic: sets 1 header(s), modifies body
+│                                               │       │                                   │       └── ContentModifier: set ResponseLog 
+│                                               │       │                                   │           📝 Modifies message: sets body to constant
+│                                               │       │                                   │              Properties: No properties set
+│                                               │       │                                   │              Headers: No headers set
+│                                               │       │                                   │           └── CallActivity: Call async m2m flow
+│                                               │       │                                   │               📝 Calls reusable subflow: Process_96162206
+│                                               │       │                                   │               └── ContentModifier: Remove async headers
+│                                               │       │                                   │                   📝 Modifies message: sets 6 header(s), sets body to constant
+│                                               │       │                                   │                      Properties: No properties set
+│                                               │       │                                   │                      Headers: [Delete] $name=SFDC_Org = (dynamic), [Delete] $name=BinaryInput = (dynamic), [Delete] $name=BinaryResponse = (dynamic)
+│                                               │       │                                   │                   └── EndEvent: End 
+│                                               │       │                                   │                       📝 End of create_KeyCop_ProductBooking
+│                                               │       │                                   └── CallActivity: ProductBookingWS54 mapping
+│                                               │       │                                       📝 Calls reusable subflow: ProductBookingWS54 mapping
+│                                               │       │                                       └── GroovyScript: final Response
+│                                               │       │                                           📝 Executes custom logic: sets 1 header(s), modifies body
+│                                               │       │                                           └── ContentModifier: set ResponseLog 
+│                                               │       │                                               📝 Modifies message: sets body to constant
+│                                               │       │                                                  Properties: No properties set
+│                                               │       │                                                  Headers: No headers set
+│                                               │       │                                               └── CallActivity: Call async m2m flow
+│                                               │       │                                                   📝 Calls reusable subflow: Process_96162206
+│                                               │       │                                                   └── ContentModifier: Remove async headers
+│                                               │       │                                                       📝 Modifies message: sets 6 header(s), sets body to constant
+│                                               │       │                                                          Properties: No properties set
+│                                               │       │                                                          Headers: [Delete] $name=SFDC_Org = (dynamic), [Delete] $name=BinaryInput = (dynamic), [Delete] $name=BinaryResponse = (dynamic)
+│                                               │       │                                                       └── EndEvent: End 
+│                                               │       │                                                           📝 End of create_KeyCop_ProductBooking
+│                                               │       └── GroovyScript: sf Request [ProductBookingWS or Pro-ProductBookingWS]
+│                                               │           📝 Executes custom logic: sets 1 property/properties, modifies body
+│                                               │           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'
+│                                               │              Writes: sfRequest
+│                                               │           └── GroovyScript: sfRequest(2) 
+│                                               │               📝 Executes custom logic: sets 1 property/properties, modifies body
+│                                               │                  Writes: sfRequest
+│                                               │               └── RequestReply: cropEdge call 
+│                                               │                   📝 Calls external system via Salesforce - GET Unknown
+│                                               │                      Target: cropEdge3
+│                                               │                   └── ContentModifier: set sfResponse as property 
+│                                               │                       📝 Modifies message: sets body to constant
+│                                               │                          Properties: No properties set
+│                                               │                          Headers: No headers set
+│                                               │                       └── GroovyScript: flatten  SF Response
+│                                               │                           📝 Executes custom logic: reads 1 property/properties, modifies body
+│                                               │                              Reads: sfresponse
+│                                               │                           └── CallActivity: JSON to XML Converter 
+│                                               │                               📝 Calls reusable subflow: JSON to XML Converter 
+│                                               │                               └── ContentModifier: set the xml into property
+│                                               │                                   📝 Modifies message: sets 1 header(s), sets body using expression
+│                                               │                                      Properties: No properties set
+│                                               │                                      Headers: Content-Type = application/xml
+│                                               │                                   └── GroovyScript: format the xml
+│                                               │                                       📝 Executes custom logic: modifies body
+│                                               │                                       └── CallActivity: ProductBookin Response
+│                                               │                                           📝 Calls reusable subflow: ProductBookin Response
+│                                               │                                           └── CallActivity: XML Validator 
+│                                               │                                               📝 Calls reusable subflow: XML Validator 
+│                                               │                                               └── Router: IsValid?
+│                                               │                                                   📝 Routes message based on 1 condition(s)
+│                                               │                                                      Routes: 1
+│                                               │                                                   ├── GroovyScript: final response
+│                                               │                                                   │   📝 Executes custom logic: sets 1 header(s), modifies body
+│                                               │                                                   │   └── ContentModifier: set ResponseLog 
+│                                               │                                                   │       📝 Modifies message: sets body to constant
+│                                               │                                                   │          Properties: No properties set
+│                                               │                                                   │          Headers: No headers set
+│                                               │                                                   │       └── CallActivity: call to async m2m flow
+│                                               │                                                   │           📝 Calls reusable subflow: Process_96162206
+│                                               │                                                   │           └── ContentModifier: Remove async headers
+│                                               │                                                   │               📝 Modifies message: sets 6 header(s), sets body to constant
+│                                               │                                                   │                  Properties: No properties set
+│                                               │                                                   │                  Headers: [Delete] $name=SFDC_Org = (dynamic), [Delete] $name=BinaryInput = (dynamic), [Delete] $name=BinaryResponse = (dynamic)
+│                                               │                                                   │               └── EndEvent: End 
+│                                               │                                                   │                   📝 End of create_KeyCop_ProductBooking
+│                                               │                                                   └── ContentModifier: Schema Error [Invalid]
+│                                               │                                                       📝 Modifies message: sets 1 header(s), sets body to constant
+│                                               │                                                       🔀 Condition: ${property.SAP_XmlValidationResult} != null
+│                                               │                                                          Properties: No properties set
+│                                               │                                                          Headers: CamelHTTPResponseCode = 500
+│                                               │                                                       └── CallActivity: call to check error business process
+│                                               │                                                           📝 Calls reusable subflow: Process_62520130
+│                                               │                                                           └── EndEvent: End 
+│                                               │                                                               📝 End of create_KeyCop_ProductBooking
+│                                               └── EndEvent: End  [Invalid]
+│                                                   📝 End of create_KeyCop_ProductBooking
+│                                                   🔀 Condition: ${header.CamelHTTPResponseCode} = '500'
+├── StartEvent: Start
+│   📝 Entry point of Integration Process
+│   └── Router: IsValid?
+│       📝 Routes message based on 1 condition(s)
+│          Routes: 1
+│       ├── ContentModifier: InvalidHttpMethod 
+│       │   📝 Modifies message: sets 1 header(s), sets body to constant
+│       │      Properties: No properties set
+│       │      Headers: Content-Type = application/json
+│       │   └── EndEvent: End
+│       │       📝 End of Integration Process
+│       └── CallActivity: call to CreateGrower [Valid]
+│           📝 Calls reusable subflow: Process_10
+│           🔀 Condition: ${header.CamelHttpMethod} = 'POST'
+│           └── EndEvent: End
+│               📝 End of Integration Process
+├── StartEvent: Error Start 
+│   📝 Entry point of getGLNNumber
+│   └── ContentModifier: Set Error Parameters
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: call emailnotify
+│           📝 Calls reusable subflow: Process_96162317
+│           └── CallActivity: call to check bussiness process
+│               📝 Calls reusable subflow: Process_62520130
+│               └── EndEvent: End 
+│                   📝 End of getGLNNumber
+├── StartEvent: Start 
+│   📝 Entry point of getGLNNumber
+│   └── GroovyScript: Set Partner
+│       📝 Executes custom logic: sets 1 property/properties, reads 2 property/properties
+│          Writes: Partner
+│          Reads: PartnerIdentifier, resellerGLN
+│       └── ContentModifier: set salesforce Query
+│           📝 Modifies message: sets body using expression
+│              Properties: No properties set
+│              Headers: No headers set
+│           └── CallActivity: call to RR Query
+│               📝 Calls reusable subflow: Process_62520184
+│               └── GroovyScript: set GLN
+│                   📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties, sets 1 header(s)
+│                      Writes: setGLN
+│                      Reads: Partner
+│                   └── Router: valid GLN?
+│                       📝 Routes message based on 1 condition(s)
+│                          Routes: 1
+│                       ├── EndEvent: End 
+│                       │   📝 End of getGLNNumber
+│                       └── ContentModifier: GLN Error [DupliacteGLN]
+│                           📝 Modifies message: sets 1 header(s), sets body to constant
+│                           🔀 Condition: ${property.setGLN} = 'DuplicateGLN'
+│                              Properties: No properties set
+│                              Headers: CamelHTTPResponseCode = 500
+│                           └── CallActivity: call to Check Error Business Process
+│                               📝 Calls reusable subflow: Process_62520130
+│                               └── EndEvent: End 
+│                                   📝 End of getGLNNumber
+├── StartEvent: Start 
+│   📝 Entry point of RR dynamicquery
+│   └── RequestReply: Request Reply 
+│       📝 Calls external system via ProcessDirect - GET /dynamicsoql/query/v3
+│          Target: SalesforceQuery
+│       └── EndEvent: End 
+│           📝 End of RR dynamicquery
+├── StartEvent: Error Start 
+│   📝 Entry point of check sales validation
+│   └── ContentModifier: Set Error Parameters 
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: call to notify email
+│           📝 Calls reusable subflow: Process_96162317
+│           └── CallActivity: call to check error business process
+│               📝 Calls reusable subflow: Process_62520130
+│               └── EndEvent: End 
+│                   📝 End of check sales validation
+├── StartEvent: Start 
+│   📝 Entry point of check sales validation
+│   └── Router: salesValidation check
+│       📝 Routes message based on 2 condition(s)
+│          Routes: 2
+│       ├── GroovyScript: Groovy Script 3 [true]
+│       │   📝 Executes custom logic: sets 1 property/properties, reads 3 property/properties
+│       │   🔀 Condition: ${property.query8} = 'true'
+│       │      Writes: setErrorList
+│       │      Reads: CheckEG, GtinStatus, setErrorList
+│       │   └── ContentModifier: set ErrorList as body
+│       │       📝 Modifies message: sets body using expression
+│       │          Properties: No properties set
+│       │          Headers: No headers set
+│       │       └── EndEvent: End 
+│       │           📝 End of check sales validation
+│       ├── ContentModifier: CUSTOM_ERROR:INVALID_SEED_YEAR [false]
+│       │   📝 Modifies message: sets 1 header(s), sets body to constant
+│       │   🔀 Condition: ${property.query8} = 'false'
+│       │      Properties: No properties set
+│       │      Headers: CamelHTTPResponseCode = 500
+│       │   └── CallActivity: call to asyn err handler flow
+│       │       📝 Calls reusable subflow: Process_96162241
+│       │       └── ContentModifier: Removeasyn header
+│       │           📝 Modifies message: sets 3 header(s), sets body to constant
+│       │              Properties: No properties set
+│       │              Headers: [Delete] $name=InputPayload = (dynamic), [Delete] $name=partnerIdentifier = (dynamic), [Delete] $name=RequiredField = (dynamic)
+│       │           └── CallActivity: call to CheckErrorBusinessProcessSubFlow
+│       │               📝 Calls reusable subflow: Process_62520130
+│       │               └── EndEvent: End 
+│       │                   📝 End of check sales validation
+│       └── ContentModifier: CUSTOM_ERROR:MISSING_SALESYEAR
+│           📝 Modifies message: sets 1 property/properties, sets 1 header(s), sets body to constant
+│              Properties: RequiredField = ${query8}
+│              Headers: CamelHTTPResponseCode = 500
+│           └── CallActivity: call to CheckErrorBusinessProcessSubFlow
+│               📝 Calls reusable subflow: Process_62520130
+│               └── EndEvent: End 
+│                   📝 End of check sales validation
+├── StartEvent: Error Start 
+│   📝 Entry point of Async M2M log flow2
+│   └── ContentModifier: Set Error Parameters
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: call to notify email
+│           📝 Calls reusable subflow: Process_96162317
+│           └── EndEvent: End 
+│               📝 End of Async M2M log flow2
+├── StartEvent: Start 
+│   📝 Entry point of Async M2M log flow2
+│   └── GroovyScript: Inputpayload binary 
+│       📝 Executes custom logic: sets 2 property/properties
+│          Writes: BinaryInput, BinaryResponse
+│       └── GroovyScript: set compositerequerst body
+│           📝 Executes custom logic: modifies body
+│           └── ContentModifier: set composite request
+│               📝 Modifies message: sets body using expression
+│                  Properties: No properties set
+│                  Headers: No headers set
+│               └── CallActivity: call to RR compositequery
+│                   📝 Calls reusable subflow: Process_62520215
+│                   └── ContentModifier: Async body
+│                       📝 Modifies message: sets body using expression
+│                          Properties: No properties set
+│                          Headers: No headers set
+│                       └── EndEvent: End 
+│                           📝 End of Async M2M log flow2
+├── StartEvent: Start 
+│   📝 Entry point of RR Composite query
+│   └── RequestReply: Request Reply 
+│       📝 Calls external system via ProcessDirect - GET /dynamicsoql/executecompositerequest/v1
+│          Target: QueryStatusInSFDC
+│       └── EndEvent: End 
+│           📝 End of RR Composite query
+├── StartEvent: Error Start 
+│   📝 Entry point of Advance OrderChange
+│   └── ContentModifier: Set Error Parameters  
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: call to notify mail
+│           📝 Calls reusable subflow: Process_96162317
+│           └── CallActivity: call to check error businessprocess
+│               📝 Calls reusable subflow: Process_62520130
+│               └── EndEvent: End 
+│                   📝 End of Advance OrderChange
+├── StartEvent: Start 
+│   📝 Entry point of Advance OrderChange
+│   └── GroovyScript: set Variables
+│       📝 Executes custom logic: sets 10 property/properties
+│          Writes: growerGLNForSFDCQuery, growerGLNSeperatedCommasNoBrackets, growerGLN
+│       └── GroovyScript: set Error variable
+│           📝 Executes custom logic: sets 1 property/properties, modifies body
+│              Writes: ErrorCodes
+│           └── GroovyScript: Validate Year
+│               📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties
+│                  Writes: isValidMarketYear
+│                  Reads: seedYear
+│               └── Router: IsValid
+│                   📝 Routes message based on 1 condition(s)
+│                      Routes: 1
+│                   ├── ContentModifier: InvalidYearError
+│                   │   📝 Modifies message: sets 1 header(s), sets body using expression
+│                   │      Properties: No properties set
+│                   │      Headers: CamelHTTPResponseCode = 500
+│                   │   └── CallActivity: call to async err handler flow
+│                   │       📝 Calls reusable subflow: Process_96162241
+│                   │       └── ContentModifier: Removeasyn header 
+│                   │           📝 Modifies message: sets 3 header(s), sets body to constant
+│                   │              Properties: No properties set
+│                   │              Headers: [Delete] $name=InputPayload = (dynamic), [Delete] $name=partnerIdentifier = (dynamic), [Delete] $name=RequiredField = (dynamic)
+│                   │           └── CallActivity: call to check error business process
+│                   │               📝 Calls reusable subflow: Process_62520130
+│                   │               └── EndEvent: End 
+│                   │                   📝 End of Advance OrderChange
+│                   └── GroovyScript: Check errors in input [Valid]
+│                       📝 Executes custom logic: sets 1 property/properties, modifies body
+│                       🔀 Condition: ${property.isValidMarketYear} = 'true'
+│                          Writes: checkError
+│                       └── GroovyScript: set ErrorList
+│                           📝 Executes custom logic: sets 1 property/properties, reads 2 property/properties, modifies body
+│                              Writes: setErrorList
+│                              Reads: ErrorCodes, checkError
+│                           └── CallActivity: call getGLNnumber
+│                               📝 Calls reusable subflow: Process_62520170
+│                               └── Router: valid?
+│                                   📝 Routes message based on 1 condition(s)
+│                                      Routes: 1
+│                                   ├── CallActivity: call Validate_Agvance_Order
+│                                   │   📝 Calls reusable subflow: Process_62520207
+│                                   │   └── Router: is valid?
+│                                   │       📝 Routes message based on 1 condition(s)
+│                                   │          Routes: 1
+│                                   │       ├── ContentModifier: call the formatted input payload
+│                                   │       │   📝 Modifies message: sets body using expression
+│                                   │       │      Properties: No properties set
+│                                   │       │      Headers: No headers set
+│                                   │       │   └── GroovyScript: sfRequest
+│                                   │       │       📝 Executes custom logic: sets 1 property/properties
+│                                   │       │          Writes: sfRequest
+│                                   │       │       └── GroovyScript: sfRequest(2)
+│                                   │       │           📝 Executes custom logic: sets 1 property/properties, modifies body
+│                                   │       │              Writes: sfRequest
+│                                   │       │           └── RequestReply: cropEdge call
+│                                   │       │               📝 Calls external system via Salesforce - GET Unknown
+│                                   │       │                  Target: cropEdge2
+│                                   │       │               └── ContentModifier: set sfResponse as property
+│                                   │       │                   📝 Modifies message: sets body to constant
+│                                   │       │                      Properties: No properties set
+│                                   │       │                      Headers: No headers set
+│                                   │       │                   └── GroovyScript: Flatten SF Response
+│                                   │       │                       📝 Executes custom logic: reads 1 property/properties, modifies body
+│                                   │       │                          Reads: sfresponse
+│                                   │       │                       └── CallActivity: JSON to XML Converter 
+│                                   │       │                           📝 Calls reusable subflow: JSON to XML Converter 
+│                                   │       │                           └── ContentModifier: set the xml into property
+│                                   │       │                               📝 Modifies message: sets 1 header(s), sets body using expression
+│                                   │       │                                  Properties: No properties set
+│                                   │       │                                  Headers: Content-Type = application/xml
+│                                   │       │                               └── GroovyScript: formatted xml
+│                                   │       │                                   📝 Executes custom logic: modifies body
+│                                   │       │                                   └── CallActivity: order change response
+│                                   │       │                                       📝 Calls reusable subflow: order change response
+│                                   │       │                                       └── CallActivity: transform message
+│                                   │       │                                           📝 Calls reusable subflow: transform message
+│                                   │       │                                           └── GroovyScript: final response
+│                                   │       │                                               📝 Executes custom logic: sets 1 header(s), modifies body
+│                                   │       │                                               └── ContentModifier: set ResponseLog
+│                                   │       │                                                   📝 Modifies message: sets body to constant
+│                                   │       │                                                      Properties: No properties set
+│                                   │       │                                                      Headers: No headers set
+│                                   │       │                                                   └── CallActivity: call async m2m flow
+│                                   │       │                                                       📝 Calls reusable subflow: Process_96162206
+│                                   │       │                                                       └── ContentModifier: Remove async headers
+│                                   │       │                                                           📝 Modifies message: sets 6 header(s), sets body to constant
+│                                   │       │                                                              Properties: No properties set
+│                                   │       │                                                              Headers: [Delete] $name=SFDC_Org = (dynamic), [Delete] $name=BinaryInput = (dynamic), [Delete] $name=BinaryResponse = (dynamic)
+│                                   │       │                                                           └── EndEvent: End 
+│                                   │       │                                                               📝 End of Advance OrderChange
+│                                   │       └── EndEvent: End  [invalid]
+│                                   │           📝 End of Advance OrderChange
+│                                   │           🔀 Condition: ${header.CamelHTTPResponseCode} = '500'
+│                                   └── EndEvent: End  [invalid]
+│                                       📝 End of Advance OrderChange
+│                                       🔀 Condition: ${header.CamelHTTPResponseCode} = '500'
+├── StartEvent: Error Start 
+│   📝 Entry point of salesforce-Authorization
+│   └── ContentModifier: Set Error Parameters 
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: call notify email
+│           📝 Calls reusable subflow: Process_96162317
+│           └── CallActivity: call to check error business process
+│               📝 Calls reusable subflow: Process_62520130
+│               └── EndEvent: End 
+│                   📝 End of salesforce-Authorization
+├── StartEvent: Start 
+│   📝 Entry point of salesforce-Authorization
+│   └── ContentModifier: set Authorisation query
+│       📝 Modifies message: sets body using expression
+│          Properties: No properties set
+│          Headers: No headers set
+│       └── CallActivity: call RR composite query
+│           📝 Calls reusable subflow: Process_62520215
+│           └── GroovyScript: Authorization Response Validation
+│               📝 Executes custom logic: sets 4 property/properties
+│                  Writes: query3, query4, query1
+│               └── Router: IsValid?
+│                   📝 Routes message based on 1 condition(s)
+│                      Routes: 1
+│                   ├── ContentModifier: set required fields [notvalid]
+│                   │   📝 Modifies message: sets 1 header(s), sets body to constant
+│                   │   🔀 Condition: ${property.query1} = 'false' or ${property.query2} = 'false' or ${property.query3} = 'false' or ${property.query4} = 'false'
+│                   │      Properties: No properties set
+│                   │      Headers: CamelHTTPResponseCode = 500
+│                   │   └── GroovyScript: set Authorisation error
+│                   │       📝 Executes custom logic: sets 1 property/properties, reads 7 property/properties, modifies body
+│                   │          Writes: RequiredField
+│                   │          Reads: query1, auth_query2_1, auth_pal_query3
+│                   │       └── CallActivity: call to async err handler flow
+│                   │           📝 Calls reusable subflow: Process_96162241
+│                   │           └── ContentModifier: Removeasyn header
+│                   │               📝 Modifies message: sets 3 header(s), sets body to constant
+│                   │                  Properties: No properties set
+│                   │                  Headers: [Delete] $name=InputPayload = (dynamic), [Delete] $name=partnerIdentifier = (dynamic), [Delete] $name=RequiredField = (dynamic)
+│                   │               └── CallActivity: call to Check Error Business Process
+│                   │                   📝 Calls reusable subflow: Process_62520130
+│                   │                   └── EndEvent: End 
+│                   │                       📝 End of salesforce-Authorization
+│                   └── EndEvent: End 
+│                       📝 End of salesforce-Authorization
+├── StartEvent: Error Start 
+│   📝 Entry point of Validate_OrderFlow(1)
+│   └── ContentModifier: Set Error Parameters 
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: notify email
+│           📝 Calls reusable subflow: Process_96162317
+│           └── CallActivity: call to check business process
+│               📝 Calls reusable subflow: Process_62520130
+│               └── EndEvent: End 
+│                   📝 End of Validate_OrderFlow(1)
+├── StartEvent: Start 
+│   📝 Entry point of Validate_OrderFlow(1)
+│   └── CallActivity: call to getGLNNumner
+│       📝 Calls reusable subflow: Process_62520170
+│       └── CallActivity: call to salesforce authentication
+│           📝 Calls reusable subflow: Process_62520248
+│           └── Router: isValid?
+│               📝 Routes message based on 1 condition(s)
+│                  Routes: 1
+│               ├── CallActivity: call Validation AGIIS
+│               │   📝 Calls reusable subflow: Process_79626264
+│               │   └── GroovyScript: set status code
+│               │       📝 Executes custom logic: sets 1 property/properties, modifies body
+│               │          Writes: stateCode
+│               │       └── GroovyScript: add invalid GLNs to ErrorList(pr setErrorList)
+│               │           📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties
+│               │              Writes: setErrorList
+│               │              Reads: setErrorList
+│               │           └── GroovyScript: set Grower and Partner function
+│               │               📝 Executes custom logic: reads 3 property/properties, modifies body
+│               │                  Reads: resellerGLN, stateCode, growerAddress
+│               │               └── RequestReply: cropEdge call
+│               │                   📝 Calls external system via Salesforce - GET Unknown
+│               │                      Target: CropEdge
+│               │                   └── GroovyScript: set ErrorList
+│               │                       📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties, modifies body
+│               │                          Writes: setErrorList
+│               │                          Reads: setErrorList
+│               │                       └── GroovyScript: GetFailedGrowers
+│               │                           📝 Executes custom logic: sets 2 property/properties, modifies body
+│               │                              Writes: FailedRecordsEmpty, failedRecords
+│               │                           └── GroovyScript: set ErrorList
+│               │                               📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties, modifies body
+│               │                                  Writes: setErrorList
+│               │                                  Reads: setErrorList
+│               │                               └── ContentModifier: compositeRequest
+│               │                                   📝 Modifies message: sets body using expression
+│               │                                      Properties: No properties set
+│               │                                      Headers: No headers set
+│               │                                   └── CallActivity: call to RR compositeRequest
+│               │                                       📝 Calls reusable subflow: Process_62520215
+│               │                                       └── GroovyScript: set resllerId and PMRXRef variables
+│               │                                           📝 Executes custom logic: sets 3 property/properties
+│               │                                              Writes: resellerId, PMRXRef_products, PMRXRef_GTINs
+│               │                                           └── Router: Valid ResllerID?
+│               │                                               📝 Routes message based on 1 condition(s)
+│               │                                                  Routes: 1
+│               │                                               ├── ContentModifier: set Composite Request 2 [valid]
+│               │                                               │   📝 Modifies message: sets body using expression
+│               │                                               │   🔀 Condition: ${property.resellerId} != null
+│               │                                               │      Properties: No properties set
+│               │                                               │      Headers: No headers set
+│               │                                               │   └── CallActivity: call to RR CompositeQuery
+│               │                                               │       📝 Calls reusable subflow: Process_62520215
+│               │                                               │       └── GroovyScript: Set Product Gtins
+│               │                                               │           📝 Executes custom logic: sets 4 property/properties, reads 1 property/properties
+│               │                                               │              Writes: CheckEG, query8, isProductGtinsNotEmpty
+│               │                                               │              Reads: PMRXRef_GTINs
+│               │                                               │           └── Router: isProductGtinsNotEmpty?
+│               │                                               │               📝 Routes message based on 1 condition(s)
+│               │                                               │                  Routes: 1
+│               │                                               │               ├── GroovyScript: setErrorList
+│               │                                               │               │   📝 Executes custom logic: sets 1 property/properties, reads 2 property/properties, modifies body
+│               │                                               │               │      Writes: setErrorList
+│               │                                               │               │      Reads: ErrorCodes, setErrorList
+│               │                                               │               │   └── CallActivity: call check sales validation
+│               │                                               │               │       📝 Calls reusable subflow: Process_79626341
+│               │                                               │               │       └── EndEvent: End 
+│               │                                               │               │           📝 End of Validate_OrderFlow(1)
+│               │                                               │               └── GroovyScript: check GTINs [isProductGtinsNotEmpty]
+│               │                                               │                   📝 Executes custom logic: sets 3 property/properties, reads 4 property/properties
+│               │                                               │                   🔀 Condition: ${property.isProductGtinsNotEmpty} = 'true'
+│               │                                               │                      Writes: CheckEG, GtinStatus, isValid
+│               │                                               │                      Reads: CheckEG, product_Gtins, GTIN
+│               │                                               │                   └── Router: check Gtins and EG status
+│               │                                               │                       📝 Routes message based on 1 condition(s)
+│               │                                               │                          Routes: 1
+│               │                                               │                       ├── CallActivity: call check sales validation [valid]
+│               │                                               │                       │   📝 Calls reusable subflow: Process_79626341
+│               │                                               │                       │   🔀 Condition: ${property.isValid} = 'true'
+│               │                                               │                       │   └── EndEvent: End 
+│               │                                               │                       │       📝 End of Validate_OrderFlow(1)
+│               │                                               │                       └── GroovyScript: set Error List
+│               │                                               │                           📝 Executes custom logic: sets 1 property/properties
+│               │                                               │                              Writes: setErrorList
+│               │                                               │                           └── CallActivity: call check sales validation
+│               │                                               │                               📝 Calls reusable subflow: Process_79626341
+│               │                                               │                               └── EndEvent: End 
+│               │                                               │                                   📝 End of Validate_OrderFlow(1)
+│               │                                               └── ContentModifier: set CUSTOM_ERROR:INVALID_RESELLER
+│               │                                                   📝 Modifies message: sets 1 header(s), sets body to constant
+│               │                                                      Properties: No properties set
+│               │                                                      Headers: CamelHTTPResponseCode = 500
+│               │                                                   └── CallActivity: call to CheckErrorBusinessProcessSubFlow
+│               │                                                       📝 Calls reusable subflow: Process_62520130
+│               │                                                       └── EndEvent: End
+│               │                                                           📝 End of Validate_OrderFlow(1)
+│               └── EndEvent: End  [Invalid]
+│                   📝 End of Validate_OrderFlow(1)
+│                   🔀 Condition: ${header.CamelHTTPResponseCode} = '500'
+├── StartEvent: Error Start 
+│   📝 Entry point of Check Error Business Process
+│   └── CallActivity: call BP exception handler
+│       📝 Calls reusable subflow: Process_62520134
+│       └── EndEvent: End 
+│           📝 End of Check Error Business Process
+├── StartEvent: Start 
+│   📝 Entry point of Check Error Business Process
+│   └── ContentModifier: call the input payload
+│       📝 Modifies message: sets body using expression
+│          Properties: No properties set
+│          Headers: No headers set
+│       └── Router: BP
+│           📝 Routes message based on 3 condition(s)
+│              Routes: 3
+│           ├── CallActivity: set Response [PBWS]
+│           │   📝 Calls reusable subflow: set Response
+│           │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'
+│           │   └── GroovyScript: final response
+│           │       📝 Executes custom logic: sets 1 header(s), modifies body
+│           │       └── Router: m2m check
+│           │           📝 Routes message based on 1 condition(s)
+│           │              Routes: 1
+│           │           ├── ContentModifier: set ResponseLog  [m2m not null]
+│           │           │   📝 Modifies message: sets body to constant
+│           │           │   🔀 Condition: ${property.m2m} != null
+│           │           │      Properties: No properties set
+│           │           │      Headers: No headers set
+│           │           │   └── CallActivity: call m2m sync flow
+│           │           │       📝 Calls reusable subflow: Process_96162206
+│           │           │       └── ContentModifier: Remove async headers
+│           │           │           📝 Modifies message: sets 6 header(s), sets body to constant
+│           │           │              Properties: No properties set
+│           │           │              Headers: [Delete] $name=SFDC_Org = (dynamic), [Delete] $name=BinaryInput = (dynamic), [Delete] $name=BinaryResponse = (dynamic)
+│           │           │           └── EndEvent: End 
+│           │           │               📝 End of Check Error Business Process
+│           │           └── EndEvent: End 
+│           │               📝 End of Check Error Business Process
+│           ├── CallActivity: set Response [PBWS53]
+│           │   📝 Calls reusable subflow: set Response
+│           │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS53'
+│           │   └── GroovyScript: final response
+│           │       📝 Executes custom logic: sets 1 header(s), modifies body
+│           │       └── Router: m2m check
+│           │           📝 Routes message based on 1 condition(s)
+│           │              Routes: 1
+│           │           ├── ContentModifier: set ResponseLog  [m2m not null]
+│           │           │   📝 Modifies message: sets body to constant
+│           │           │   🔀 Condition: ${property.m2m} != null
+│           │           │      Properties: No properties set
+│           │           │      Headers: No headers set
+│           │           │   └── CallActivity: call m2m sync flow
+│           │           │       📝 Calls reusable subflow: Process_96162206
+│           │           │       └── ContentModifier: Remove async headers
+│           │           │           📝 Modifies message: sets 6 header(s), sets body to constant
+│           │           │              Properties: No properties set
+│           │           │              Headers: [Delete] $name=SFDC_Org = (dynamic), [Delete] $name=BinaryInput = (dynamic), [Delete] $name=BinaryResponse = (dynamic)
+│           │           │           └── EndEvent: End 
+│           │           │               📝 End of Check Error Business Process
+│           │           └── EndEvent: End 
+│           │               📝 End of Check Error Business Process
+│           ├── CallActivity: set response [PBWS54]
+│           │   📝 Calls reusable subflow: set response
+│           │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS54'
+│           │   └── GroovyScript: final Response
+│           │       📝 Executes custom logic: sets 1 header(s), modifies body
+│           │       └── Router: m2m check
+│           │           📝 Routes message based on 1 condition(s)
+│           │              Routes: 1
+│           │           ├── ContentModifier: set ResponseLog  [m2m not null]
+│           │           │   📝 Modifies message: sets body to constant
+│           │           │   🔀 Condition: ${property.m2m} != null
+│           │           │      Properties: No properties set
+│           │           │      Headers: No headers set
+│           │           │   └── CallActivity: call m2m sync flow
+│           │           │       📝 Calls reusable subflow: Process_96162206
+│           │           │       └── ContentModifier: Remove async headers
+│           │           │           📝 Modifies message: sets 6 header(s), sets body to constant
+│           │           │              Properties: No properties set
+│           │           │              Headers: [Delete] $name=SFDC_Org = (dynamic), [Delete] $name=BinaryInput = (dynamic), [Delete] $name=BinaryResponse = (dynamic)
+│           │           │           └── EndEvent: End 
+│           │           │               📝 End of Check Error Business Process
+│           │           └── EndEvent: End 
+│           │               📝 End of Check Error Business Process
+│           └── CallActivity: Set agvance
+│               📝 Calls reusable subflow: Set agvance
+│               └── GroovyScript: final Response
+│                   📝 Executes custom logic: sets 1 header(s), modifies body
+│                   └── Router: m2m check
+│                       📝 Routes message based on 1 condition(s)
+│                          Routes: 1
+│                       ├── ContentModifier: set ResponseLog  [m2m not null]
+│                       │   📝 Modifies message: sets body to constant
+│                       │   🔀 Condition: ${property.m2m} != null
+│                       │      Properties: No properties set
+│                       │      Headers: No headers set
+│                       │   └── CallActivity: call m2m sync flow
+│                       │       📝 Calls reusable subflow: Process_96162206
+│                       │       └── ContentModifier: Remove async headers
+│                       │           📝 Modifies message: sets 6 header(s), sets body to constant
+│                       │              Properties: No properties set
+│                       │              Headers: [Delete] $name=SFDC_Org = (dynamic), [Delete] $name=BinaryInput = (dynamic), [Delete] $name=BinaryResponse = (dynamic)
+│                       │           └── EndEvent: End 
+│                       │               📝 End of Check Error Business Process
+│                       └── EndEvent: End 
+│                           📝 End of Check Error Business Process
+├── StartEvent: Start 
+│   📝 Entry point of Business process exception handler
+│   └── ContentModifier: set message
+│       📝 Modifies message: sets 2 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: Content-Type = application/json, CamelHTTPResponseCode = 500
+│       └── GroovyScript: err respone to caller
+│           📝 Executes custom logic: sets 1 header(s), modifies body
+│           └── EndEvent: End 
+│               📝 End of Business process exception handler
+├── StartEvent: Error Start 
+│   📝 Entry point of CreateGrower
+│   └── ContentModifier: Set Error Parameters 
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: notify mail
+│           📝 Calls reusable subflow: Process_96162317
+│           └── CallActivity: call check error business process error
+│               📝 Calls reusable subflow: Process_62520130
+│               └── EndEvent: End 
+│                   📝 End of CreateGrower
+├── StartEvent: Start 
+│   📝 Entry point of CreateGrower
+│   └── ContentModifier: set params 
+│       📝 Modifies message: sets 6 header(s), sets body to constant
+│          Properties: No properties set
+│          Headers: SAP_Receiver = {{Receiver}}, SAP_Sender = {{sender}}, apiName = syng-productbooking-api
+│       └── ContentModifier: set Org
+│           📝 Modifies message: sets body to constant
+│              Properties: No properties set
+│              Headers: No headers set
+│           └── GroovyScript: set required params
+│               📝 Executes custom logic: sets 5 property/properties, sets 1 header(s), modifies body
+│                  Writes: Username, password, InputPayload
+│               └── GroovyScript: M2M Input Mapping
+│                   📝 Executes custom logic: sets 1 property/properties, modifies body
+│                      Writes: M2MInput
+│                   └── Router: Router
+│                       📝 Routes message based on 3 condition(s)
+│                          Routes: 3
+│                       ├── ContentModifier: Error Handler
+│                       │   📝 Modifies message: sets 2 header(s), sets body using expression
+│                       │      Properties: No properties set
+│                       │      Headers: CamelHTTPResponseCode = 500, Content-Type = application/json
+│                       │   └── CallActivity: call to async err handler flow
+│                       │       📝 Calls reusable subflow: Process_96162241
+│                       │       └── ContentModifier: Removeasyn header
+│                       │           📝 Modifies message: sets 3 header(s), sets body to constant
+│                       │              Properties: No properties set
+│                       │              Headers: [Delete] $name=InputPayload = (dynamic), [Delete] $name=partnerIdentifier = (dynamic), [Delete] $name=RequiredField = (dynamic)
+│                       │           └── GroovyScript: err respone to caller
+│                       │               📝 Executes custom logic: sets 1 header(s), modifies body
+│                       │               └── EndEvent: End 
+│                       │                   📝 End of CreateGrower
+│                       ├── CallActivity: call to key crop product booking [ProductBookingWS53 or ProductBookingWS54]
+│                       │   📝 Calls reusable subflow: Process_79626401
+│                       │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS53' or ${property.businessProcess} = 'ProductBookingWS54'
+│                       │   └── EndEvent: End 
+│                       │       📝 End of CreateGrower
+│                       ├── CallActivity: call Advance OrderChange [GrowerOrderWS]
+│                       │   📝 Calls reusable subflow: Process_62520109
+│                       │   🔀 Condition: ${property.businessProcess} = 'GrowerOrderWS'
+│                       │   └── EndEvent: End 
+│                       │       📝 End of CreateGrower
+│                       └── CallActivity: call to key crop product booking [ProductBookingWS or Pro-ProductBookingWS]
+│                           📝 Calls reusable subflow: Process_79626401
+│                           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'
+│                           └── EndEvent: End 
+│                               📝 End of CreateGrower
+├── StartEvent: Error Start 
+│   📝 Entry point of ValidationAGIIS
+│   └── ContentModifier: Set Error Parameters 
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: call to emailnotify
+│           📝 Calls reusable subflow: Process_96162317
+│           └── CallActivity: call to check business process
+│               📝 Calls reusable subflow: Process_62520130
+│               └── EndEvent: End 
+│                   📝 End of ValidationAGIIS
+├── StartEvent: Start 
+│   📝 Entry point of ValidationAGIIS
+│   └── RequestReply: Request Reply 
+│       📝 Calls external system via HTTP - GET {{address}}
+│          Target: AGIIS
+│       └── GroovyScript: getStatus
+│           📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties, modifies body
+│              Writes: validateGLN
+│              Reads: growerGLNSeperatedCommas
+│           └── EndEvent: End 
+│               📝 End of ValidationAGIIS
+├── StartEvent: Error Start 
+│   📝 Entry point of Async flow for error
+│   └── ContentModifier: Set Error Parameters  
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: call email notify
+│           📝 Calls reusable subflow: Process_96162317
+│           └── EndEvent: End 
+│               📝 End of Async flow for error
+├── StartEvent: Start 
+│   📝 Entry point of Async flow for error
+│   └── GroovyScript: set required Field
+│       📝 Executes custom logic: sets 3 property/properties
+│          Writes: source, business, RequiredFiled
+│       └── ContentModifier: set body
+│           📝 Modifies message: sets 1 header(s), sets body using expression
+│              Properties: No properties set
+│              Headers: Content-Type = application/json
+│           └── RequestReply: apex call
+│               📝 Calls external system via Salesforce - GET Unknown
+│                  Target: calltoapex
+│               └── ContentModifier: set body
+│                   📝 Modifies message: sets body using expression
+│                      Properties: No properties set
+│                      Headers: No headers set
+│                   └── EndEvent: End 
+│                       📝 End of Async flow for error
+├── StartEvent: Error Start 
+│   📝 Entry point of async flow for errr handler
+│   └── ContentModifier: Set Error Parameters 
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: call to email notify
+│           📝 Calls reusable subflow: Process_96162317
+│           └── EndEvent: End 
+│               📝 End of async flow for errr handler
+├── StartEvent: Start 
+│   📝 Entry point of async flow for errr handler
+│   └── ContentModifier: setParams
+│       📝 Modifies message: sets 6 header(s), sets body to constant
+│          Properties: No properties set
+│          Headers: RequiredField = RequiredField, partnerIdentifier = partnerIdentifier, InputPayload = InputPayload
+│       └── ServiceTask: Send 
+│           📝 Performs Send operation
+│           └── EndEvent: End 
+│               📝 End of async flow for errr handler
+├── StartEvent: Error Start 
+│   📝 Entry point of Async M2M flow
+│   └── ContentModifier: Set Error Parameters
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: call to email notify
+│           📝 Calls reusable subflow: Process_96162317
+│           └── EndEvent: End 
+│               📝 End of Async M2M flow
+├── StartEvent: Start 
+│   📝 Entry point of Async M2M flow
+│   └── ContentModifier: setParams
+│       📝 Modifies message: sets 8 header(s), sets body to constant
+│          Properties: No properties set
+│          Headers: M2MInput = M2MInput, SFDC_Org = SFDC_Org, BinaryResponse = BinaryResponse
+│       └── ServiceTask: Send 
+│           📝 Performs Send operation
+│           └── EndEvent: End 
+│               📝 End of Async M2M flow
+├── StartEvent: Start 
+│   📝 Entry point of Email notification
+│   └── RequestReply: notify email
+│       📝 Calls external system via ProcessDirect - GET /emailnotification/v1
+│          Target: SFDCMailReceiver
+│       └── EndEvent: End 
+│           📝 End of Email notification
+├── StartEvent: Error Start 
+│   📝 Entry point of Validate_Agvance_Order
+│   └── ContentModifier: Set Error Parameters
+│       📝 Modifies message: sets 5 header(s), sets body using expression
+│          Properties: No properties set
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│       └── CallActivity: call to notify email
+│           📝 Calls reusable subflow: Process_96162317
+│           └── CallActivity: call to check error business process
+│               📝 Calls reusable subflow: Process_62520130
+│               └── EndEvent: End 
+│                   📝 End of Validate_Agvance_Order
+└── StartEvent: Start 
+    📝 Entry point of Validate_Agvance_Order
+    └── GroovyScript: Groovy Script 1
+        📝 Executes custom logic: sets 1 property/properties
+           Writes: growerGLNSeperatedCommas
+        └── ContentModifier: set compoiste query
+            📝 Modifies message: sets body using expression
+               Properties: No properties set
+               Headers: No headers set
+            └── CallActivity: Call RR Composite query
+                📝 Calls reusable subflow: Process_62520215
+                └── GroovyScript: set Growers
+                    📝 Executes custom logic: sets 4 property/properties, reads 3 property/properties
+                       Writes: growerGLN, newGrowerGLNSeperatedcommas, setGrowers
+                       Reads: growerGLN, setErrorList, growerAddress
+                    └── GroovyScript: checking condition
+                        📝 Executes custom logic: sets 1 property/properties, reads 5 property/properties
+                           Writes: conditionMet
+                           Reads: growerGLN, GTIN, resellerGLN
+                        └── Router: isvalid?
+                            📝 Routes message based on 1 condition(s)
+                               Routes: 1
+                            ├── ContentModifier: Error:Required fields not found
+                            │   📝 Modifies message: sets 1 header(s), sets body to constant
+                            │      Properties: No properties set
+                            │      Headers: CamelHTTPResponseCode = 500
+                            │   └── CallActivity: Check Error Business Process
+                            │       📝 Calls reusable subflow: Process_62520130
+                            │       └── EndEvent: End 
+                            │           📝 End of Validate_Agvance_Order
+                            └── CallActivity: call Validate_OrderFlow [true]
+                                📝 Calls reusable subflow: Process_62520241
+                                🔀 Condition: ${property.conditionMet} = 'true'
+                                └── EndEvent: End 
+                                    📝 End of Validate_Agvance_Order

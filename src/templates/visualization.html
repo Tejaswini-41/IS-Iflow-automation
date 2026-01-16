@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SAP CPI iFlow Visualization</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        height: 100vh;
+        background: #f5f5f5;
+      }
+      #sidebar {
+        width: 400px;
+        min-width: 200px;
+        background: white;
+        border-right: 1px solid #ddd;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+      #resizer {
+        width: 5px;
+        cursor: col-resize;
+        background: transparent;
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 10;
+      }
+      #resizer:hover {
+        background: #0078d4;
+      }
+      #content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        gap: 20px;
+      }
+      #details-container {
+        flex: 1;
+        min-width: 0;
+      }
+      #flowchart-panel {
+        width: 450px;
+        min-width: 300px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+      #flowchart-resizer {
+        width: 5px;
+        cursor: col-resize;
+        background: transparent;
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 10;
+      }
+      #flowchart-resizer:hover {
+        background: #0078d4;
+      }
+      #flowchart-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      #flowchart-canvas {
+        flex: 1;
+        overflow: auto;
+        padding: 20px;
+        position: relative;
+        background: linear-gradient(
+            90deg,
+            rgba(102, 126, 234, 0.03) 1px,
+            transparent 1px
+          ),
+          linear-gradient(rgba(102, 126, 234, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        background-position: -1px -1px;
+      }
+      #flowchart-controls {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 8px;
+        z-index: 1000;
+      }
+      .control-btn {
+        background: white;
+        border: 2px solid #667eea;
+        border-radius: 8px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 18px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+      .control-btn:hover {
+        background: #667eea;
+        color: white;
+        transform: scale(1.1);
+      }
+      .control-btn:active {
+        transform: scale(0.95);
+      }
+      #header {
+        background: #0078d4;
+        color: white;
+        padding: 20px;
+        flex-shrink: 0;
+      }
+      #header h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      #header p {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+      #tree {
+        padding: 20px;
+        flex: 1;
+        overflow-y: auto;
+      }
+      .tree-node {
+        margin-bottom: 8px;
+        cursor: pointer;
+        user-select: none;
+        padding: 8px;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+      .tree-node:hover {
+        background: #f0f0f0;
+      }
+      .tree-node.selected {
+        background: #e3f2fd;
+        border-left: 3px solid #0078d4;
+      }
+      .node-content {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .node-icon {
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+      }
+      .node-label {
+        font-size: 14px;
+        font-weight: 500;
+        flex: 1;
+      }
+      .node-type {
+        color: #666;
+        font-size: 11px;
+        background: #f0f0f0;
+        padding: 2px 8px;
+        border-radius: 12px;
+      }
+      .tree-children {
+        margin-left: 32px;
+        border-left: 2px solid #e0e0e0;
+        padding-left: 8px;
+      }
+      #details {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      #details h2 {
+        color: #0078d4;
+        margin-bottom: 20px;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      #details .section {
+        margin-bottom: 25px;
+      }
+      #details .section h3 {
+        font-size: 16px;
+        color: #333;
+        margin-bottom: 12px;
+        border-bottom: 2px solid #0078d4;
+        padding-bottom: 8px;
+      }
+      #details .section p {
+        color: #666;
+        line-height: 1.8;
+        font-size: 14px;
+      }
+      #details .detail-item {
+        background: #f9f9f9;
+        padding: 12px 15px;
+        margin: 8px 0;
+        border-left: 3px solid #0078d4;
+        border-radius: 4px;
+      }
+      #details .detail-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+        font-size: 13px;
+      }
+      #details .detail-value {
+        color: #666;
+        font-size: 13px;
+        word-break: break-word;
+      }
+      #details .detail-list {
+        list-style: none;
+        padding: 0;
+      }
+      #details .detail-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+      }
+      #details .detail-list li:last-child {
+        border-bottom: none;
+      }
+      #details .detail-list code {
+        font-family: "Consolas", "Monaco", monospace;
+        font-size: 12px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+      }
+      .empty-state h2 {
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-right: 5px;
+      }
+      .badge-success {
+        background: #d4edda;
+        color: #155724;
+      }
+      .badge-info {
+        background: #d1ecf1;
+        color: #0c5460;
+      }
+      .badge-warning {
+        background: #fff3cd;
+        color: #856404;
+      }
+      .badge-danger {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .process-badge {
+        display: inline-block;
+        background: #e8f4f8;
+        color: #0078d4;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 600;
+        margin-left: 5px;
+        border: 1px solid #b3d9e6;
+      }
+
+      /* Flowchart Styles */
+      .flow-node {
+        position: absolute;
+        background: white;
+        border: 2px solid #667eea;
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 200px;
+        max-width: 280px;
+        font-size: 13px;
+      }
+      .flow-node:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        border-color: #764ba2;
+        z-index: 100;
+      }
+      .flow-node.main-process {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        font-weight: 600;
+        box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+        border: 3px solid rgba(255, 255, 255, 0.3);
+      }
+      .flow-node.main-process .flow-node-id {
+        color: rgba(255, 255, 255, 0.8);
+      }
+      .flow-node.subprocess {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border: 2px solid #b3c0ff;
+        box-shadow: 0 2px 8px rgba(163, 180, 234, 0.2);
+      }
+      .flow-node.highlighted {
+        border-color: #ff6b6b;
+        border-width: 3px;
+        box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+      }
+      .flow-node-title {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        word-wrap: break-word;
+        line-height: 1.3;
+      }
+      .flow-node-type {
+        font-size: 10px;
+        opacity: 0.7;
+        font-style: italic;
+      }
+      .flow-node-id {
+        font-size: 9px;
+        opacity: 0.5;
+        margin-top: 2px;
+      }
+      .flow-connection {
+        position: absolute;
+        pointer-events: none;
+      }
+      .flow-arrow {
+        stroke: #8b9cec;
+        stroke-width: 2.5;
+        fill: none;
+        marker-end: url(#arrowhead);
+        opacity: 0.6;
+        transition: all 0.3s ease;
+      }
+      .flow-arrow:hover {
+        stroke-width: 3;
+        opacity: 1;
+      }
+      .flow-arrow.highlighted {
+        stroke: #ff4757;
+        stroke-width: 4;
+        opacity: 1;
+        animation: dash 1.5s linear infinite;
+        filter: drop-shadow(0 0 4px rgba(255, 71, 87, 0.6));
+      }
+      @keyframes dash {
+        to {
+          stroke-dashoffset: -20;
+        }
+      }
+      .legend {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px;
+        font-size: 11px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 5px 0;
+      }
+      .legend-box {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sidebar">
+      <div id="resizer"></div>
+      <div id="header">
+        <h1>🔄 SAP CPI iFlow</h1>
+        <p id="metadata">Loading...</p>
+      </div>
+      <div id="tree"></div>
+    </div>
+    <div id="content">
+      <div id="details-container">
+        <div id="details">
+          <div class="empty-state">
+            <h2>👈 Select a node from the tree</h2>
+            <p>Click on any node in the left panel to view its details</p>
+          </div>
+        </div>
+      </div>
+      <div id="flowchart-panel">
+        <div id="flowchart-resizer"></div>
+        <div id="flowchart-header">📊 Process Flow Diagram</div>
+        <div id="flowchart-canvas">
+          <div id="flowchart-controls">
+            <div class="control-btn" onclick="zoomIn()" title="Zoom In">+</div>
+            <div class="control-btn" onclick="zoomOut()" title="Zoom Out">
+              −
+            </div>
+            <div class="control-btn" onclick="resetZoom()" title="Reset View">
+              ⟲
+            </div>
+          </div>
+          <svg id="flowchart-svg" width="100%" height="100%">
+            <defs>
+              <marker
+                id="arrowhead"
+                markerWidth="12"
+                markerHeight="12"
+                refX="10"
+                refY="4"
+                orient="auto"
+              >
+                <polygon points="0 0, 12 4, 0 8" fill="#8b9cec" />
+              </marker>
+              <marker
+                id="arrowhead-highlight"
+                markerWidth="12"
+                markerHeight="12"
+                refX="10"
+                refY="4"
+                orient="auto"
+              >
+                <polygon points="0 0, 12 4, 0 8" fill="#ff4757" />
+              </marker>
+            </defs>
+          </svg>
+          <div id="flowchart-nodes"></div>
+          <div class="legend">
+            <div class="legend-item">
+              <div
+                class="legend-box"
+                style="
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                "
+              ></div>
+              <span>Main Process</span>
+            </div>
+            <div class="legend-item">
+              <div
+                class="legend-box"
+                style="background: #f8f9ff; border: 2px solid #a8b4ea"
+              ></div>
+              <span>Subprocess</span>
+            </div>
+            <div class="legend-item">
+              <div style="width: 30px; height: 2px; background: #667eea"></div>
+              <span>Process Call</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const flowData = {{FLOW_DATA}};
+      const metadata = {{METADATA}};
+
+      console.log('Flow Data:', flowData);
+      console.log('Metadata:', metadata);
+
+      // Display metadata
+      document.getElementById('metadata').textContent =
+          `File: ${metadata.filename} | Processes: ${metadata.processes} | Participants: ${metadata.participants}`;
+
+      // Global variables for flowchart
+      let processCallMap = new Map(); // Map of process -> called subprocesses
+      let allProcesses = new Set(); // All unique processes
+      let currentHighlightedPath = [];
+
+      // Extract process call relationships
+      function extractProcessCalls(nodes, parentProcess = null) {
+          nodes.forEach(node => {
+              // Track processes
+              if (node.details && node.details.processName) {
+                  allProcesses.add(node.details.processName);
+
+                  // Store process ID to name mapping
+                  if (node.details.processId && node.details.processName) {
+                      if (!window.processIdToName) window.processIdToName = new Map();
+                      window.processIdToName.set(node.details.processId, node.details.processName);
+                  }
+              }
+
+              // Track CallActivity relationships
+              if (node.type === 'CallActivity' && node.details && node.details.subflowName) {
+                  const callingProcess = parentProcess || 'Main Flow';
+                  const calledProcess = node.details.subflowName;
+
+                  if (!processCallMap.has(callingProcess)) {
+                      processCallMap.set(callingProcess, []);
+                  }
+                  processCallMap.get(callingProcess).push({
+                      name: node.name,
+                      subflowId: calledProcess,
+                      nodeId: node.id
+                  });
+
+                  allProcesses.add(calledProcess);
+              }
+
+              // Recursively process children
+              if (node.children && node.children.length > 0) {
+                  const nextParent = (node.details && node.details.processName) ? node.details.processName : parentProcess;
+                  extractProcessCalls(node.children, nextParent);
+              }
+          });
+      }
+
+      // Build flowchart visualization
+      function buildFlowchart() {
+          extractProcessCalls(flowData);
+
+          console.log('Process Call Map:', processCallMap);
+          console.log('All Processes:', allProcesses);
+
+          const canvas = document.getElementById('flowchart-nodes');
+          const svg = document.getElementById('flowchart-svg');
+          canvas.innerHTML = '';
+          svg.innerHTML = svg.innerHTML; // Keep defs
+
+          if (processCallMap.size === 0) {
+              canvas.innerHTML = `
+                  <div style="padding: 40px; text-align: center; color: #999;">
+                      <div style="font-size: 48px; margin-bottom: 20px;">📊</div>
+                      <h3 style="color: #666; margin-bottom: 10px;">No Process Calls Detected</h3>
+                      <p style="font-size: 14px;">This iFlow doesn't contain any CallActivity elements that reference subprocesses.</p>
+                      <p style="font-size: 12px; margin-top: 10px; color: #999;">Process calls appear when one flow calls another via CallActivity.</p>
+                  </div>
+              `;
+              return;
+          }
+
+          // Layout configuration - More spacing for clarity
+          const nodeWidth = 220;
+          const nodeHeight = 80;
+          const horizontalGap = 180;
+          const verticalGap = 120;
+          const startX = 30;
+          const startY = 40;
+
+          // Create hierarchical layout
+          let processLevels = new Map();
+          let processPositions = new Map();
+          let level = 0;
+
+          // Level 0: Main processes (those that call others)
+          const mainProcesses = Array.from(processCallMap.keys());
+          mainProcesses.forEach((proc, idx) => {
+              processLevels.set(proc, 0);
+              processPositions.set(proc, {
+                  x: startX,
+                  y: startY + idx * (nodeHeight + verticalGap),
+                  level: 0
+              });
+          });
+
+          // Level 1+: Called processes with better distribution
+          let subprocessY = startY;
+          let maxX = startX;
+          const subprocesses = new Set();
+
+          // Collect all unique subprocesses
+          processCallMap.forEach((calls) => {
+              calls.forEach((call) => {
+                  subprocesses.add(call.subflowId);
+              });
+          });
+
+          // Position subprocesses vertically with even spacing
+          Array.from(subprocesses).forEach((subprocId, idx) => {
+              const x = startX + nodeWidth + horizontalGap;
+              const y = subprocessY + (idx * (nodeHeight + verticalGap));
+
+              processPositions.set(subprocId, {
+                  x: x,
+                  y: y,
+                  level: 1
+              });
+
+              if (x > maxX) maxX = x;
+          });          // Set SVG size
+          const totalHeight = Math.max(...Array.from(processPositions.values()).map(p => p.y)) + nodeHeight + 100;
+          const totalWidth = maxX + nodeWidth + 100;
+          svg.setAttribute('height', totalHeight);
+          svg.setAttribute('width', totalWidth);
+
+          // Draw connections first (so they appear behind nodes)
+          const lines = [];
+          processCallMap.forEach((calls, mainProc) => {
+              const fromPos = processPositions.get(mainProc);
+              if (!fromPos) return;
+
+              calls.forEach(call => {
+                  const toPos = processPositions.get(call.subflowId);
+                  if (!toPos) return;
+
+                  const x1 = fromPos.x + nodeWidth;
+                  const y1 = fromPos.y + nodeHeight / 2;
+                  const x2 = toPos.x;
+                  const y2 = toPos.y + nodeHeight / 2;
+
+                  // Create smooth curved path with better control points
+                  const controlOffset = horizontalGap * 0.4;
+                  const path = `M ${x1} ${y1} C ${x1 + controlOffset} ${y1}, ${x2 - controlOffset} ${y2}, ${x2} ${y2}`;
+
+                  const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                  pathElement.setAttribute('d', path);
+                  pathElement.setAttribute('class', 'flow-arrow');
+                  pathElement.setAttribute('data-from', mainProc);
+                  pathElement.setAttribute('data-to', call.subflowId);
+                  pathElement.setAttribute('stroke-dasharray', '8,4');
+                  svg.appendChild(pathElement);
+
+                  lines.push({
+                      element: pathElement,
+                      from: mainProc,
+                      to: call.subflowId
+                  });
+              });
+          });
+
+          // Draw nodes
+          processPositions.forEach((pos, procId) => {
+              const isMainProcess = processCallMap.has(procId);
+              const node = document.createElement('div');
+              node.className = 'flow-node ' + (isMainProcess ? 'main-process' : 'subprocess');
+              node.style.left = pos.x + 'px';
+              node.style.top = pos.y + 'px';
+              node.style.width = nodeWidth + 'px';
+              node.setAttribute('data-process-id', procId);
+
+              // Try to get human-readable name
+              let displayName = procId;
+              if (window.processIdToName && window.processIdToName.has(procId)) {
+                  displayName = window.processIdToName.get(procId);
+              } else {
+                  displayName = procId.replace('Process_', 'P-');
+              }
+
+              // Tooltip with full ID
+              node.title = `Process ID: ${procId}\nClick to highlight connections`;
+
+              // Count incoming and outgoing connections
+              let outgoingCount = processCallMap.has(procId) ? processCallMap.get(procId).length : 0;
+              let incomingCount = 0;
+              processCallMap.forEach((calls) => {
+                  if (calls.find(c => c.subflowId === procId)) incomingCount++;
+              });
+
+              const connectionInfo = outgoingCount > 0 ? `→ Calls ${outgoingCount}` :
+                                    incomingCount > 0 ? `← Called by ${incomingCount}` : '';
+
+              node.innerHTML = `
+                  <div class="flow-node-title">${escapeHtml(displayName)}</div>
+                  <div class="flow-node-type">${isMainProcess ? '🔄 Main Process' : '📞 Subprocess'}</div>
+                  ${connectionInfo ? `<div style="font-size: 10px; opacity: 0.7; margin-top: 4px;">${connectionInfo}</div>` : ''}
+              `;
+
+              node.onclick = () => highlightProcessFlow(procId);
+              canvas.appendChild(node);
+          });
+
+          // Store lines for highlighting
+          window.flowChartLines = lines;
+      }
+
+      // Highlight process flow
+      function highlightProcessFlow(processId) {
+          // Clear previous highlights
+          document.querySelectorAll('.flow-node').forEach(n => n.classList.remove('highlighted'));
+          document.querySelectorAll('.flow-arrow').forEach(a => {
+              a.classList.remove('highlighted');
+              a.setAttribute('marker-end', 'url(#arrowhead)');
+          });
+
+          // Highlight selected node
+          const selectedNode = document.querySelector(`[data-process-id="${processId}"]`);
+          if (selectedNode) {
+              selectedNode.classList.add('highlighted');
+          }
+
+          // Highlight outgoing connections
+          if (processCallMap.has(processId)) {
+              const calls = processCallMap.get(processId);
+              calls.forEach(call => {
+                  // Highlight called subprocess
+                  const calledNode = document.querySelector(`[data-process-id="${call.subflowId}"]`);
+                  if (calledNode) {
+                      calledNode.classList.add('highlighted');
+                  }
+
+                  // Highlight connection line
+                  const line = window.flowChartLines.find(l => l.from === processId && l.to === call.subflowId);
+                  if (line) {
+                      line.element.classList.add('highlighted');
+                      line.element.setAttribute('marker-end', 'url(#arrowhead-highlight)');
+                  }
+              });
+          }
+
+          // Highlight incoming connections (who calls this process)
+          processCallMap.forEach((calls, mainProc) => {
+              const callsThis = calls.find(c => c.subflowId === processId);
+              if (callsThis) {
+                  const callingNode = document.querySelector(`[data-process-id="${mainProc}"]`);
+                  if (callingNode) {
+                      callingNode.classList.add('highlighted');
+                  }
+
+                  const line = window.flowChartLines.find(l => l.from === mainProc && l.to === processId);
+                  if (line) {
+                      line.element.classList.add('highlighted');
+                      line.element.setAttribute('marker-end', 'url(#arrowhead-highlight)');
+                  }
+              }
+          });
+      }
+
+      // Render tree recursively
+      function renderTree(nodes, container) {
+          if (!nodes || nodes.length === 0) return;
+
+          nodes.forEach(node => {
+              const nodeDiv = document.createElement('div');
+
+              const nodeContent = document.createElement('div');
+              nodeContent.className = 'tree-node';
+              const processName = (node.type === 'StartEvent' || node.type === 'EndEvent') && node.details && node.details.processName
+                  ? `<span class="process-badge">${escapeHtml(node.details.processName)}</span>`
+                  : '';
+              nodeContent.innerHTML = `
+                  <div class="node-content">
+                      <span class="node-icon">${getIcon(node.type)}</span>
+                      <span class="node-label">${escapeHtml(node.name || 'Unnamed')}</span>
+                      ${processName}
+                      <span class="node-type">${node.type}</span>
+                  </div>
+              `;
+              nodeContent.onclick = (e) => {
+                  e.stopPropagation();
+                  document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
+                  nodeContent.classList.add('selected');
+                  showDetails(node);
+
+                  // Highlight in flowchart if it's a CallActivity
+                  if (node.type === 'CallActivity' && node.details && node.details.subflowName) {
+                      highlightProcessFlow(node.details.subflowName);
+                  }
+              };
+
+              nodeDiv.appendChild(nodeContent);
+
+              // Render children if they exist
+              if (node.children && node.children.length > 0) {
+                  const childrenContainer = document.createElement('div');
+                  childrenContainer.className = 'tree-children';
+                  renderTree(node.children, childrenContainer);
+                  nodeDiv.appendChild(childrenContainer);
+              }
+
+              container.appendChild(nodeDiv);
+          });
+      }
+
+      function getIcon(type) {
+          const icons = {
+              'Sender': '📥',
+              'Receiver': '📤',
+              'StartEvent': '▶️',
+              'EndEvent': '⏹️',
+              'ContentModifier': '✏️',
+              'GroovyScript': '📜',
+              'Router': '🔀',
+              'RequestReply': '🔄',
+              'CallActivity': '📞',
+              'ServiceTask': '⚙️'
+          };
+          return icons[type] || '📦';
+      }
+
+      function escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+      }
+
+      function showDetails(node) {
+          const detailsDiv = document.getElementById('details');
+          let html = `<h2><span>${getIcon(node.type)}</span> ${escapeHtml(node.name || 'Unnamed')}</h2>`;
+
+          // Type badge
+          html += `<div class="section">`;
+          html += `<span class="badge badge-info">${node.type}</span>`;
+          if (node.route_name) {
+              html += `<span class="badge badge-warning">Route: ${escapeHtml(node.route_name)}</span>`;
+          }
+          html += `</div>`;
+
+          // Summary
+          if (node.summary) {
+              html += `<div class="section">
+                  <h3>📝 Summary</h3>
+                  <p>${escapeHtml(node.summary)}</p>
+              </div>`;
+          }
+
+          // Condition (for router branches)
+          if (node.condition) {
+              html += `<div class="section">
+                  <h3>🔀 Condition</h3>
+                  <div class="detail-item">
+                      <div class="detail-value"><code>${escapeHtml(node.condition)}</code></div>
+                  </div>
+              </div>`;
+          }
+
+          // Details
+          if (node.details && Object.keys(node.details).length > 0) {
+              html += `<div class="section"><h3>🔍 Details</h3>`;
+
+              for (const [key, value] of Object.entries(node.details)) {
+                  if (value === null || value === undefined || value === '') continue;
+
+                  if (Array.isArray(value) && value.length > 0) {
+                      // Check if this is an array of objects (like router conditions)
+                      if (typeof value[0] === 'object' && value[0] !== null) {
+                          html += `<div class="detail-item">
+                              <div class="detail-label">${formatLabel(key)}</div>`;
+
+                          // Special handling for conditions array
+                          if (key === 'conditions') {
+                              html += `<ul class="detail-list">`;
+                              value.forEach(cond => {
+                                  const routeName = cond.route || 'Default Route';
+                                  const condition = cond.condition || 'No condition';
+                                  html += `<li>
+                                      <strong style="color: #0078d4;">${escapeHtml(routeName)}:</strong><br>
+                                      <code style="background: #f5f5f5; padding: 4px 8px; display: block; margin-top: 4px; border-radius: 4px; font-size: 12px;">${escapeHtml(condition)}</code>
+                                  </li>`;
+                              });
+                              html += `</ul>`;
+                          } else {
+                              // Generic object array display
+                              html += `<div class="detail-value"><pre>${escapeHtml(JSON.stringify(value, null, 2))}</pre></div>`;
+                          }
+                          html += `</div>`;
+                      } else {
+                          // Simple array of primitives
+                          html += `<div class="detail-item">
+                              <div class="detail-label">${formatLabel(key)}</div>
+                              <ul class="detail-list">
+                                  ${value.map(v => `<li>${escapeHtml(String(v))}</li>`).join('')}
+                              </ul>
+                          </div>`;
+                      }
+                  } else if (typeof value === 'object' && value !== null) {
+                      // Handle nested objects
+                      if (key !== 'allProperties' && key !== 'properties') {
+                          html += `<div class="detail-item">
+                              <div class="detail-label">${formatLabel(key)}</div>
+                              <div class="detail-value"><pre style="background: #f9f9f9; padding: 10px; border-radius: 4px; overflow-x: auto;">${escapeHtml(JSON.stringify(value, null, 2))}</pre></div>
+                          </div>`;
+                      }
+                  } else if (value !== false && value !== 0) {
+                      html += `<div class="detail-item">
+                          <div class="detail-label">${formatLabel(key)}</div>
+                          <div class="detail-value">${escapeHtml(String(value))}</div>
+                      </div>`;
+                  } else if (value === true) {
+                      html += `<div class="detail-item">
+                          <div class="detail-label">${formatLabel(key)}</div>
+                          <div class="detail-value"><span class="badge badge-success">Yes</span></div>
+                      </div>`;
+                  }
+              }
+              html += `</div>`;
+          }
+
+          detailsDiv.innerHTML = html;
+      }
+
+      function formatLabel(str) {
+          return str
+              .replace(/([A-Z])/g, ' $1')
+              .replace(/^./, s => s.toUpperCase())
+              .trim();
+      }
+
+      // Initialize
+      if (flowData && flowData.length > 0) {
+          renderTree(flowData, document.getElementById('tree'));
+          buildFlowchart(); // Build the process flow diagram
+      } else {
+          document.getElementById('tree').innerHTML = '<div class="empty-state"><p>No flow data available</p></div>';
+      }
+
+      // Resizable sidebar
+      const sidebar = document.getElementById('sidebar');
+      const resizer = document.getElementById('resizer');
+      let isResizing = false;
+
+      resizer.addEventListener('mousedown', (e) => {
+          isResizing = true;
+          document.body.style.cursor = 'col-resize';
+          document.body.style.userSelect = 'none';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+          if (!isResizing) return;
+
+          const newWidth = e.clientX;
+          const maxWidth = window.innerWidth - 300; // Leave at least 300px for content
+          if (newWidth >= 200 && newWidth <= maxWidth) {
+              sidebar.style.width = newWidth + 'px';
+          }
+      });      document.addEventListener('mouseup', () => {
+          if (isResizing) {
+              isResizing = false;
+              document.body.style.cursor = '';
+              document.body.style.userSelect = '';
+          }
+      });
+
+      // Resizable flowchart panel
+      const flowchartPanel = document.getElementById('flowchart-panel');
+      const flowchartResizer = document.getElementById('flowchart-resizer');
+      let isResizingFlowchart = false;
+
+      flowchartResizer.addEventListener('mousedown', (e) => {
+          isResizingFlowchart = true;
+          document.body.style.cursor = 'col-resize';
+          document.body.style.userSelect = 'none';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+          if (!isResizingFlowchart) return;
+
+          const containerWidth = document.getElementById('content').offsetWidth;
+          const newWidth = containerWidth - e.clientX + document.getElementById('content').offsetLeft;
+          const minWidth = 300;
+          const maxWidth = containerWidth - 400; // Leave at least 400px for details
+
+          if (newWidth >= minWidth && newWidth <= maxWidth) {
+              flowchartPanel.style.width = newWidth + 'px';
+          }
+      });
+
+      document.addEventListener('mouseup', () => {
+          if (isResizingFlowchart) {
+              isResizingFlowchart = false;
+              document.body.style.cursor = '';
+              document.body.style.userSelect = '';
+          }
+      });
+
+      // Zoom functionality
+      let currentZoom = 1;
+      const zoomStep = 0.15;
+      const minZoom = 0.5;
+      const maxZoom = 2;
+
+      function zoomIn() {
+          if (currentZoom < maxZoom) {
+              currentZoom = Math.min(currentZoom + zoomStep, maxZoom);
+              applyZoom();
+          }
+      }
+
+      function zoomOut() {
+          if (currentZoom > minZoom) {
+              currentZoom = Math.max(currentZoom - zoomStep, minZoom);
+              applyZoom();
+          }
+      }
+
+      function resetZoom() {
+          currentZoom = 1;
+          applyZoom();
+          // Also scroll to top-left
+          const canvas = document.getElementById('flowchart-canvas');
+          canvas.scrollTo(0, 0);
+      }
+
+      function applyZoom() {
+          const nodesContainer = document.getElementById('flowchart-nodes');
+          const svgContainer = document.getElementById('flowchart-svg');
+          nodesContainer.style.transform = `scale(${currentZoom})`;
+          nodesContainer.style.transformOrigin = 'top left';
+          svgContainer.style.transform = `scale(${currentZoom})`;
+          svgContainer.style.transformOrigin = 'top left';
+      }
+    </script>
+  </body>
+</html>
