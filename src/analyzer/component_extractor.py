@@ -307,6 +307,10 @@ class ComponentExtractor:
         
         summary = self._generate_groovy_summary(script_analysis, script_name)
         
+        # Extract function names for display
+        functions = script_analysis.get('functions', [])
+        function_display = f" ({', '.join(functions)})" if functions else ""
+        
         return {
             'id': service_task['id'],
             'name': service_task['name'] or script_name or 'Groovy Script',
@@ -314,13 +318,17 @@ class ComponentExtractor:
             'summary': summary,
             'details': {
                 'scriptName': script_name,
+                'functionNames': functions,
+                'variables': script_analysis.get('variables', []),
+                'scriptContent': script_analysis.get('script_content', ''),
                 'propertiesRead': script_analysis.get('properties_read', []),
                 'propertiesWritten': script_analysis.get('properties_written', []),
                 'headersRead': script_analysis.get('headers_read', []),
                 'headersWritten': script_analysis.get('headers_written', []),
                 'bodyModified': script_analysis.get('body_modified', False),
                 'externalCalls': script_analysis.get('external_calls', []),
-                'scriptAvailable': 'error' not in script_analysis
+                'scriptAvailable': 'error' not in script_analysis,
+                'scriptDisplayName': f"{script_name}{function_display}" if script_name else "Groovy Script"
             },
             'children': []
         }

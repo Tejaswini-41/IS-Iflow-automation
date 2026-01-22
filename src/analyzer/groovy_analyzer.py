@@ -22,6 +22,9 @@ class GroovyAnalyzer:
                 'headers_written': [],
                 'body_modified': False,
                 'external_calls': [],
+                'functions': [],
+                'variables': [],
+                'script_content': '',
                 'error': 'Empty script content'
             }
         
@@ -31,7 +34,10 @@ class GroovyAnalyzer:
             'headers_read': self._extract_headers_read(script_content),
             'headers_written': self._extract_headers_written(script_content),
             'body_modified': self._detect_body_modification(script_content),
-            'external_calls': self._detect_external_calls(script_content)
+            'external_calls': self._detect_external_calls(script_content),
+            'functions': self._extract_functions(script_content),
+            'variables': self._extract_variables(script_content),
+            'script_content': script_content
         }
     
     def _extract_properties_read(self, script: str) -> List[str]:
@@ -150,6 +156,32 @@ class GroovyAnalyzer:
             })
         
         return calls
+    
+    def _extract_functions(self, script: str) -> List[str]:
+        """Extract function/method names from Groovy script"""
+        functions = []
+        
+        # Pattern: def functionName(...) or Message functionName(...)
+        function_pattern = r'(?:def|Message|void|String|Integer|Boolean)\s+(\w+)\s*\('
+        matches = re.findall(function_pattern, script)
+        functions.extend(matches)
+        
+        return list(set(functions))
+    
+    def _extract_variables(self, script: str) -> List[str]:
+        """Extract variable names from Groovy script"""
+        variables = []
+        
+        # Pattern: def variableName = ...
+        def_pattern = r'def\s+(\w+)\s*='
+        variables.extend(re.findall(def_pattern, script))
+        
+        # Pattern: variableName = ... (assignments without def)
+        # Only capture if it's a new line or after semicolon
+        assign_pattern = r'(?:^|\n|\s)\s*([a-z][a-zA-Z0-9_]*)\s*='
+        variables.extend(re.findall(assign_pattern, script))
+        
+        return list(set(variables))
     
     def generate_summary(self, analysis: Dict[str, Any]) -> str:
         """Generate human-readable summary from analysis"""

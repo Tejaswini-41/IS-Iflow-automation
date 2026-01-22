@@ -486,7 +486,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -577,25 +577,20 @@
           "id": "CallActivity_79626405",
           "name": "set Variables for key crop pb",
           "type": "GroovyScript",
-          "summary": "Executes custom logic: sets 8 property/properties",
+          "summary": "Executes Groovy script: script33.groovy (script file not loaded)",
           "details": {
             "scriptName": "script33.groovy",
+            "functionNames": [],
+            "variables": [],
+            "scriptContent": "",
             "propertiesRead": [],
-            "propertiesWritten": [
-              "growerGLN",
-              "GTIN",
-              "GTINSeperatedCommas",
-              "growerGLNSeperatedCommas",
-              "resellerGLN",
-              "seedYear",
-              "growerAddress",
-              "partnerIdentifier"
-            ],
+            "propertiesWritten": [],
             "headersRead": [],
             "headersWritten": [],
             "bodyModified": false,
             "externalCalls": [],
-            "scriptAvailable": true
+            "scriptAvailable": false,
+            "scriptDisplayName": "script33.groovy"
           },
           "condition": "",
           "route_name": "",
@@ -604,18 +599,20 @@
               "id": "CallActivity_79626413",
               "name": "set Error variable",
               "type": "GroovyScript",
-              "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+              "summary": "Executes Groovy script: script10.groovy (script file not loaded)",
               "details": {
                 "scriptName": "script10.groovy",
+                "functionNames": [],
+                "variables": [],
+                "scriptContent": "",
                 "propertiesRead": [],
-                "propertiesWritten": [
-                  "ErrorCodes"
-                ],
+                "propertiesWritten": [],
                 "headersRead": [],
                 "headersWritten": [],
-                "bodyModified": true,
+                "bodyModified": false,
                 "externalCalls": [],
-                "scriptAvailable": true
+                "scriptAvailable": false,
+                "scriptDisplayName": "script10.groovy"
               },
               "condition": "",
               "route_name": "",
@@ -624,20 +621,20 @@
                   "id": "CallActivity_79626416",
                   "name": "Validate Year",
                   "type": "GroovyScript",
-                  "summary": "Executes custom logic: sets 1 property/properties, reads 1 property/properties",
+                  "summary": "Executes Groovy script: script4.groovy (script file not loaded)",
                   "details": {
                     "scriptName": "script4.groovy",
-                    "propertiesRead": [
-                      "seedYear"
-                    ],
-                    "propertiesWritten": [
-                      "isValidMarketYear"
-                    ],
+                    "functionNames": [],
+                    "variables": [],
+                    "scriptContent": "",
+                    "propertiesRead": [],
+                    "propertiesWritten": [],
                     "headersRead": [],
                     "headersWritten": [],
                     "bodyModified": false,
                     "externalCalls": [],
-                    "scriptAvailable": true
+                    "scriptAvailable": false,
+                    "scriptDisplayName": "script4.groovy"
                   },
                   "condition": "",
                   "route_name": "",
@@ -773,7 +770,7 @@
                             "conditions": [
                               {
                                 "route": "ProductBookingWS or Pro-ProductBookingWS",
-                                "condition": "${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'"
+                                "condition": "${property.businessProcess} = 'ProductBookingWS'\n                or ${property.businessProcess} = 'Pro-ProductBookingWS'"
                               }
                             ],
                             "routeCount": 2
@@ -785,18 +782,20 @@
                               "id": "CallActivity_79626443",
                               "name": "checkError",
                               "type": "GroovyScript",
-                              "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                              "summary": "Executes Groovy script: script38.groovy (script file not loaded)",
                               "details": {
                                 "scriptName": "script38.groovy",
+                                "functionNames": [],
+                                "variables": [],
+                                "scriptContent": "",
                                 "propertiesRead": [],
-                                "propertiesWritten": [
-                                  "checkError"
-                                ],
+                                "propertiesWritten": [],
                                 "headersRead": [],
                                 "headersWritten": [],
-                                "bodyModified": true,
+                                "bodyModified": false,
                                 "externalCalls": [],
-                                "scriptAvailable": true
+                                "scriptAvailable": false,
+                                "scriptDisplayName": "script38.groovy"
                               },
                               "condition": "",
                               "route_name": "",
@@ -805,21 +804,20 @@
                                   "id": "CallActivity_79626445",
                                   "name": "set Error List",
                                   "type": "GroovyScript",
-                                  "summary": "Executes custom logic: sets 1 property/properties, reads 2 property/properties, modifies body",
+                                  "summary": "Executes Groovy script: script39.groovy (script file not loaded)",
                                   "details": {
                                     "scriptName": "script39.groovy",
-                                    "propertiesRead": [
-                                      "ErrorCodes",
-                                      "checkError"
-                                    ],
-                                    "propertiesWritten": [
-                                      "setErrorList"
-                                    ],
+                                    "functionNames": [],
+                                    "variables": [],
+                                    "scriptContent": "",
+                                    "propertiesRead": [],
+                                    "propertiesWritten": [],
                                     "headersRead": [],
                                     "headersWritten": [],
-                                    "bodyModified": true,
+                                    "bodyModified": false,
                                     "externalCalls": [],
-                                    "scriptAvailable": true
+                                    "scriptAvailable": false,
+                                    "scriptDisplayName": "script39.groovy"
                                   },
                                   "condition": "",
                                   "route_name": "",
@@ -941,7 +939,7 @@
                                                             "conditions": [
                                                               {
                                                                 "route": "ProductBookingWS or Pro-ProductBookingWS",
-                                                                "condition": "${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'"
+                                                                "condition": "${property.businessProcess} = 'ProductBookingWS'\n                or ${property.businessProcess} = 'Pro-ProductBookingWS'"
                                                               }
                                                             ],
                                                             "routeCount": 2
@@ -953,18 +951,20 @@
                                                               "id": "CallActivity_79626497",
                                                               "name": "sf Request",
                                                               "type": "GroovyScript",
-                                                              "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                                                              "summary": "Executes Groovy script: script44.groovy (script file not loaded)",
                                                               "details": {
                                                                 "scriptName": "script44.groovy",
+                                                                "functionNames": [],
+                                                                "variables": [],
+                                                                "scriptContent": "",
                                                                 "propertiesRead": [],
-                                                                "propertiesWritten": [
-                                                                  "sfRequest"
-                                                                ],
+                                                                "propertiesWritten": [],
                                                                 "headersRead": [],
                                                                 "headersWritten": [],
-                                                                "bodyModified": true,
+                                                                "bodyModified": false,
                                                                 "externalCalls": [],
-                                                                "scriptAvailable": true
+                                                                "scriptAvailable": false,
+                                                                "scriptDisplayName": "script44.groovy"
                                                               },
                                                               "condition": "",
                                                               "route_name": "",
@@ -973,18 +973,20 @@
                                                                   "id": "CallActivity_79626500",
                                                                   "name": "sfRequest(2) ",
                                                                   "type": "GroovyScript",
-                                                                  "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                                                                  "summary": "Executes Groovy script: script31.groovy (script file not loaded)",
                                                                   "details": {
                                                                     "scriptName": "script31.groovy",
+                                                                    "functionNames": [],
+                                                                    "variables": [],
+                                                                    "scriptContent": "",
                                                                     "propertiesRead": [],
-                                                                    "propertiesWritten": [
-                                                                      "sfRequest"
-                                                                    ],
+                                                                    "propertiesWritten": [],
                                                                     "headersRead": [],
                                                                     "headersWritten": [],
-                                                                    "bodyModified": true,
+                                                                    "bodyModified": false,
                                                                     "externalCalls": [],
-                                                                    "scriptAvailable": true
+                                                                    "scriptAvailable": false,
+                                                                    "scriptDisplayName": "script31.groovy"
                                                                   },
                                                                   "condition": "",
                                                                   "route_name": "",
@@ -1030,18 +1032,20 @@
                                                                               "id": "CallActivity_3",
                                                                               "name": "Flatten SF Response",
                                                                               "type": "GroovyScript",
-                                                                              "summary": "Executes custom logic: reads 1 property/properties, modifies body",
+                                                                              "summary": "Executes Groovy script: script32.groovy (script file not loaded)",
                                                                               "details": {
                                                                                 "scriptName": "script32.groovy",
-                                                                                "propertiesRead": [
-                                                                                  "sfresponse"
-                                                                                ],
+                                                                                "functionNames": [],
+                                                                                "variables": [],
+                                                                                "scriptContent": "",
+                                                                                "propertiesRead": [],
                                                                                 "propertiesWritten": [],
                                                                                 "headersRead": [],
                                                                                 "headersWritten": [],
-                                                                                "bodyModified": true,
+                                                                                "bodyModified": false,
                                                                                 "externalCalls": [],
-                                                                                "scriptAvailable": true
+                                                                                "scriptAvailable": false,
+                                                                                "scriptDisplayName": "script32.groovy"
                                                                               },
                                                                               "condition": "",
                                                                               "route_name": "",
@@ -1093,16 +1097,20 @@
                                                                                           "id": "CallActivity_12",
                                                                                           "name": "format the xml",
                                                                                           "type": "GroovyScript",
-                                                                                          "summary": "Executes custom logic: modifies body",
+                                                                                          "summary": "Executes Groovy script: script42.groovy (script file not loaded)",
                                                                                           "details": {
                                                                                             "scriptName": "script42.groovy",
+                                                                                            "functionNames": [],
+                                                                                            "variables": [],
+                                                                                            "scriptContent": "",
                                                                                             "propertiesRead": [],
                                                                                             "propertiesWritten": [],
                                                                                             "headersRead": [],
                                                                                             "headersWritten": [],
-                                                                                            "bodyModified": true,
+                                                                                            "bodyModified": false,
                                                                                             "externalCalls": [],
-                                                                                            "scriptAvailable": true
+                                                                                            "scriptAvailable": false,
+                                                                                            "scriptDisplayName": "script42.groovy"
                                                                                           },
                                                                                           "condition": "",
                                                                                           "route_name": "",
@@ -1116,7 +1124,7 @@
                                                                                                 "conditions": [
                                                                                                   {
                                                                                                     "route": "ProductBookingWS53 ",
-                                                                                                    "condition": "${property.businessProcess} = 'ProductBookingWS53'"
+                                                                                                    "condition": "${property.businessProcess} =\n                'ProductBookingWS53'"
                                                                                                   }
                                                                                                 ],
                                                                                                 "routeCount": 2
@@ -1145,30 +1153,27 @@
                                                                                                       "subActivityType": "XSLTMapping"
                                                                                                     }
                                                                                                   },
-                                                                                                  "condition": "${property.businessProcess} = 'ProductBookingWS53'",
+                                                                                                  "condition": "${property.businessProcess} =\n                'ProductBookingWS53'",
                                                                                                   "route_name": "ProductBookingWS53 ",
                                                                                                   "children": [
                                                                                                     {
                                                                                                       "id": "CallActivity_96162179",
                                                                                                       "name": "final Response",
                                                                                                       "type": "GroovyScript",
-                                                                                                      "summary": "Executes custom logic: sets 1 header(s), modifies body",
+                                                                                                      "summary": "Executes Groovy script: script47.groovy (script file not loaded)",
                                                                                                       "details": {
                                                                                                         "scriptName": "script47.groovy",
+                                                                                                        "functionNames": [],
+                                                                                                        "variables": [],
+                                                                                                        "scriptContent": "",
                                                                                                         "propertiesRead": [],
                                                                                                         "propertiesWritten": [],
                                                                                                         "headersRead": [],
-                                                                                                        "headersWritten": [
-                                                                                                          "Content-Type"
-                                                                                                        ],
-                                                                                                        "bodyModified": true,
-                                                                                                        "externalCalls": [
-                                                                                                          {
-                                                                                                            "type": "HTTP",
-                                                                                                            "target": "http"
-                                                                                                          }
-                                                                                                        ],
-                                                                                                        "scriptAvailable": true
+                                                                                                        "headersWritten": [],
+                                                                                                        "bodyModified": false,
+                                                                                                        "externalCalls": [],
+                                                                                                        "scriptAvailable": false,
+                                                                                                        "scriptDisplayName": "script47.groovy"
                                                                                                       },
                                                                                                       "condition": "",
                                                                                                       "route_name": "",
@@ -1291,23 +1296,20 @@
                                                                                                       "id": "CallActivity_96162179",
                                                                                                       "name": "final Response",
                                                                                                       "type": "GroovyScript",
-                                                                                                      "summary": "Executes custom logic: sets 1 header(s), modifies body",
+                                                                                                      "summary": "Executes Groovy script: script47.groovy (script file not loaded)",
                                                                                                       "details": {
                                                                                                         "scriptName": "script47.groovy",
+                                                                                                        "functionNames": [],
+                                                                                                        "variables": [],
+                                                                                                        "scriptContent": "",
                                                                                                         "propertiesRead": [],
                                                                                                         "propertiesWritten": [],
                                                                                                         "headersRead": [],
-                                                                                                        "headersWritten": [
-                                                                                                          "Content-Type"
-                                                                                                        ],
-                                                                                                        "bodyModified": true,
-                                                                                                        "externalCalls": [
-                                                                                                          {
-                                                                                                            "type": "HTTP",
-                                                                                                            "target": "http"
-                                                                                                          }
-                                                                                                        ],
-                                                                                                        "scriptAvailable": true
+                                                                                                        "headersWritten": [],
+                                                                                                        "bodyModified": false,
+                                                                                                        "externalCalls": [],
+                                                                                                        "scriptAvailable": false,
+                                                                                                        "scriptDisplayName": "script47.groovy"
                                                                                                       },
                                                                                                       "condition": "",
                                                                                                       "route_name": "",
@@ -1424,38 +1426,42 @@
                                                               "id": "CallActivity_79626457",
                                                               "name": "sf Request",
                                                               "type": "GroovyScript",
-                                                              "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                                                              "summary": "Executes Groovy script: script40.groovy (script file not loaded)",
                                                               "details": {
                                                                 "scriptName": "script40.groovy",
+                                                                "functionNames": [],
+                                                                "variables": [],
+                                                                "scriptContent": "",
                                                                 "propertiesRead": [],
-                                                                "propertiesWritten": [
-                                                                  "sfRequest"
-                                                                ],
+                                                                "propertiesWritten": [],
                                                                 "headersRead": [],
                                                                 "headersWritten": [],
-                                                                "bodyModified": true,
+                                                                "bodyModified": false,
                                                                 "externalCalls": [],
-                                                                "scriptAvailable": true
+                                                                "scriptAvailable": false,
+                                                                "scriptDisplayName": "script40.groovy"
                                                               },
-                                                              "condition": "${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'",
+                                                              "condition": "${property.businessProcess} = 'ProductBookingWS'\n                or ${property.businessProcess} = 'Pro-ProductBookingWS'",
                                                               "route_name": "ProductBookingWS or Pro-ProductBookingWS",
                                                               "children": [
                                                                 {
                                                                   "id": "CallActivity_79626460",
                                                                   "name": "sfRequest(2) ",
                                                                   "type": "GroovyScript",
-                                                                  "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                                                                  "summary": "Executes Groovy script: script31.groovy (script file not loaded)",
                                                                   "details": {
                                                                     "scriptName": "script31.groovy",
+                                                                    "functionNames": [],
+                                                                    "variables": [],
+                                                                    "scriptContent": "",
                                                                     "propertiesRead": [],
-                                                                    "propertiesWritten": [
-                                                                      "sfRequest"
-                                                                    ],
+                                                                    "propertiesWritten": [],
                                                                     "headersRead": [],
                                                                     "headersWritten": [],
-                                                                    "bodyModified": true,
+                                                                    "bodyModified": false,
                                                                     "externalCalls": [],
-                                                                    "scriptAvailable": true
+                                                                    "scriptAvailable": false,
+                                                                    "scriptDisplayName": "script31.groovy"
                                                                   },
                                                                   "condition": "",
                                                                   "route_name": "",
@@ -1501,18 +1507,20 @@
                                                                               "id": "CallActivity_79626470",
                                                                               "name": "flatten  SF Response",
                                                                               "type": "GroovyScript",
-                                                                              "summary": "Executes custom logic: reads 1 property/properties, modifies body",
+                                                                              "summary": "Executes Groovy script: script41.groovy (script file not loaded)",
                                                                               "details": {
                                                                                 "scriptName": "script41.groovy",
-                                                                                "propertiesRead": [
-                                                                                  "sfresponse"
-                                                                                ],
+                                                                                "functionNames": [],
+                                                                                "variables": [],
+                                                                                "scriptContent": "",
+                                                                                "propertiesRead": [],
                                                                                 "propertiesWritten": [],
                                                                                 "headersRead": [],
                                                                                 "headersWritten": [],
-                                                                                "bodyModified": true,
+                                                                                "bodyModified": false,
                                                                                 "externalCalls": [],
-                                                                                "scriptAvailable": true
+                                                                                "scriptAvailable": false,
+                                                                                "scriptDisplayName": "script41.groovy"
                                                                               },
                                                                               "condition": "",
                                                                               "route_name": "",
@@ -1564,16 +1572,20 @@
                                                                                           "id": "CallActivity_79626477",
                                                                                           "name": "format the xml",
                                                                                           "type": "GroovyScript",
-                                                                                          "summary": "Executes custom logic: modifies body",
+                                                                                          "summary": "Executes Groovy script: script42.groovy (script file not loaded)",
                                                                                           "details": {
                                                                                             "scriptName": "script42.groovy",
+                                                                                            "functionNames": [],
+                                                                                            "variables": [],
+                                                                                            "scriptContent": "",
                                                                                             "propertiesRead": [],
                                                                                             "propertiesWritten": [],
                                                                                             "headersRead": [],
                                                                                             "headersWritten": [],
-                                                                                            "bodyModified": true,
+                                                                                            "bodyModified": false,
                                                                                             "externalCalls": [],
-                                                                                            "scriptAvailable": true
+                                                                                            "scriptAvailable": false,
+                                                                                            "scriptDisplayName": "script42.groovy"
                                                                                           },
                                                                                           "condition": "",
                                                                                           "route_name": "",
@@ -1644,23 +1656,20 @@
                                                                                                           "id": "CallActivity_96162175",
                                                                                                           "name": "final response",
                                                                                                           "type": "GroovyScript",
-                                                                                                          "summary": "Executes custom logic: sets 1 header(s), modifies body",
+                                                                                                          "summary": "Executes Groovy script: script46.groovy (script file not loaded)",
                                                                                                           "details": {
                                                                                                             "scriptName": "script46.groovy",
+                                                                                                            "functionNames": [],
+                                                                                                            "variables": [],
+                                                                                                            "scriptContent": "",
                                                                                                             "propertiesRead": [],
                                                                                                             "propertiesWritten": [],
                                                                                                             "headersRead": [],
-                                                                                                            "headersWritten": [
-                                                                                                              "Content-Type"
-                                                                                                            ],
-                                                                                                            "bodyModified": true,
-                                                                                                            "externalCalls": [
-                                                                                                              {
-                                                                                                                "type": "HTTP",
-                                                                                                                "target": "http"
-                                                                                                              }
-                                                                                                            ],
-                                                                                                            "scriptAvailable": true
+                                                                                                            "headersWritten": [],
+                                                                                                            "bodyModified": false,
+                                                                                                            "externalCalls": [],
+                                                                                                            "scriptAvailable": false,
+                                                                                                            "scriptDisplayName": "script46.groovy"
                                                                                                           },
                                                                                                           "condition": "",
                                                                                                           "route_name": "",
@@ -1866,41 +1875,42 @@
                               "id": "CallActivity_96162498",
                               "name": "check error",
                               "type": "GroovyScript",
-                              "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                              "summary": "Executes Groovy script: script55.groovy (script file not loaded)",
                               "details": {
                                 "scriptName": "script55.groovy",
+                                "functionNames": [],
+                                "variables": [],
+                                "scriptContent": "",
                                 "propertiesRead": [],
-                                "propertiesWritten": [
-                                  "checkError"
-                                ],
+                                "propertiesWritten": [],
                                 "headersRead": [],
                                 "headersWritten": [],
-                                "bodyModified": true,
+                                "bodyModified": false,
                                 "externalCalls": [],
-                                "scriptAvailable": true
+                                "scriptAvailable": false,
+                                "scriptDisplayName": "script55.groovy"
                               },
-                              "condition": "${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'",
+                              "condition": "${property.businessProcess} = 'ProductBookingWS'\n                or ${property.businessProcess} = 'Pro-ProductBookingWS'",
                               "route_name": "ProductBookingWS or Pro-ProductBookingWS",
                               "children": [
                                 {
                                   "id": "CallActivity_79626445",
                                   "name": "set Error List",
                                   "type": "GroovyScript",
-                                  "summary": "Executes custom logic: sets 1 property/properties, reads 2 property/properties, modifies body",
+                                  "summary": "Executes Groovy script: script39.groovy (script file not loaded)",
                                   "details": {
                                     "scriptName": "script39.groovy",
-                                    "propertiesRead": [
-                                      "ErrorCodes",
-                                      "checkError"
-                                    ],
-                                    "propertiesWritten": [
-                                      "setErrorList"
-                                    ],
+                                    "functionNames": [],
+                                    "variables": [],
+                                    "scriptContent": "",
+                                    "propertiesRead": [],
+                                    "propertiesWritten": [],
                                     "headersRead": [],
                                     "headersWritten": [],
-                                    "bodyModified": true,
+                                    "bodyModified": false,
                                     "externalCalls": [],
-                                    "scriptAvailable": true
+                                    "scriptAvailable": false,
+                                    "scriptDisplayName": "script39.groovy"
                                   },
                                   "condition": "",
                                   "route_name": "",
@@ -2022,7 +2032,7 @@
                                                             "conditions": [
                                                               {
                                                                 "route": "ProductBookingWS or Pro-ProductBookingWS",
-                                                                "condition": "${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'"
+                                                                "condition": "${property.businessProcess} = 'ProductBookingWS'\n                or ${property.businessProcess} = 'Pro-ProductBookingWS'"
                                                               }
                                                             ],
                                                             "routeCount": 2
@@ -2034,18 +2044,20 @@
                                                               "id": "CallActivity_79626497",
                                                               "name": "sf Request",
                                                               "type": "GroovyScript",
-                                                              "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                                                              "summary": "Executes Groovy script: script44.groovy (script file not loaded)",
                                                               "details": {
                                                                 "scriptName": "script44.groovy",
+                                                                "functionNames": [],
+                                                                "variables": [],
+                                                                "scriptContent": "",
                                                                 "propertiesRead": [],
-                                                                "propertiesWritten": [
-                                                                  "sfRequest"
-                                                                ],
+                                                                "propertiesWritten": [],
                                                                 "headersRead": [],
                                                                 "headersWritten": [],
-                                                                "bodyModified": true,
+                                                                "bodyModified": false,
                                                                 "externalCalls": [],
-                                                                "scriptAvailable": true
+                                                                "scriptAvailable": false,
+                                                                "scriptDisplayName": "script44.groovy"
                                                               },
                                                               "condition": "",
                                                               "route_name": "",
@@ -2054,18 +2066,20 @@
                                                                   "id": "CallActivity_79626500",
                                                                   "name": "sfRequest(2) ",
                                                                   "type": "GroovyScript",
-                                                                  "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                                                                  "summary": "Executes Groovy script: script31.groovy (script file not loaded)",
                                                                   "details": {
                                                                     "scriptName": "script31.groovy",
+                                                                    "functionNames": [],
+                                                                    "variables": [],
+                                                                    "scriptContent": "",
                                                                     "propertiesRead": [],
-                                                                    "propertiesWritten": [
-                                                                      "sfRequest"
-                                                                    ],
+                                                                    "propertiesWritten": [],
                                                                     "headersRead": [],
                                                                     "headersWritten": [],
-                                                                    "bodyModified": true,
+                                                                    "bodyModified": false,
                                                                     "externalCalls": [],
-                                                                    "scriptAvailable": true
+                                                                    "scriptAvailable": false,
+                                                                    "scriptDisplayName": "script31.groovy"
                                                                   },
                                                                   "condition": "",
                                                                   "route_name": "",
@@ -2111,18 +2125,20 @@
                                                                               "id": "CallActivity_3",
                                                                               "name": "Flatten SF Response",
                                                                               "type": "GroovyScript",
-                                                                              "summary": "Executes custom logic: reads 1 property/properties, modifies body",
+                                                                              "summary": "Executes Groovy script: script32.groovy (script file not loaded)",
                                                                               "details": {
                                                                                 "scriptName": "script32.groovy",
-                                                                                "propertiesRead": [
-                                                                                  "sfresponse"
-                                                                                ],
+                                                                                "functionNames": [],
+                                                                                "variables": [],
+                                                                                "scriptContent": "",
+                                                                                "propertiesRead": [],
                                                                                 "propertiesWritten": [],
                                                                                 "headersRead": [],
                                                                                 "headersWritten": [],
-                                                                                "bodyModified": true,
+                                                                                "bodyModified": false,
                                                                                 "externalCalls": [],
-                                                                                "scriptAvailable": true
+                                                                                "scriptAvailable": false,
+                                                                                "scriptDisplayName": "script32.groovy"
                                                                               },
                                                                               "condition": "",
                                                                               "route_name": "",
@@ -2174,16 +2190,20 @@
                                                                                           "id": "CallActivity_12",
                                                                                           "name": "format the xml",
                                                                                           "type": "GroovyScript",
-                                                                                          "summary": "Executes custom logic: modifies body",
+                                                                                          "summary": "Executes Groovy script: script42.groovy (script file not loaded)",
                                                                                           "details": {
                                                                                             "scriptName": "script42.groovy",
+                                                                                            "functionNames": [],
+                                                                                            "variables": [],
+                                                                                            "scriptContent": "",
                                                                                             "propertiesRead": [],
                                                                                             "propertiesWritten": [],
                                                                                             "headersRead": [],
                                                                                             "headersWritten": [],
-                                                                                            "bodyModified": true,
+                                                                                            "bodyModified": false,
                                                                                             "externalCalls": [],
-                                                                                            "scriptAvailable": true
+                                                                                            "scriptAvailable": false,
+                                                                                            "scriptDisplayName": "script42.groovy"
                                                                                           },
                                                                                           "condition": "",
                                                                                           "route_name": "",
@@ -2197,7 +2217,7 @@
                                                                                                 "conditions": [
                                                                                                   {
                                                                                                     "route": "ProductBookingWS53 ",
-                                                                                                    "condition": "${property.businessProcess} = 'ProductBookingWS53'"
+                                                                                                    "condition": "${property.businessProcess} =\n                'ProductBookingWS53'"
                                                                                                   }
                                                                                                 ],
                                                                                                 "routeCount": 2
@@ -2226,30 +2246,27 @@
                                                                                                       "subActivityType": "XSLTMapping"
                                                                                                     }
                                                                                                   },
-                                                                                                  "condition": "${property.businessProcess} = 'ProductBookingWS53'",
+                                                                                                  "condition": "${property.businessProcess} =\n                'ProductBookingWS53'",
                                                                                                   "route_name": "ProductBookingWS53 ",
                                                                                                   "children": [
                                                                                                     {
                                                                                                       "id": "CallActivity_96162179",
                                                                                                       "name": "final Response",
                                                                                                       "type": "GroovyScript",
-                                                                                                      "summary": "Executes custom logic: sets 1 header(s), modifies body",
+                                                                                                      "summary": "Executes Groovy script: script47.groovy (script file not loaded)",
                                                                                                       "details": {
                                                                                                         "scriptName": "script47.groovy",
+                                                                                                        "functionNames": [],
+                                                                                                        "variables": [],
+                                                                                                        "scriptContent": "",
                                                                                                         "propertiesRead": [],
                                                                                                         "propertiesWritten": [],
                                                                                                         "headersRead": [],
-                                                                                                        "headersWritten": [
-                                                                                                          "Content-Type"
-                                                                                                        ],
-                                                                                                        "bodyModified": true,
-                                                                                                        "externalCalls": [
-                                                                                                          {
-                                                                                                            "type": "HTTP",
-                                                                                                            "target": "http"
-                                                                                                          }
-                                                                                                        ],
-                                                                                                        "scriptAvailable": true
+                                                                                                        "headersWritten": [],
+                                                                                                        "bodyModified": false,
+                                                                                                        "externalCalls": [],
+                                                                                                        "scriptAvailable": false,
+                                                                                                        "scriptDisplayName": "script47.groovy"
                                                                                                       },
                                                                                                       "condition": "",
                                                                                                       "route_name": "",
@@ -2372,23 +2389,20 @@
                                                                                                       "id": "CallActivity_96162179",
                                                                                                       "name": "final Response",
                                                                                                       "type": "GroovyScript",
-                                                                                                      "summary": "Executes custom logic: sets 1 header(s), modifies body",
+                                                                                                      "summary": "Executes Groovy script: script47.groovy (script file not loaded)",
                                                                                                       "details": {
                                                                                                         "scriptName": "script47.groovy",
+                                                                                                        "functionNames": [],
+                                                                                                        "variables": [],
+                                                                                                        "scriptContent": "",
                                                                                                         "propertiesRead": [],
                                                                                                         "propertiesWritten": [],
                                                                                                         "headersRead": [],
-                                                                                                        "headersWritten": [
-                                                                                                          "Content-Type"
-                                                                                                        ],
-                                                                                                        "bodyModified": true,
-                                                                                                        "externalCalls": [
-                                                                                                          {
-                                                                                                            "type": "HTTP",
-                                                                                                            "target": "http"
-                                                                                                          }
-                                                                                                        ],
-                                                                                                        "scriptAvailable": true
+                                                                                                        "headersWritten": [],
+                                                                                                        "bodyModified": false,
+                                                                                                        "externalCalls": [],
+                                                                                                        "scriptAvailable": false,
+                                                                                                        "scriptDisplayName": "script47.groovy"
                                                                                                       },
                                                                                                       "condition": "",
                                                                                                       "route_name": "",
@@ -2505,38 +2519,42 @@
                                                               "id": "CallActivity_79626457",
                                                               "name": "sf Request",
                                                               "type": "GroovyScript",
-                                                              "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                                                              "summary": "Executes Groovy script: script40.groovy (script file not loaded)",
                                                               "details": {
                                                                 "scriptName": "script40.groovy",
+                                                                "functionNames": [],
+                                                                "variables": [],
+                                                                "scriptContent": "",
                                                                 "propertiesRead": [],
-                                                                "propertiesWritten": [
-                                                                  "sfRequest"
-                                                                ],
+                                                                "propertiesWritten": [],
                                                                 "headersRead": [],
                                                                 "headersWritten": [],
-                                                                "bodyModified": true,
+                                                                "bodyModified": false,
                                                                 "externalCalls": [],
-                                                                "scriptAvailable": true
+                                                                "scriptAvailable": false,
+                                                                "scriptDisplayName": "script40.groovy"
                                                               },
-                                                              "condition": "${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'",
+                                                              "condition": "${property.businessProcess} = 'ProductBookingWS'\n                or ${property.businessProcess} = 'Pro-ProductBookingWS'",
                                                               "route_name": "ProductBookingWS or Pro-ProductBookingWS",
                                                               "children": [
                                                                 {
                                                                   "id": "CallActivity_79626460",
                                                                   "name": "sfRequest(2) ",
                                                                   "type": "GroovyScript",
-                                                                  "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                                                                  "summary": "Executes Groovy script: script31.groovy (script file not loaded)",
                                                                   "details": {
                                                                     "scriptName": "script31.groovy",
+                                                                    "functionNames": [],
+                                                                    "variables": [],
+                                                                    "scriptContent": "",
                                                                     "propertiesRead": [],
-                                                                    "propertiesWritten": [
-                                                                      "sfRequest"
-                                                                    ],
+                                                                    "propertiesWritten": [],
                                                                     "headersRead": [],
                                                                     "headersWritten": [],
-                                                                    "bodyModified": true,
+                                                                    "bodyModified": false,
                                                                     "externalCalls": [],
-                                                                    "scriptAvailable": true
+                                                                    "scriptAvailable": false,
+                                                                    "scriptDisplayName": "script31.groovy"
                                                                   },
                                                                   "condition": "",
                                                                   "route_name": "",
@@ -2582,18 +2600,20 @@
                                                                               "id": "CallActivity_79626470",
                                                                               "name": "flatten  SF Response",
                                                                               "type": "GroovyScript",
-                                                                              "summary": "Executes custom logic: reads 1 property/properties, modifies body",
+                                                                              "summary": "Executes Groovy script: script41.groovy (script file not loaded)",
                                                                               "details": {
                                                                                 "scriptName": "script41.groovy",
-                                                                                "propertiesRead": [
-                                                                                  "sfresponse"
-                                                                                ],
+                                                                                "functionNames": [],
+                                                                                "variables": [],
+                                                                                "scriptContent": "",
+                                                                                "propertiesRead": [],
                                                                                 "propertiesWritten": [],
                                                                                 "headersRead": [],
                                                                                 "headersWritten": [],
-                                                                                "bodyModified": true,
+                                                                                "bodyModified": false,
                                                                                 "externalCalls": [],
-                                                                                "scriptAvailable": true
+                                                                                "scriptAvailable": false,
+                                                                                "scriptDisplayName": "script41.groovy"
                                                                               },
                                                                               "condition": "",
                                                                               "route_name": "",
@@ -2645,16 +2665,20 @@
                                                                                           "id": "CallActivity_79626477",
                                                                                           "name": "format the xml",
                                                                                           "type": "GroovyScript",
-                                                                                          "summary": "Executes custom logic: modifies body",
+                                                                                          "summary": "Executes Groovy script: script42.groovy (script file not loaded)",
                                                                                           "details": {
                                                                                             "scriptName": "script42.groovy",
+                                                                                            "functionNames": [],
+                                                                                            "variables": [],
+                                                                                            "scriptContent": "",
                                                                                             "propertiesRead": [],
                                                                                             "propertiesWritten": [],
                                                                                             "headersRead": [],
                                                                                             "headersWritten": [],
-                                                                                            "bodyModified": true,
+                                                                                            "bodyModified": false,
                                                                                             "externalCalls": [],
-                                                                                            "scriptAvailable": true
+                                                                                            "scriptAvailable": false,
+                                                                                            "scriptDisplayName": "script42.groovy"
                                                                                           },
                                                                                           "condition": "",
                                                                                           "route_name": "",
@@ -2725,23 +2749,20 @@
                                                                                                           "id": "CallActivity_96162175",
                                                                                                           "name": "final response",
                                                                                                           "type": "GroovyScript",
-                                                                                                          "summary": "Executes custom logic: sets 1 header(s), modifies body",
+                                                                                                          "summary": "Executes Groovy script: script46.groovy (script file not loaded)",
                                                                                                           "details": {
                                                                                                             "scriptName": "script46.groovy",
+                                                                                                            "functionNames": [],
+                                                                                                            "variables": [],
+                                                                                                            "scriptContent": "",
                                                                                                             "propertiesRead": [],
                                                                                                             "propertiesWritten": [],
                                                                                                             "headersRead": [],
-                                                                                                            "headersWritten": [
-                                                                                                              "Content-Type"
-                                                                                                            ],
-                                                                                                            "bodyModified": true,
-                                                                                                            "externalCalls": [
-                                                                                                              {
-                                                                                                                "type": "HTTP",
-                                                                                                                "target": "http"
-                                                                                                              }
-                                                                                                            ],
-                                                                                                            "scriptAvailable": true
+                                                                                                            "headersWritten": [],
+                                                                                                            "bodyModified": false,
+                                                                                                            "externalCalls": [],
+                                                                                                            "scriptAvailable": false,
+                                                                                                            "scriptDisplayName": "script46.groovy"
                                                                                                           },
                                                                                                           "condition": "",
                                                                                                           "route_name": "",
@@ -3082,7 +3103,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -3173,21 +3194,20 @@
           "id": "CallActivity_62520174",
           "name": "Set Partner",
           "type": "GroovyScript",
-          "summary": "Executes custom logic: sets 1 property/properties, reads 2 property/properties",
+          "summary": "Executes Groovy script: script12.groovy (script file not loaded)",
           "details": {
             "scriptName": "script12.groovy",
-            "propertiesRead": [
-              "PartnerIdentifier",
-              "resellerGLN"
-            ],
-            "propertiesWritten": [
-              "Partner"
-            ],
+            "functionNames": [],
+            "variables": [],
+            "scriptContent": "",
+            "propertiesRead": [],
+            "propertiesWritten": [],
             "headersRead": [],
             "headersWritten": [],
             "bodyModified": false,
             "externalCalls": [],
-            "scriptAvailable": true
+            "scriptAvailable": false,
+            "scriptDisplayName": "script12.groovy"
           },
           "condition": "",
           "route_name": "",
@@ -3237,22 +3257,20 @@
                       "id": "CallActivity_62520196",
                       "name": "set GLN",
                       "type": "GroovyScript",
-                      "summary": "Executes custom logic: sets 1 property/properties, reads 1 property/properties, sets 1 header(s)",
+                      "summary": "Executes Groovy script: script13.groovy (script file not loaded)",
                       "details": {
                         "scriptName": "script13.groovy",
-                        "propertiesRead": [
-                          "Partner"
-                        ],
-                        "propertiesWritten": [
-                          "setGLN"
-                        ],
+                        "functionNames": [],
+                        "variables": [],
+                        "scriptContent": "",
+                        "propertiesRead": [],
+                        "propertiesWritten": [],
                         "headersRead": [],
-                        "headersWritten": [
-                          "DebugPartner"
-                        ],
+                        "headersWritten": [],
                         "bodyModified": false,
                         "externalCalls": [],
-                        "scriptAvailable": true
+                        "scriptAvailable": false,
+                        "scriptDisplayName": "script13.groovy"
                       },
                       "condition": "",
                       "route_name": "",
@@ -3425,7 +3443,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -3537,31 +3555,20 @@
               "id": "CallActivity_96162526",
               "name": "Groovy Script 3",
               "type": "GroovyScript",
-              "summary": "Executes custom logic: sets 1 property/properties, reads 3 property/properties",
+              "summary": "Executes Groovy script: script58.groovy (script file not loaded)",
               "details": {
                 "scriptName": "script58.groovy",
-                "propertiesRead": [
-                  "CheckEG",
-                  "GtinStatus",
-                  "setErrorList"
-                ],
-                "propertiesWritten": [
-                  "setErrorList"
-                ],
+                "functionNames": [],
+                "variables": [],
+                "scriptContent": "",
+                "propertiesRead": [],
+                "propertiesWritten": [],
                 "headersRead": [],
                 "headersWritten": [],
                 "bodyModified": false,
-                "externalCalls": [
-                  {
-                    "type": "HTTP",
-                    "target": "https"
-                  },
-                  {
-                    "type": "HTTP",
-                    "target": "https"
-                  }
-                ],
-                "scriptAvailable": true
+                "externalCalls": [],
+                "scriptAvailable": false,
+                "scriptDisplayName": "script58.groovy"
               },
               "condition": "${property.query8} = 'true'",
               "route_name": "true",
@@ -3794,7 +3801,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -3863,19 +3870,20 @@
           "id": "CallActivity_96162201",
           "name": "Inputpayload binary ",
           "type": "GroovyScript",
-          "summary": "Executes custom logic: sets 2 property/properties",
+          "summary": "Executes Groovy script: script50.groovy (script file not loaded)",
           "details": {
             "scriptName": "script50.groovy",
+            "functionNames": [],
+            "variables": [],
+            "scriptContent": "",
             "propertiesRead": [],
-            "propertiesWritten": [
-              "BinaryInput",
-              "BinaryResponse"
-            ],
+            "propertiesWritten": [],
             "headersRead": [],
             "headersWritten": [],
             "bodyModified": false,
             "externalCalls": [],
-            "scriptAvailable": true
+            "scriptAvailable": false,
+            "scriptDisplayName": "script50.groovy"
           },
           "condition": "",
           "route_name": "",
@@ -3884,16 +3892,20 @@
               "id": "CallActivity_96162222",
               "name": "set compositerequerst body",
               "type": "GroovyScript",
-              "summary": "Executes custom logic: modifies body",
+              "summary": "Executes Groovy script: script51.groovy (script file not loaded)",
               "details": {
                 "scriptName": "script51.groovy",
+                "functionNames": [],
+                "variables": [],
+                "scriptContent": "",
                 "propertiesRead": [],
                 "propertiesWritten": [],
                 "headersRead": [],
                 "headersWritten": [],
-                "bodyModified": true,
+                "bodyModified": false,
                 "externalCalls": [],
-                "scriptAvailable": true
+                "scriptAvailable": false,
+                "scriptDisplayName": "script51.groovy"
               },
               "condition": "",
               "route_name": "",
@@ -4053,7 +4065,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -4144,27 +4156,20 @@
           "id": "CallActivity_62520113",
           "name": "set Variables",
           "type": "GroovyScript",
-          "summary": "Executes custom logic: sets 10 property/properties",
+          "summary": "Executes Groovy script: script3.groovy (script file not loaded)",
           "details": {
             "scriptName": "script3.groovy",
+            "functionNames": [],
+            "variables": [],
+            "scriptContent": "",
             "propertiesRead": [],
-            "propertiesWritten": [
-              "growerGLNForSFDCQuery",
-              "growerGLNSeperatedCommasNoBrackets",
-              "growerGLN",
-              "GTIN",
-              "GTINSeperatedCommas",
-              "growerGLNSeperatedCommas",
-              "resellerGLN",
-              "seedYear",
-              "growerAddress",
-              "partnerIdentifier"
-            ],
+            "propertiesWritten": [],
             "headersRead": [],
             "headersWritten": [],
             "bodyModified": false,
             "externalCalls": [],
-            "scriptAvailable": true
+            "scriptAvailable": false,
+            "scriptDisplayName": "script3.groovy"
           },
           "condition": "",
           "route_name": "",
@@ -4173,18 +4178,20 @@
               "id": "CallActivity_62520166",
               "name": "set Error variable",
               "type": "GroovyScript",
-              "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+              "summary": "Executes Groovy script: script10.groovy (script file not loaded)",
               "details": {
                 "scriptName": "script10.groovy",
+                "functionNames": [],
+                "variables": [],
+                "scriptContent": "",
                 "propertiesRead": [],
-                "propertiesWritten": [
-                  "ErrorCodes"
-                ],
+                "propertiesWritten": [],
                 "headersRead": [],
                 "headersWritten": [],
-                "bodyModified": true,
+                "bodyModified": false,
                 "externalCalls": [],
-                "scriptAvailable": true
+                "scriptAvailable": false,
+                "scriptDisplayName": "script10.groovy"
               },
               "condition": "",
               "route_name": "",
@@ -4193,20 +4200,20 @@
                   "id": "CallActivity_62520115",
                   "name": "Validate Year",
                   "type": "GroovyScript",
-                  "summary": "Executes custom logic: sets 1 property/properties, reads 1 property/properties",
+                  "summary": "Executes Groovy script: script4.groovy (script file not loaded)",
                   "details": {
                     "scriptName": "script4.groovy",
-                    "propertiesRead": [
-                      "seedYear"
-                    ],
-                    "propertiesWritten": [
-                      "isValidMarketYear"
-                    ],
+                    "functionNames": [],
+                    "variables": [],
+                    "scriptContent": "",
+                    "propertiesRead": [],
+                    "propertiesWritten": [],
                     "headersRead": [],
                     "headersWritten": [],
                     "bodyModified": false,
                     "externalCalls": [],
-                    "scriptAvailable": true
+                    "scriptAvailable": false,
+                    "scriptDisplayName": "script4.groovy"
                   },
                   "condition": "",
                   "route_name": "",
@@ -4337,18 +4344,20 @@
                           "id": "CallActivity_62520164",
                           "name": "Check errors in input",
                           "type": "GroovyScript",
-                          "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                          "summary": "Executes Groovy script: script9.groovy (script file not loaded)",
                           "details": {
                             "scriptName": "script9.groovy",
+                            "functionNames": [],
+                            "variables": [],
+                            "scriptContent": "",
                             "propertiesRead": [],
-                            "propertiesWritten": [
-                              "checkError"
-                            ],
+                            "propertiesWritten": [],
                             "headersRead": [],
                             "headersWritten": [],
-                            "bodyModified": true,
+                            "bodyModified": false,
                             "externalCalls": [],
-                            "scriptAvailable": true
+                            "scriptAvailable": false,
+                            "scriptDisplayName": "script9.groovy"
                           },
                           "condition": "${property.isValidMarketYear} = 'true'",
                           "route_name": "Valid",
@@ -4357,21 +4366,20 @@
                               "id": "CallActivity_62520168",
                               "name": "set ErrorList",
                               "type": "GroovyScript",
-                              "summary": "Executes custom logic: sets 1 property/properties, reads 2 property/properties, modifies body",
+                              "summary": "Executes Groovy script: script11.groovy (script file not loaded)",
                               "details": {
                                 "scriptName": "script11.groovy",
-                                "propertiesRead": [
-                                  "ErrorCodes",
-                                  "checkError"
-                                ],
-                                "propertiesWritten": [
-                                  "setErrorList"
-                                ],
+                                "functionNames": [],
+                                "variables": [],
+                                "scriptContent": "",
+                                "propertiesRead": [],
+                                "propertiesWritten": [],
                                 "headersRead": [],
                                 "headersWritten": [],
-                                "bodyModified": true,
+                                "bodyModified": false,
                                 "externalCalls": [],
-                                "scriptAvailable": true
+                                "scriptAvailable": false,
+                                "scriptDisplayName": "script11.groovy"
                               },
                               "condition": "",
                               "route_name": "",
@@ -4475,18 +4483,20 @@
                                                       "id": "CallActivity_79626382",
                                                       "name": "sfRequest",
                                                       "type": "GroovyScript",
-                                                      "summary": "Executes custom logic: sets 1 property/properties",
+                                                      "summary": "Executes Groovy script: script30.groovy (script file not loaded)",
                                                       "details": {
                                                         "scriptName": "script30.groovy",
+                                                        "functionNames": [],
+                                                        "variables": [],
+                                                        "scriptContent": "",
                                                         "propertiesRead": [],
-                                                        "propertiesWritten": [
-                                                          "sfRequest"
-                                                        ],
+                                                        "propertiesWritten": [],
                                                         "headersRead": [],
                                                         "headersWritten": [],
                                                         "bodyModified": false,
                                                         "externalCalls": [],
-                                                        "scriptAvailable": true
+                                                        "scriptAvailable": false,
+                                                        "scriptDisplayName": "script30.groovy"
                                                       },
                                                       "condition": "",
                                                       "route_name": "",
@@ -4495,18 +4505,20 @@
                                                           "id": "CallActivity_79626384",
                                                           "name": "sfRequest(2)",
                                                           "type": "GroovyScript",
-                                                          "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                                                          "summary": "Executes Groovy script: script31.groovy (script file not loaded)",
                                                           "details": {
                                                             "scriptName": "script31.groovy",
+                                                            "functionNames": [],
+                                                            "variables": [],
+                                                            "scriptContent": "",
                                                             "propertiesRead": [],
-                                                            "propertiesWritten": [
-                                                              "sfRequest"
-                                                            ],
+                                                            "propertiesWritten": [],
                                                             "headersRead": [],
                                                             "headersWritten": [],
-                                                            "bodyModified": true,
+                                                            "bodyModified": false,
                                                             "externalCalls": [],
-                                                            "scriptAvailable": true
+                                                            "scriptAvailable": false,
+                                                            "scriptDisplayName": "script31.groovy"
                                                           },
                                                           "condition": "",
                                                           "route_name": "",
@@ -4552,18 +4564,20 @@
                                                                       "id": "CallActivity_79626394",
                                                                       "name": "Flatten SF Response",
                                                                       "type": "GroovyScript",
-                                                                      "summary": "Executes custom logic: reads 1 property/properties, modifies body",
+                                                                      "summary": "Executes Groovy script: script32.groovy (script file not loaded)",
                                                                       "details": {
                                                                         "scriptName": "script32.groovy",
-                                                                        "propertiesRead": [
-                                                                          "sfresponse"
-                                                                        ],
+                                                                        "functionNames": [],
+                                                                        "variables": [],
+                                                                        "scriptContent": "",
+                                                                        "propertiesRead": [],
                                                                         "propertiesWritten": [],
                                                                         "headersRead": [],
                                                                         "headersWritten": [],
-                                                                        "bodyModified": true,
+                                                                        "bodyModified": false,
                                                                         "externalCalls": [],
-                                                                        "scriptAvailable": true
+                                                                        "scriptAvailable": false,
+                                                                        "scriptDisplayName": "script32.groovy"
                                                                       },
                                                                       "condition": "",
                                                                       "route_name": "",
@@ -4615,16 +4629,20 @@
                                                                                   "id": "CallActivity_96162184",
                                                                                   "name": "formatted xml",
                                                                                   "type": "GroovyScript",
-                                                                                  "summary": "Executes custom logic: modifies body",
+                                                                                  "summary": "Executes Groovy script: script48.groovy (script file not loaded)",
                                                                                   "details": {
                                                                                     "scriptName": "script48.groovy",
+                                                                                    "functionNames": [],
+                                                                                    "variables": [],
+                                                                                    "scriptContent": "",
                                                                                     "propertiesRead": [],
                                                                                     "propertiesWritten": [],
                                                                                     "headersRead": [],
                                                                                     "headersWritten": [],
-                                                                                    "bodyModified": true,
+                                                                                    "bodyModified": false,
                                                                                     "externalCalls": [],
-                                                                                    "scriptAvailable": true
+                                                                                    "scriptAvailable": false,
+                                                                                    "scriptDisplayName": "script48.groovy"
                                                                                   },
                                                                                   "condition": "",
                                                                                   "route_name": "",
@@ -4681,23 +4699,20 @@
                                                                                               "id": "CallActivity_96162192",
                                                                                               "name": "final response",
                                                                                               "type": "GroovyScript",
-                                                                                              "summary": "Executes custom logic: sets 1 header(s), modifies body",
+                                                                                              "summary": "Executes Groovy script: script49.groovy (script file not loaded)",
                                                                                               "details": {
                                                                                                 "scriptName": "script49.groovy",
+                                                                                                "functionNames": [],
+                                                                                                "variables": [],
+                                                                                                "scriptContent": "",
                                                                                                 "propertiesRead": [],
                                                                                                 "propertiesWritten": [],
                                                                                                 "headersRead": [],
-                                                                                                "headersWritten": [
-                                                                                                  "Content-Type"
-                                                                                                ],
-                                                                                                "bodyModified": true,
-                                                                                                "externalCalls": [
-                                                                                                  {
-                                                                                                    "type": "HTTP",
-                                                                                                    "target": "http"
-                                                                                                  }
-                                                                                                ],
-                                                                                                "scriptAvailable": true
+                                                                                                "headersWritten": [],
+                                                                                                "bodyModified": false,
+                                                                                                "externalCalls": [],
+                                                                                                "scriptAvailable": false,
+                                                                                                "scriptDisplayName": "script49.groovy"
                                                                                               },
                                                                                               "condition": "",
                                                                                               "route_name": "",
@@ -4883,7 +4898,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -5015,21 +5030,20 @@
                   "id": "CallActivity_62520257",
                   "name": "Authorization Response Validation",
                   "type": "GroovyScript",
-                  "summary": "Executes custom logic: sets 4 property/properties",
+                  "summary": "Executes Groovy script: script16.groovy (script file not loaded)",
                   "details": {
                     "scriptName": "script16.groovy",
+                    "functionNames": [],
+                    "variables": [],
+                    "scriptContent": "",
                     "propertiesRead": [],
-                    "propertiesWritten": [
-                      "query3",
-                      "query4",
-                      "query1",
-                      "query2"
-                    ],
+                    "propertiesWritten": [],
                     "headersRead": [],
                     "headersWritten": [],
                     "bodyModified": false,
                     "externalCalls": [],
-                    "scriptAvailable": true
+                    "scriptAvailable": false,
+                    "scriptDisplayName": "script16.groovy"
                   },
                   "condition": "",
                   "route_name": "",
@@ -5043,7 +5057,7 @@
                         "conditions": [
                           {
                             "route": "notvalid",
-                            "condition": "${property.query1} = 'false' or ${property.query2} = 'false' or ${property.query3} = 'false' or ${property.query4} = 'false'"
+                            "condition": "${property.query1} = 'false' or\n                ${property.query2} = 'false' or ${property.query3} = 'false' or ${property.query4} =\n                'false'"
                           }
                         ],
                         "routeCount": 2
@@ -5069,33 +5083,27 @@
                             "messageBody": "",
                             "activityType": "Enricher"
                           },
-                          "condition": "${property.query1} = 'false' or ${property.query2} = 'false' or ${property.query3} = 'false' or ${property.query4} = 'false'",
+                          "condition": "${property.query1} = 'false' or\n                ${property.query2} = 'false' or ${property.query3} = 'false' or ${property.query4} =\n                'false'",
                           "route_name": "notvalid",
                           "children": [
                             {
                               "id": "CallActivity_62520268",
                               "name": "set Authorisation error",
                               "type": "GroovyScript",
-                              "summary": "Executes custom logic: sets 1 property/properties, reads 7 property/properties, modifies body",
+                              "summary": "Executes Groovy script: script17.groovy (script file not loaded)",
                               "details": {
                                 "scriptName": "script17.groovy",
-                                "propertiesRead": [
-                                  "query1",
-                                  "auth_query2_1",
-                                  "auth_pal_query3",
-                                  "query3",
-                                  "auth_query4",
-                                  "auth_query2",
-                                  "query2"
-                                ],
-                                "propertiesWritten": [
-                                  "RequiredField"
-                                ],
+                                "functionNames": [],
+                                "variables": [],
+                                "scriptContent": "",
+                                "propertiesRead": [],
+                                "propertiesWritten": [],
                                 "headersRead": [],
                                 "headersWritten": [],
-                                "bodyModified": true,
+                                "bodyModified": false,
                                 "externalCalls": [],
-                                "scriptAvailable": true
+                                "scriptAvailable": false,
+                                "scriptDisplayName": "script17.groovy"
                               },
                               "condition": "",
                               "route_name": "",
@@ -5232,7 +5240,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -5400,18 +5408,20 @@
                           "id": "CallActivity_79626279",
                           "name": "set status code",
                           "type": "GroovyScript",
-                          "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                          "summary": "Executes Groovy script: script19.groovy (script file not loaded)",
                           "details": {
                             "scriptName": "script19.groovy",
+                            "functionNames": [],
+                            "variables": [],
+                            "scriptContent": "",
                             "propertiesRead": [],
-                            "propertiesWritten": [
-                              "stateCode"
-                            ],
+                            "propertiesWritten": [],
                             "headersRead": [],
                             "headersWritten": [],
-                            "bodyModified": true,
+                            "bodyModified": false,
                             "externalCalls": [],
-                            "scriptAvailable": true
+                            "scriptAvailable": false,
+                            "scriptDisplayName": "script19.groovy"
                           },
                           "condition": "",
                           "route_name": "",
@@ -5420,20 +5430,20 @@
                               "id": "CallActivity_79626281",
                               "name": "add invalid GLNs to ErrorList(pr setErrorList)",
                               "type": "GroovyScript",
-                              "summary": "Executes custom logic: sets 1 property/properties, reads 1 property/properties",
+                              "summary": "Executes Groovy script: script20.groovy (script file not loaded)",
                               "details": {
                                 "scriptName": "script20.groovy",
-                                "propertiesRead": [
-                                  "setErrorList"
-                                ],
-                                "propertiesWritten": [
-                                  "setErrorList"
-                                ],
+                                "functionNames": [],
+                                "variables": [],
+                                "scriptContent": "",
+                                "propertiesRead": [],
+                                "propertiesWritten": [],
                                 "headersRead": [],
                                 "headersWritten": [],
                                 "bodyModified": false,
                                 "externalCalls": [],
-                                "scriptAvailable": true
+                                "scriptAvailable": false,
+                                "scriptDisplayName": "script20.groovy"
                               },
                               "condition": "",
                               "route_name": "",
@@ -5442,20 +5452,20 @@
                                   "id": "CallActivity_79626283",
                                   "name": "set Grower and Partner function",
                                   "type": "GroovyScript",
-                                  "summary": "Executes custom logic: reads 3 property/properties, modifies body",
+                                  "summary": "Executes Groovy script: script21.groovy (script file not loaded)",
                                   "details": {
                                     "scriptName": "script21.groovy",
-                                    "propertiesRead": [
-                                      "resellerGLN",
-                                      "stateCode",
-                                      "growerAddress"
-                                    ],
+                                    "functionNames": [],
+                                    "variables": [],
+                                    "scriptContent": "",
+                                    "propertiesRead": [],
                                     "propertiesWritten": [],
                                     "headersRead": [],
                                     "headersWritten": [],
-                                    "bodyModified": true,
+                                    "bodyModified": false,
                                     "externalCalls": [],
-                                    "scriptAvailable": true
+                                    "scriptAvailable": false,
+                                    "scriptDisplayName": "script21.groovy"
                                   },
                                   "condition": "",
                                   "route_name": "",
@@ -5480,20 +5490,20 @@
                                           "id": "CallActivity_96162305",
                                           "name": "set ErrorList",
                                           "type": "GroovyScript",
-                                          "summary": "Executes custom logic: sets 1 property/properties, reads 1 property/properties, modifies body",
+                                          "summary": "Executes Groovy script: script23.groovy (script file not loaded)",
                                           "details": {
                                             "scriptName": "script23.groovy",
-                                            "propertiesRead": [
-                                              "setErrorList"
-                                            ],
-                                            "propertiesWritten": [
-                                              "setErrorList"
-                                            ],
+                                            "functionNames": [],
+                                            "variables": [],
+                                            "scriptContent": "",
+                                            "propertiesRead": [],
+                                            "propertiesWritten": [],
                                             "headersRead": [],
                                             "headersWritten": [],
-                                            "bodyModified": true,
+                                            "bodyModified": false,
                                             "externalCalls": [],
-                                            "scriptAvailable": true
+                                            "scriptAvailable": false,
+                                            "scriptDisplayName": "script23.groovy"
                                           },
                                           "condition": "",
                                           "route_name": "",
@@ -5502,19 +5512,20 @@
                                               "id": "CallActivity_79626290",
                                               "name": "GetFailedGrowers",
                                               "type": "GroovyScript",
-                                              "summary": "Executes custom logic: sets 2 property/properties, modifies body",
+                                              "summary": "Executes Groovy script: script22.groovy (script file not loaded)",
                                               "details": {
                                                 "scriptName": "script22.groovy",
+                                                "functionNames": [],
+                                                "variables": [],
+                                                "scriptContent": "",
                                                 "propertiesRead": [],
-                                                "propertiesWritten": [
-                                                  "FailedRecordsEmpty",
-                                                  "failedRecords"
-                                                ],
+                                                "propertiesWritten": [],
                                                 "headersRead": [],
                                                 "headersWritten": [],
-                                                "bodyModified": true,
+                                                "bodyModified": false,
                                                 "externalCalls": [],
-                                                "scriptAvailable": true
+                                                "scriptAvailable": false,
+                                                "scriptDisplayName": "script22.groovy"
                                               },
                                               "condition": "",
                                               "route_name": "",
@@ -5523,20 +5534,20 @@
                                                   "id": "CallActivity_79626299",
                                                   "name": "set ErrorList",
                                                   "type": "GroovyScript",
-                                                  "summary": "Executes custom logic: sets 1 property/properties, reads 1 property/properties, modifies body",
+                                                  "summary": "Executes Groovy script: script24.groovy (script file not loaded)",
                                                   "details": {
                                                     "scriptName": "script24.groovy",
-                                                    "propertiesRead": [
-                                                      "setErrorList"
-                                                    ],
-                                                    "propertiesWritten": [
-                                                      "setErrorList"
-                                                    ],
+                                                    "functionNames": [],
+                                                    "variables": [],
+                                                    "scriptContent": "",
+                                                    "propertiesRead": [],
+                                                    "propertiesWritten": [],
                                                     "headersRead": [],
                                                     "headersWritten": [],
-                                                    "bodyModified": true,
+                                                    "bodyModified": false,
                                                     "externalCalls": [],
-                                                    "scriptAvailable": true
+                                                    "scriptAvailable": false,
+                                                    "scriptDisplayName": "script24.groovy"
                                                   },
                                                   "condition": "",
                                                   "route_name": "",
@@ -5586,20 +5597,20 @@
                                                               "id": "CallActivity_79626307",
                                                               "name": "set resllerId and PMRXRef variables",
                                                               "type": "GroovyScript",
-                                                              "summary": "Executes custom logic: sets 3 property/properties",
+                                                              "summary": "Executes Groovy script: script25.groovy (script file not loaded)",
                                                               "details": {
                                                                 "scriptName": "script25.groovy",
+                                                                "functionNames": [],
+                                                                "variables": [],
+                                                                "scriptContent": "",
                                                                 "propertiesRead": [],
-                                                                "propertiesWritten": [
-                                                                  "resellerId",
-                                                                  "PMRXRef_products",
-                                                                  "PMRXRef_GTINs"
-                                                                ],
+                                                                "propertiesWritten": [],
                                                                 "headersRead": [],
                                                                 "headersWritten": [],
                                                                 "bodyModified": false,
                                                                 "externalCalls": [],
-                                                                "scriptAvailable": true
+                                                                "scriptAvailable": false,
+                                                                "scriptDisplayName": "script25.groovy"
                                                               },
                                                               "condition": "",
                                                               "route_name": "",
@@ -5666,23 +5677,20 @@
                                                                               "id": "CallActivity_79626325",
                                                                               "name": "Set Product Gtins",
                                                                               "type": "GroovyScript",
-                                                                              "summary": "Executes custom logic: sets 4 property/properties, reads 1 property/properties",
+                                                                              "summary": "Executes Groovy script: script26.groovy (script file not loaded)",
                                                                               "details": {
                                                                                 "scriptName": "script26.groovy",
-                                                                                "propertiesRead": [
-                                                                                  "PMRXRef_GTINs"
-                                                                                ],
-                                                                                "propertiesWritten": [
-                                                                                  "CheckEG",
-                                                                                  "query8",
-                                                                                  "isProductGtinsNotEmpty",
-                                                                                  "product_Gtins"
-                                                                                ],
+                                                                                "functionNames": [],
+                                                                                "variables": [],
+                                                                                "scriptContent": "",
+                                                                                "propertiesRead": [],
+                                                                                "propertiesWritten": [],
                                                                                 "headersRead": [],
                                                                                 "headersWritten": [],
                                                                                 "bodyModified": false,
                                                                                 "externalCalls": [],
-                                                                                "scriptAvailable": true
+                                                                                "scriptAvailable": false,
+                                                                                "scriptDisplayName": "script26.groovy"
                                                                               },
                                                                               "condition": "",
                                                                               "route_name": "",
@@ -5708,21 +5716,20 @@
                                                                                       "id": "CallActivity_79626332",
                                                                                       "name": "setErrorList",
                                                                                       "type": "GroovyScript",
-                                                                                      "summary": "Executes custom logic: sets 1 property/properties, reads 2 property/properties, modifies body",
+                                                                                      "summary": "Executes Groovy script: script27.groovy (script file not loaded)",
                                                                                       "details": {
                                                                                         "scriptName": "script27.groovy",
-                                                                                        "propertiesRead": [
-                                                                                          "ErrorCodes",
-                                                                                          "setErrorList"
-                                                                                        ],
-                                                                                        "propertiesWritten": [
-                                                                                          "setErrorList"
-                                                                                        ],
+                                                                                        "functionNames": [],
+                                                                                        "variables": [],
+                                                                                        "scriptContent": "",
+                                                                                        "propertiesRead": [],
+                                                                                        "propertiesWritten": [],
                                                                                         "headersRead": [],
                                                                                         "headersWritten": [],
-                                                                                        "bodyModified": true,
+                                                                                        "bodyModified": false,
                                                                                         "externalCalls": [],
-                                                                                        "scriptAvailable": true
+                                                                                        "scriptAvailable": false,
+                                                                                        "scriptDisplayName": "script27.groovy"
                                                                                       },
                                                                                       "condition": "",
                                                                                       "route_name": "",
@@ -5768,25 +5775,20 @@
                                                                                       "id": "CallActivity_79626334",
                                                                                       "name": "check GTINs",
                                                                                       "type": "GroovyScript",
-                                                                                      "summary": "Executes custom logic: sets 3 property/properties, reads 4 property/properties",
+                                                                                      "summary": "Executes Groovy script: script28.groovy (script file not loaded)",
                                                                                       "details": {
                                                                                         "scriptName": "script28.groovy",
-                                                                                        "propertiesRead": [
-                                                                                          "CheckEG",
-                                                                                          "product_Gtins",
-                                                                                          "GTIN",
-                                                                                          "PMRXRef_GTINs"
-                                                                                        ],
-                                                                                        "propertiesWritten": [
-                                                                                          "CheckEG",
-                                                                                          "GtinStatus",
-                                                                                          "isValid"
-                                                                                        ],
+                                                                                        "functionNames": [],
+                                                                                        "variables": [],
+                                                                                        "scriptContent": "",
+                                                                                        "propertiesRead": [],
+                                                                                        "propertiesWritten": [],
                                                                                         "headersRead": [],
                                                                                         "headersWritten": [],
                                                                                         "bodyModified": false,
                                                                                         "externalCalls": [],
-                                                                                        "scriptAvailable": true
+                                                                                        "scriptAvailable": false,
+                                                                                        "scriptDisplayName": "script28.groovy"
                                                                                       },
                                                                                       "condition": "${property.isProductGtinsNotEmpty} = 'true'",
                                                                                       "route_name": "isProductGtinsNotEmpty",
@@ -5847,18 +5849,20 @@
                                                                                               "id": "CallActivity_79626378",
                                                                                               "name": "set Error List",
                                                                                               "type": "GroovyScript",
-                                                                                              "summary": "Executes custom logic: sets 1 property/properties",
+                                                                                              "summary": "Executes Groovy script: script29.groovy (script file not loaded)",
                                                                                               "details": {
                                                                                                 "scriptName": "script29.groovy",
+                                                                                                "functionNames": [],
+                                                                                                "variables": [],
+                                                                                                "scriptContent": "",
                                                                                                 "propertiesRead": [],
-                                                                                                "propertiesWritten": [
-                                                                                                  "setErrorList"
-                                                                                                ],
+                                                                                                "propertiesWritten": [],
                                                                                                 "headersRead": [],
                                                                                                 "headersWritten": [],
                                                                                                 "bodyModified": false,
                                                                                                 "externalCalls": [],
-                                                                                                "scriptAvailable": true
+                                                                                                "scriptAvailable": false,
+                                                                                                "scriptDisplayName": "script29.groovy"
                                                                                               },
                                                                                               "condition": "",
                                                                                               "route_name": "",
@@ -6106,15 +6110,15 @@
                 "conditions": [
                   {
                     "route": "PBWS",
-                    "condition": "${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'"
+                    "condition": "${property.businessProcess} = 'ProductBookingWS'\n                or ${property.businessProcess} = 'Pro-ProductBookingWS'"
                   },
                   {
                     "route": "PBWS53",
-                    "condition": "${property.businessProcess} = 'ProductBookingWS53'"
+                    "condition": "${property.businessProcess} =\n                'ProductBookingWS53'"
                   },
                   {
                     "route": "PBWS54",
-                    "condition": "${property.businessProcess} = 'ProductBookingWS54'"
+                    "condition": "${property.businessProcess} =\n                'ProductBookingWS54'"
                   }
                 ],
                 "routeCount": 4
@@ -6143,30 +6147,27 @@
                       "subActivityType": "XSLTMapping"
                     }
                   },
-                  "condition": "${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'",
+                  "condition": "${property.businessProcess} = 'ProductBookingWS'\n                or ${property.businessProcess} = 'Pro-ProductBookingWS'",
                   "route_name": "PBWS",
                   "children": [
                     {
                       "id": "CallActivity_96162127",
                       "name": "final response",
                       "type": "GroovyScript",
-                      "summary": "Executes custom logic: sets 1 header(s), modifies body",
+                      "summary": "Executes Groovy script: script45.groovy (script file not loaded)",
                       "details": {
                         "scriptName": "script45.groovy",
+                        "functionNames": [],
+                        "variables": [],
+                        "scriptContent": "",
                         "propertiesRead": [],
                         "propertiesWritten": [],
                         "headersRead": [],
-                        "headersWritten": [
-                          "Content-Type"
-                        ],
-                        "bodyModified": true,
-                        "externalCalls": [
-                          {
-                            "type": "HTTP",
-                            "target": "http"
-                          }
-                        ],
-                        "scriptAvailable": true
+                        "headersWritten": [],
+                        "bodyModified": false,
+                        "externalCalls": [],
+                        "scriptAvailable": false,
+                        "scriptDisplayName": "script45.groovy"
                       },
                       "condition": "",
                       "route_name": "",
@@ -6314,30 +6315,27 @@
                       "subActivityType": "XSLTMapping"
                     }
                   },
-                  "condition": "${property.businessProcess} = 'ProductBookingWS53'",
+                  "condition": "${property.businessProcess} =\n                'ProductBookingWS53'",
                   "route_name": "PBWS53",
                   "children": [
                     {
                       "id": "CallActivity_96162127",
                       "name": "final response",
                       "type": "GroovyScript",
-                      "summary": "Executes custom logic: sets 1 header(s), modifies body",
+                      "summary": "Executes Groovy script: script45.groovy (script file not loaded)",
                       "details": {
                         "scriptName": "script45.groovy",
+                        "functionNames": [],
+                        "variables": [],
+                        "scriptContent": "",
                         "propertiesRead": [],
                         "propertiesWritten": [],
                         "headersRead": [],
-                        "headersWritten": [
-                          "Content-Type"
-                        ],
-                        "bodyModified": true,
-                        "externalCalls": [
-                          {
-                            "type": "HTTP",
-                            "target": "http"
-                          }
-                        ],
-                        "scriptAvailable": true
+                        "headersWritten": [],
+                        "bodyModified": false,
+                        "externalCalls": [],
+                        "scriptAvailable": false,
+                        "scriptDisplayName": "script45.groovy"
                       },
                       "condition": "",
                       "route_name": "",
@@ -6485,30 +6483,27 @@
                       "subActivityType": "XSLTMapping"
                     }
                   },
-                  "condition": "${property.businessProcess} = 'ProductBookingWS54'",
+                  "condition": "${property.businessProcess} =\n                'ProductBookingWS54'",
                   "route_name": "PBWS54",
                   "children": [
                     {
                       "id": "CallActivity_96162478",
                       "name": "final Response",
                       "type": "GroovyScript",
-                      "summary": "Executes custom logic: sets 1 header(s), modifies body",
+                      "summary": "Executes Groovy script: script54.groovy (script file not loaded)",
                       "details": {
                         "scriptName": "script54.groovy",
+                        "functionNames": [],
+                        "variables": [],
+                        "scriptContent": "",
                         "propertiesRead": [],
                         "propertiesWritten": [],
                         "headersRead": [],
-                        "headersWritten": [
-                          "Content-Type"
-                        ],
-                        "bodyModified": true,
-                        "externalCalls": [
-                          {
-                            "type": "HTTP",
-                            "target": "http"
-                          }
-                        ],
-                        "scriptAvailable": true
+                        "headersWritten": [],
+                        "bodyModified": false,
+                        "externalCalls": [],
+                        "scriptAvailable": false,
+                        "scriptDisplayName": "script54.groovy"
                       },
                       "condition": "",
                       "route_name": "",
@@ -6663,23 +6658,20 @@
                       "id": "CallActivity_62520158",
                       "name": "final Response",
                       "type": "GroovyScript",
-                      "summary": "Executes custom logic: sets 1 header(s), modifies body",
+                      "summary": "Executes Groovy script: script8.groovy (script file not loaded)",
                       "details": {
                         "scriptName": "script8.groovy",
+                        "functionNames": [],
+                        "variables": [],
+                        "scriptContent": "",
                         "propertiesRead": [],
                         "propertiesWritten": [],
                         "headersRead": [],
-                        "headersWritten": [
-                          "Content-Type"
-                        ],
-                        "bodyModified": true,
-                        "externalCalls": [
-                          {
-                            "type": "HTTP",
-                            "target": "http"
-                          }
-                        ],
-                        "scriptAvailable": true
+                        "headersWritten": [],
+                        "bodyModified": false,
+                        "externalCalls": [],
+                        "scriptAvailable": false,
+                        "scriptDisplayName": "script8.groovy"
                       },
                       "condition": "",
                       "route_name": "",
@@ -6850,27 +6842,20 @@
               "id": "CallActivity_62520141",
               "name": "err respone to caller",
               "type": "GroovyScript",
-              "summary": "Executes custom logic: sets 1 header(s), modifies body",
+              "summary": "Executes Groovy script: script5.groovy (script file not loaded)",
               "details": {
                 "scriptName": "script5.groovy",
+                "functionNames": [],
+                "variables": [],
+                "scriptContent": "",
                 "propertiesRead": [],
                 "propertiesWritten": [],
                 "headersRead": [],
-                "headersWritten": [
-                  "Content-Type"
-                ],
-                "bodyModified": true,
-                "externalCalls": [
-                  {
-                    "type": "HTTP",
-                    "target": "http"
-                  },
-                  {
-                    "type": "HTTP",
-                    "target": "http"
-                  }
-                ],
-                "scriptAvailable": true
+                "headersWritten": [],
+                "bodyModified": false,
+                "externalCalls": [],
+                "scriptAvailable": false,
+                "scriptDisplayName": "script5.groovy"
               },
               "condition": "",
               "route_name": "",
@@ -6917,7 +6902,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -7055,24 +7040,20 @@
                   "id": "CallActivity_62520090",
                   "name": "set required params",
                   "type": "GroovyScript",
-                  "summary": "Executes custom logic: sets 5 property/properties, sets 1 header(s), modifies body",
+                  "summary": "Executes Groovy script: script1.groovy (script file not loaded)",
                   "details": {
                     "scriptName": "script1.groovy",
+                    "functionNames": [],
+                    "variables": [],
+                    "scriptContent": "",
                     "propertiesRead": [],
-                    "propertiesWritten": [
-                      "Username",
-                      "password",
-                      "InputPayload",
-                      "businessProcess",
-                      "formattedInputBody"
-                    ],
+                    "propertiesWritten": [],
                     "headersRead": [],
-                    "headersWritten": [
-                      "Content-Type"
-                    ],
-                    "bodyModified": true,
+                    "headersWritten": [],
+                    "bodyModified": false,
                     "externalCalls": [],
-                    "scriptAvailable": true
+                    "scriptAvailable": false,
+                    "scriptDisplayName": "script1.groovy"
                   },
                   "condition": "",
                   "route_name": "",
@@ -7081,18 +7062,20 @@
                       "id": "CallActivity_96162474",
                       "name": "M2M Input Mapping",
                       "type": "GroovyScript",
-                      "summary": "Executes custom logic: sets 1 property/properties, modifies body",
+                      "summary": "Executes Groovy script: script53.groovy (script file not loaded)",
                       "details": {
                         "scriptName": "script53.groovy",
+                        "functionNames": [],
+                        "variables": [],
+                        "scriptContent": "",
                         "propertiesRead": [],
-                        "propertiesWritten": [
-                          "M2MInput"
-                        ],
+                        "propertiesWritten": [],
                         "headersRead": [],
                         "headersWritten": [],
-                        "bodyModified": true,
+                        "bodyModified": false,
                         "externalCalls": [],
-                        "scriptAvailable": true
+                        "scriptAvailable": false,
+                        "scriptDisplayName": "script53.groovy"
                       },
                       "condition": "",
                       "route_name": "",
@@ -7106,7 +7089,7 @@
                             "conditions": [
                               {
                                 "route": "ProductBookingWS53 or ProductBookingWS54",
-                                "condition": "${property.businessProcess} = 'ProductBookingWS53' or ${property.businessProcess} = 'ProductBookingWS54'"
+                                "condition": "${property.businessProcess} =\n                'ProductBookingWS53' or ${property.businessProcess} = 'ProductBookingWS54'"
                               },
                               {
                                 "route": "GrowerOrderWS",
@@ -7114,7 +7097,7 @@
                               },
                               {
                                 "route": "ProductBookingWS or Pro-ProductBookingWS",
-                                "condition": "${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'"
+                                "condition": "${property.businessProcess} = 'ProductBookingWS'\n                or ${property.businessProcess} = 'Pro-ProductBookingWS'"
                               }
                             ],
                             "routeCount": 4
@@ -7191,27 +7174,20 @@
                                           "id": "CallActivity_62520118",
                                           "name": "err respone to caller",
                                           "type": "GroovyScript",
-                                          "summary": "Executes custom logic: sets 1 header(s), modifies body",
+                                          "summary": "Executes Groovy script: script5.groovy (script file not loaded)",
                                           "details": {
                                             "scriptName": "script5.groovy",
+                                            "functionNames": [],
+                                            "variables": [],
+                                            "scriptContent": "",
                                             "propertiesRead": [],
                                             "propertiesWritten": [],
                                             "headersRead": [],
-                                            "headersWritten": [
-                                              "Content-Type"
-                                            ],
-                                            "bodyModified": true,
-                                            "externalCalls": [
-                                              {
-                                                "type": "HTTP",
-                                                "target": "http"
-                                              },
-                                              {
-                                                "type": "HTTP",
-                                                "target": "http"
-                                              }
-                                            ],
-                                            "scriptAvailable": true
+                                            "headersWritten": [],
+                                            "bodyModified": false,
+                                            "externalCalls": [],
+                                            "scriptAvailable": false,
+                                            "scriptDisplayName": "script5.groovy"
                                           },
                                           "condition": "",
                                           "route_name": "",
@@ -7254,7 +7230,7 @@
                                   "subActivityType": "NonLoopingProcess"
                                 }
                               },
-                              "condition": "${property.businessProcess} = 'ProductBookingWS53' or ${property.businessProcess} = 'ProductBookingWS54'",
+                              "condition": "${property.businessProcess} =\n                'ProductBookingWS53' or ${property.businessProcess} = 'ProductBookingWS54'",
                               "route_name": "ProductBookingWS53 or ProductBookingWS54",
                               "children": [
                                 {
@@ -7324,7 +7300,7 @@
                                   "subActivityType": "NonLoopingProcess"
                                 }
                               },
-                              "condition": "${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'",
+                              "condition": "${property.businessProcess} = 'ProductBookingWS'\n                or ${property.businessProcess} = 'Pro-ProductBookingWS'",
                               "route_name": "ProductBookingWS or Pro-ProductBookingWS",
                               "children": [
                                 {
@@ -7377,7 +7353,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -7484,20 +7460,20 @@
               "id": "CallActivity_79626274",
               "name": "getStatus",
               "type": "GroovyScript",
-              "summary": "Executes custom logic: sets 1 property/properties, reads 1 property/properties, modifies body",
+              "summary": "Executes Groovy script: script18.groovy (script file not loaded)",
               "details": {
                 "scriptName": "script18.groovy",
-                "propertiesRead": [
-                  "growerGLNSeperatedCommas"
-                ],
-                "propertiesWritten": [
-                  "validateGLN"
-                ],
+                "functionNames": [],
+                "variables": [],
+                "scriptContent": "",
+                "propertiesRead": [],
+                "propertiesWritten": [],
                 "headersRead": [],
                 "headersWritten": [],
-                "bodyModified": true,
+                "bodyModified": false,
                 "externalCalls": [],
-                "scriptAvailable": true
+                "scriptAvailable": false,
+                "scriptDisplayName": "script18.groovy"
               },
               "condition": "",
               "route_name": "",
@@ -7544,7 +7520,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -7613,20 +7589,20 @@
           "id": "CallActivity_96162259",
           "name": "set required Field",
           "type": "GroovyScript",
-          "summary": "Executes custom logic: sets 3 property/properties",
+          "summary": "Executes Groovy script: script52.groovy (script file not loaded)",
           "details": {
             "scriptName": "script52.groovy",
+            "functionNames": [],
+            "variables": [],
+            "scriptContent": "",
             "propertiesRead": [],
-            "propertiesWritten": [
-              "source",
-              "business",
-              "RequiredFiled"
-            ],
+            "propertiesWritten": [],
             "headersRead": [],
             "headersWritten": [],
             "bodyModified": false,
             "externalCalls": [],
-            "scriptAvailable": true
+            "scriptAvailable": false,
+            "scriptDisplayName": "script52.groovy"
           },
           "condition": "",
           "route_name": "",
@@ -7735,7 +7711,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -7884,7 +7860,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -8080,7 +8056,7 @@
             ],
             "headersSet": [
               "errorMessage = (expression: ${exception.message})",
-              "errorType = Connection/Data Failure",
+              "errorType = Connection/Data\n                            Failure",
               "emailType = failure",
               "attachmentName = PB_CreateGrower.txt",
               "attachment = true"
@@ -8171,27 +8147,20 @@
           "id": "CallActivity_96162522",
           "name": "Groovy Script 1",
           "type": "GroovyScript",
-          "summary": "Executes custom logic: sets 1 property/properties",
+          "summary": "Executes Groovy script: script56.groovy (script file not loaded)",
           "details": {
             "scriptName": "script56.groovy",
+            "functionNames": [],
+            "variables": [],
+            "scriptContent": "",
             "propertiesRead": [],
-            "propertiesWritten": [
-              "growerGLNSeperatedCommas"
-            ],
+            "propertiesWritten": [],
             "headersRead": [],
             "headersWritten": [],
             "bodyModified": false,
-            "externalCalls": [
-              {
-                "type": "HTTP",
-                "target": "https"
-              },
-              {
-                "type": "HTTP",
-                "target": "https"
-              }
-            ],
-            "scriptAvailable": true
+            "externalCalls": [],
+            "scriptAvailable": false,
+            "scriptDisplayName": "script56.groovy"
           },
           "condition": "",
           "route_name": "",
@@ -8241,25 +8210,20 @@
                       "id": "CallActivity_62520226",
                       "name": "set Growers",
                       "type": "GroovyScript",
-                      "summary": "Executes custom logic: sets 4 property/properties, reads 3 property/properties",
+                      "summary": "Executes Groovy script: script14.groovy (script file not loaded)",
                       "details": {
                         "scriptName": "script14.groovy",
-                        "propertiesRead": [
-                          "growerGLN",
-                          "setErrorList",
-                          "growerAddress"
-                        ],
-                        "propertiesWritten": [
-                          "growerGLN",
-                          "newGrowerGLNSeperatedcommas",
-                          "setGrowers",
-                          "growerAddress"
-                        ],
+                        "functionNames": [],
+                        "variables": [],
+                        "scriptContent": "",
+                        "propertiesRead": [],
+                        "propertiesWritten": [],
                         "headersRead": [],
                         "headersWritten": [],
                         "bodyModified": false,
                         "externalCalls": [],
-                        "scriptAvailable": true
+                        "scriptAvailable": false,
+                        "scriptDisplayName": "script14.groovy"
                       },
                       "condition": "",
                       "route_name": "",
@@ -8268,24 +8232,20 @@
                           "id": "CallActivity_62520228",
                           "name": "checking condition",
                           "type": "GroovyScript",
-                          "summary": "Executes custom logic: sets 1 property/properties, reads 5 property/properties",
+                          "summary": "Executes Groovy script: script15.groovy (script file not loaded)",
                           "details": {
                             "scriptName": "script15.groovy",
-                            "propertiesRead": [
-                              "growerGLN",
-                              "GTIN",
-                              "resellerGLN",
-                              "growerAddress",
-                              "partnerIdentifier"
-                            ],
-                            "propertiesWritten": [
-                              "conditionMet"
-                            ],
+                            "functionNames": [],
+                            "variables": [],
+                            "scriptContent": "",
+                            "propertiesRead": [],
+                            "propertiesWritten": [],
                             "headersRead": [],
                             "headersWritten": [],
                             "bodyModified": false,
                             "externalCalls": [],
-                            "scriptAvailable": true
+                            "scriptAvailable": false,
+                            "scriptDisplayName": "script15.groovy"
                           },
                           "condition": "",
                           "route_name": "",

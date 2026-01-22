@@ -73,7 +73,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters 
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: notify email
 │           📝 Calls reusable subflow: Process_96162317
 │           └── CallActivity: call to check error business process
@@ -83,15 +84,11 @@ SAP CPI iFlow - Flow Tree Visualization
 ├── StartEvent: Start 
 │   📝 Entry point of create_KeyCop_ProductBooking
 │   └── GroovyScript: set Variables for key crop pb
-│       📝 Executes custom logic: sets 8 property/properties
-│          Writes: growerGLN, GTIN, GTINSeperatedCommas
+│       📝 Executes Groovy script: script33.groovy (script file not loaded)
 │       └── GroovyScript: set Error variable
-│           📝 Executes custom logic: sets 1 property/properties, modifies body
-│              Writes: ErrorCodes
+│           📝 Executes Groovy script: script10.groovy (script file not loaded)
 │           └── GroovyScript: Validate Year
-│               📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties
-│                  Writes: isValidMarketYear
-│                  Reads: seedYear
+│               📝 Executes Groovy script: script4.groovy (script file not loaded)
 │               └── Router: isValid
 │                   📝 Routes message based on 1 condition(s)
 │                      Routes: 1
@@ -114,12 +111,9 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       🔀 Condition: ${property.isValidMarketYear} = 'true'
 │                          Routes: 1
 │                       ├── GroovyScript: checkError
-│                       │   📝 Executes custom logic: sets 1 property/properties, modifies body
-│                       │      Writes: checkError
+│                       │   📝 Executes Groovy script: script38.groovy (script file not loaded)
 │                       │   └── GroovyScript: set Error List
-│                       │       📝 Executes custom logic: sets 1 property/properties, reads 2 property/properties, modifies body
-│                       │          Writes: setErrorList
-│                       │          Reads: ErrorCodes, checkError
+│                       │       📝 Executes Groovy script: script39.groovy (script file not loaded)
 │                       │       └── CallActivity: call getGLN number
 │                       │           📝 Calls reusable subflow: Process_62520170
 │                       │           └── Router: IsValid?
@@ -141,11 +135,9 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       │                       │       📝 Routes message based on 1 condition(s)
 │                       │                       │          Routes: 1
 │                       │                       │       ├── GroovyScript: sf Request
-│                       │                       │       │   📝 Executes custom logic: sets 1 property/properties, modifies body
-│                       │                       │       │      Writes: sfRequest
+│                       │                       │       │   📝 Executes Groovy script: script44.groovy (script file not loaded)
 │                       │                       │       │   └── GroovyScript: sfRequest(2) 
-│                       │                       │       │       📝 Executes custom logic: sets 1 property/properties, modifies body
-│                       │                       │       │          Writes: sfRequest
+│                       │                       │       │       📝 Executes Groovy script: script31.groovy (script file not loaded)
 │                       │                       │       │       └── RequestReply: cropEdge call
 │                       │                       │       │           📝 Calls external system via Salesforce - GET Unknown
 │                       │                       │       │              Target: cropedge4
@@ -154,8 +146,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       │                       │       │                  Properties: No properties set
 │                       │                       │       │                  Headers: No headers set
 │                       │                       │       │               └── GroovyScript: Flatten SF Response
-│                       │                       │       │                   📝 Executes custom logic: reads 1 property/properties, modifies body
-│                       │                       │       │                      Reads: sfresponse
+│                       │                       │       │                   📝 Executes Groovy script: script32.groovy (script file not loaded)
 │                       │                       │       │                   └── CallActivity: JSON to XML Converter 
 │                       │                       │       │                       📝 Calls reusable subflow: JSON to XML Converter 
 │                       │                       │       │                       └── ContentModifier: set the xml into property 
@@ -163,15 +154,16 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       │                       │       │                              Properties: No properties set
 │                       │                       │       │                              Headers: Content-Type = application/xml
 │                       │                       │       │                           └── GroovyScript: format the xml
-│                       │                       │       │                               📝 Executes custom logic: modifies body
+│                       │                       │       │                               📝 Executes Groovy script: script42.groovy (script file not loaded)
 │                       │                       │       │                               └── Router: BusinessProcess
 │                       │                       │       │                                   📝 Routes message based on 1 condition(s)
 │                       │                       │       │                                      Routes: 1
 │                       │                       │       │                                   ├── CallActivity: ProductBookingWS53 Response [ProductBookingWS53 ]
 │                       │                       │       │                                   │   📝 Calls reusable subflow: ProductBookingWS53 Response
-│                       │                       │       │                                   │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS53'
+│                       │                       │       │                                   │   🔀 Condition: ${property.businessProcess} =
+                'ProductBookingWS53'
 │                       │                       │       │                                   │   └── GroovyScript: final Response
-│                       │                       │       │                                   │       📝 Executes custom logic: sets 1 header(s), modifies body
+│                       │                       │       │                                   │       📝 Executes Groovy script: script47.groovy (script file not loaded)
 │                       │                       │       │                                   │       └── ContentModifier: set ResponseLog 
 │                       │                       │       │                                   │           📝 Modifies message: sets body to constant
 │                       │                       │       │                                   │              Properties: No properties set
@@ -187,7 +179,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       │                       │       │                                   └── CallActivity: ProductBookingWS54 mapping
 │                       │                       │       │                                       📝 Calls reusable subflow: ProductBookingWS54 mapping
 │                       │                       │       │                                       └── GroovyScript: final Response
-│                       │                       │       │                                           📝 Executes custom logic: sets 1 header(s), modifies body
+│                       │                       │       │                                           📝 Executes Groovy script: script47.groovy (script file not loaded)
 │                       │                       │       │                                           └── ContentModifier: set ResponseLog 
 │                       │                       │       │                                               📝 Modifies message: sets body to constant
 │                       │                       │       │                                                  Properties: No properties set
@@ -201,12 +193,11 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       │                       │       │                                                       └── EndEvent: End 
 │                       │                       │       │                                                           📝 End of create_KeyCop_ProductBooking
 │                       │                       │       └── GroovyScript: sf Request [ProductBookingWS or Pro-ProductBookingWS]
-│                       │                       │           📝 Executes custom logic: sets 1 property/properties, modifies body
-│                       │                       │           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'
-│                       │                       │              Writes: sfRequest
+│                       │                       │           📝 Executes Groovy script: script40.groovy (script file not loaded)
+│                       │                       │           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS'
+                or ${property.businessProcess} = 'Pro-ProductBookingWS'
 │                       │                       │           └── GroovyScript: sfRequest(2) 
-│                       │                       │               📝 Executes custom logic: sets 1 property/properties, modifies body
-│                       │                       │                  Writes: sfRequest
+│                       │                       │               📝 Executes Groovy script: script31.groovy (script file not loaded)
 │                       │                       │               └── RequestReply: cropEdge call 
 │                       │                       │                   📝 Calls external system via Salesforce - GET Unknown
 │                       │                       │                      Target: cropEdge3
@@ -215,8 +206,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       │                       │                          Properties: No properties set
 │                       │                       │                          Headers: No headers set
 │                       │                       │                       └── GroovyScript: flatten  SF Response
-│                       │                       │                           📝 Executes custom logic: reads 1 property/properties, modifies body
-│                       │                       │                              Reads: sfresponse
+│                       │                       │                           📝 Executes Groovy script: script41.groovy (script file not loaded)
 │                       │                       │                           └── CallActivity: JSON to XML Converter 
 │                       │                       │                               📝 Calls reusable subflow: JSON to XML Converter 
 │                       │                       │                               └── ContentModifier: set the xml into property
@@ -224,7 +214,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       │                       │                                      Properties: No properties set
 │                       │                       │                                      Headers: Content-Type = application/xml
 │                       │                       │                                   └── GroovyScript: format the xml
-│                       │                       │                                       📝 Executes custom logic: modifies body
+│                       │                       │                                       📝 Executes Groovy script: script42.groovy (script file not loaded)
 │                       │                       │                                       └── CallActivity: ProductBookin Response
 │                       │                       │                                           📝 Calls reusable subflow: ProductBookin Response
 │                       │                       │                                           └── CallActivity: XML Validator 
@@ -233,7 +223,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       │                       │                                                   📝 Routes message based on 1 condition(s)
 │                       │                       │                                                      Routes: 1
 │                       │                       │                                                   ├── GroovyScript: final response
-│                       │                       │                                                   │   📝 Executes custom logic: sets 1 header(s), modifies body
+│                       │                       │                                                   │   📝 Executes Groovy script: script46.groovy (script file not loaded)
 │                       │                       │                                                   │   └── ContentModifier: set ResponseLog 
 │                       │                       │                                                   │       📝 Modifies message: sets body to constant
 │                       │                       │                                                   │          Properties: No properties set
@@ -259,13 +249,11 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       │                           📝 End of create_KeyCop_ProductBooking
 │                       │                           🔀 Condition: ${header.CamelHTTPResponseCode} = '500'
 │                       └── GroovyScript: check error [ProductBookingWS or Pro-ProductBookingWS]
-│                           📝 Executes custom logic: sets 1 property/properties, modifies body
-│                           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'
-│                              Writes: checkError
+│                           📝 Executes Groovy script: script55.groovy (script file not loaded)
+│                           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS'
+                or ${property.businessProcess} = 'Pro-ProductBookingWS'
 │                           └── GroovyScript: set Error List
-│                               📝 Executes custom logic: sets 1 property/properties, reads 2 property/properties, modifies body
-│                                  Writes: setErrorList
-│                                  Reads: ErrorCodes, checkError
+│                               📝 Executes Groovy script: script39.groovy (script file not loaded)
 │                               └── CallActivity: call getGLN number
 │                                   📝 Calls reusable subflow: Process_62520170
 │                                   └── Router: IsValid?
@@ -287,11 +275,9 @@ SAP CPI iFlow - Flow Tree Visualization
 │                                               │       📝 Routes message based on 1 condition(s)
 │                                               │          Routes: 1
 │                                               │       ├── GroovyScript: sf Request
-│                                               │       │   📝 Executes custom logic: sets 1 property/properties, modifies body
-│                                               │       │      Writes: sfRequest
+│                                               │       │   📝 Executes Groovy script: script44.groovy (script file not loaded)
 │                                               │       │   └── GroovyScript: sfRequest(2) 
-│                                               │       │       📝 Executes custom logic: sets 1 property/properties, modifies body
-│                                               │       │          Writes: sfRequest
+│                                               │       │       📝 Executes Groovy script: script31.groovy (script file not loaded)
 │                                               │       │       └── RequestReply: cropEdge call
 │                                               │       │           📝 Calls external system via Salesforce - GET Unknown
 │                                               │       │              Target: cropedge4
@@ -300,8 +286,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │                                               │       │                  Properties: No properties set
 │                                               │       │                  Headers: No headers set
 │                                               │       │               └── GroovyScript: Flatten SF Response
-│                                               │       │                   📝 Executes custom logic: reads 1 property/properties, modifies body
-│                                               │       │                      Reads: sfresponse
+│                                               │       │                   📝 Executes Groovy script: script32.groovy (script file not loaded)
 │                                               │       │                   └── CallActivity: JSON to XML Converter 
 │                                               │       │                       📝 Calls reusable subflow: JSON to XML Converter 
 │                                               │       │                       └── ContentModifier: set the xml into property 
@@ -309,15 +294,16 @@ SAP CPI iFlow - Flow Tree Visualization
 │                                               │       │                              Properties: No properties set
 │                                               │       │                              Headers: Content-Type = application/xml
 │                                               │       │                           └── GroovyScript: format the xml
-│                                               │       │                               📝 Executes custom logic: modifies body
+│                                               │       │                               📝 Executes Groovy script: script42.groovy (script file not loaded)
 │                                               │       │                               └── Router: BusinessProcess
 │                                               │       │                                   📝 Routes message based on 1 condition(s)
 │                                               │       │                                      Routes: 1
 │                                               │       │                                   ├── CallActivity: ProductBookingWS53 Response [ProductBookingWS53 ]
 │                                               │       │                                   │   📝 Calls reusable subflow: ProductBookingWS53 Response
-│                                               │       │                                   │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS53'
+│                                               │       │                                   │   🔀 Condition: ${property.businessProcess} =
+                'ProductBookingWS53'
 │                                               │       │                                   │   └── GroovyScript: final Response
-│                                               │       │                                   │       📝 Executes custom logic: sets 1 header(s), modifies body
+│                                               │       │                                   │       📝 Executes Groovy script: script47.groovy (script file not loaded)
 │                                               │       │                                   │       └── ContentModifier: set ResponseLog 
 │                                               │       │                                   │           📝 Modifies message: sets body to constant
 │                                               │       │                                   │              Properties: No properties set
@@ -333,7 +319,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │                                               │       │                                   └── CallActivity: ProductBookingWS54 mapping
 │                                               │       │                                       📝 Calls reusable subflow: ProductBookingWS54 mapping
 │                                               │       │                                       └── GroovyScript: final Response
-│                                               │       │                                           📝 Executes custom logic: sets 1 header(s), modifies body
+│                                               │       │                                           📝 Executes Groovy script: script47.groovy (script file not loaded)
 │                                               │       │                                           └── ContentModifier: set ResponseLog 
 │                                               │       │                                               📝 Modifies message: sets body to constant
 │                                               │       │                                                  Properties: No properties set
@@ -347,12 +333,11 @@ SAP CPI iFlow - Flow Tree Visualization
 │                                               │       │                                                       └── EndEvent: End 
 │                                               │       │                                                           📝 End of create_KeyCop_ProductBooking
 │                                               │       └── GroovyScript: sf Request [ProductBookingWS or Pro-ProductBookingWS]
-│                                               │           📝 Executes custom logic: sets 1 property/properties, modifies body
-│                                               │           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'
-│                                               │              Writes: sfRequest
+│                                               │           📝 Executes Groovy script: script40.groovy (script file not loaded)
+│                                               │           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS'
+                or ${property.businessProcess} = 'Pro-ProductBookingWS'
 │                                               │           └── GroovyScript: sfRequest(2) 
-│                                               │               📝 Executes custom logic: sets 1 property/properties, modifies body
-│                                               │                  Writes: sfRequest
+│                                               │               📝 Executes Groovy script: script31.groovy (script file not loaded)
 │                                               │               └── RequestReply: cropEdge call 
 │                                               │                   📝 Calls external system via Salesforce - GET Unknown
 │                                               │                      Target: cropEdge3
@@ -361,8 +346,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │                                               │                          Properties: No properties set
 │                                               │                          Headers: No headers set
 │                                               │                       └── GroovyScript: flatten  SF Response
-│                                               │                           📝 Executes custom logic: reads 1 property/properties, modifies body
-│                                               │                              Reads: sfresponse
+│                                               │                           📝 Executes Groovy script: script41.groovy (script file not loaded)
 │                                               │                           └── CallActivity: JSON to XML Converter 
 │                                               │                               📝 Calls reusable subflow: JSON to XML Converter 
 │                                               │                               └── ContentModifier: set the xml into property
@@ -370,7 +354,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │                                               │                                      Properties: No properties set
 │                                               │                                      Headers: Content-Type = application/xml
 │                                               │                                   └── GroovyScript: format the xml
-│                                               │                                       📝 Executes custom logic: modifies body
+│                                               │                                       📝 Executes Groovy script: script42.groovy (script file not loaded)
 │                                               │                                       └── CallActivity: ProductBookin Response
 │                                               │                                           📝 Calls reusable subflow: ProductBookin Response
 │                                               │                                           └── CallActivity: XML Validator 
@@ -379,7 +363,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │                                               │                                                   📝 Routes message based on 1 condition(s)
 │                                               │                                                      Routes: 1
 │                                               │                                                   ├── GroovyScript: final response
-│                                               │                                                   │   📝 Executes custom logic: sets 1 header(s), modifies body
+│                                               │                                                   │   📝 Executes Groovy script: script46.groovy (script file not loaded)
 │                                               │                                                   │   └── ContentModifier: set ResponseLog 
 │                                               │                                                   │       📝 Modifies message: sets body to constant
 │                                               │                                                   │          Properties: No properties set
@@ -425,7 +409,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: call emailnotify
 │           📝 Calls reusable subflow: Process_96162317
 │           └── CallActivity: call to check bussiness process
@@ -435,9 +420,7 @@ SAP CPI iFlow - Flow Tree Visualization
 ├── StartEvent: Start 
 │   📝 Entry point of getGLNNumber
 │   └── GroovyScript: Set Partner
-│       📝 Executes custom logic: sets 1 property/properties, reads 2 property/properties
-│          Writes: Partner
-│          Reads: PartnerIdentifier, resellerGLN
+│       📝 Executes Groovy script: script12.groovy (script file not loaded)
 │       └── ContentModifier: set salesforce Query
 │           📝 Modifies message: sets body using expression
 │              Properties: No properties set
@@ -445,9 +428,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │           └── CallActivity: call to RR Query
 │               📝 Calls reusable subflow: Process_62520184
 │               └── GroovyScript: set GLN
-│                   📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties, sets 1 header(s)
-│                      Writes: setGLN
-│                      Reads: Partner
+│                   📝 Executes Groovy script: script13.groovy (script file not loaded)
 │                   └── Router: valid GLN?
 │                       📝 Routes message based on 1 condition(s)
 │                          Routes: 1
@@ -474,7 +455,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters 
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: call to notify email
 │           📝 Calls reusable subflow: Process_96162317
 │           └── CallActivity: call to check error business process
@@ -487,10 +469,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │       📝 Routes message based on 2 condition(s)
 │          Routes: 2
 │       ├── GroovyScript: Groovy Script 3 [true]
-│       │   📝 Executes custom logic: sets 1 property/properties, reads 3 property/properties
+│       │   📝 Executes Groovy script: script58.groovy (script file not loaded)
 │       │   🔀 Condition: ${property.query8} = 'true'
-│       │      Writes: setErrorList
-│       │      Reads: CheckEG, GtinStatus, setErrorList
 │       │   └── ContentModifier: set ErrorList as body
 │       │       📝 Modifies message: sets body using expression
 │       │          Properties: No properties set
@@ -525,7 +505,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: call to notify email
 │           📝 Calls reusable subflow: Process_96162317
 │           └── EndEvent: End 
@@ -533,10 +514,9 @@ SAP CPI iFlow - Flow Tree Visualization
 ├── StartEvent: Start 
 │   📝 Entry point of Async M2M log flow2
 │   └── GroovyScript: Inputpayload binary 
-│       📝 Executes custom logic: sets 2 property/properties
-│          Writes: BinaryInput, BinaryResponse
+│       📝 Executes Groovy script: script50.groovy (script file not loaded)
 │       └── GroovyScript: set compositerequerst body
-│           📝 Executes custom logic: modifies body
+│           📝 Executes Groovy script: script51.groovy (script file not loaded)
 │           └── ContentModifier: set composite request
 │               📝 Modifies message: sets body using expression
 │                  Properties: No properties set
@@ -561,7 +541,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters  
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: call to notify mail
 │           📝 Calls reusable subflow: Process_96162317
 │           └── CallActivity: call to check error businessprocess
@@ -571,15 +552,11 @@ SAP CPI iFlow - Flow Tree Visualization
 ├── StartEvent: Start 
 │   📝 Entry point of Advance OrderChange
 │   └── GroovyScript: set Variables
-│       📝 Executes custom logic: sets 10 property/properties
-│          Writes: growerGLNForSFDCQuery, growerGLNSeperatedCommasNoBrackets, growerGLN
+│       📝 Executes Groovy script: script3.groovy (script file not loaded)
 │       └── GroovyScript: set Error variable
-│           📝 Executes custom logic: sets 1 property/properties, modifies body
-│              Writes: ErrorCodes
+│           📝 Executes Groovy script: script10.groovy (script file not loaded)
 │           └── GroovyScript: Validate Year
-│               📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties
-│                  Writes: isValidMarketYear
-│                  Reads: seedYear
+│               📝 Executes Groovy script: script4.groovy (script file not loaded)
 │               └── Router: IsValid
 │                   📝 Routes message based on 1 condition(s)
 │                      Routes: 1
@@ -598,13 +575,10 @@ SAP CPI iFlow - Flow Tree Visualization
 │                   │               └── EndEvent: End 
 │                   │                   📝 End of Advance OrderChange
 │                   └── GroovyScript: Check errors in input [Valid]
-│                       📝 Executes custom logic: sets 1 property/properties, modifies body
+│                       📝 Executes Groovy script: script9.groovy (script file not loaded)
 │                       🔀 Condition: ${property.isValidMarketYear} = 'true'
-│                          Writes: checkError
 │                       └── GroovyScript: set ErrorList
-│                           📝 Executes custom logic: sets 1 property/properties, reads 2 property/properties, modifies body
-│                              Writes: setErrorList
-│                              Reads: ErrorCodes, checkError
+│                           📝 Executes Groovy script: script11.groovy (script file not loaded)
 │                           └── CallActivity: call getGLNnumber
 │                               📝 Calls reusable subflow: Process_62520170
 │                               └── Router: valid?
@@ -620,11 +594,9 @@ SAP CPI iFlow - Flow Tree Visualization
 │                                   │       │      Properties: No properties set
 │                                   │       │      Headers: No headers set
 │                                   │       │   └── GroovyScript: sfRequest
-│                                   │       │       📝 Executes custom logic: sets 1 property/properties
-│                                   │       │          Writes: sfRequest
+│                                   │       │       📝 Executes Groovy script: script30.groovy (script file not loaded)
 │                                   │       │       └── GroovyScript: sfRequest(2)
-│                                   │       │           📝 Executes custom logic: sets 1 property/properties, modifies body
-│                                   │       │              Writes: sfRequest
+│                                   │       │           📝 Executes Groovy script: script31.groovy (script file not loaded)
 │                                   │       │           └── RequestReply: cropEdge call
 │                                   │       │               📝 Calls external system via Salesforce - GET Unknown
 │                                   │       │                  Target: cropEdge2
@@ -633,8 +605,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │                                   │       │                      Properties: No properties set
 │                                   │       │                      Headers: No headers set
 │                                   │       │                   └── GroovyScript: Flatten SF Response
-│                                   │       │                       📝 Executes custom logic: reads 1 property/properties, modifies body
-│                                   │       │                          Reads: sfresponse
+│                                   │       │                       📝 Executes Groovy script: script32.groovy (script file not loaded)
 │                                   │       │                       └── CallActivity: JSON to XML Converter 
 │                                   │       │                           📝 Calls reusable subflow: JSON to XML Converter 
 │                                   │       │                           └── ContentModifier: set the xml into property
@@ -642,13 +613,13 @@ SAP CPI iFlow - Flow Tree Visualization
 │                                   │       │                                  Properties: No properties set
 │                                   │       │                                  Headers: Content-Type = application/xml
 │                                   │       │                               └── GroovyScript: formatted xml
-│                                   │       │                                   📝 Executes custom logic: modifies body
+│                                   │       │                                   📝 Executes Groovy script: script48.groovy (script file not loaded)
 │                                   │       │                                   └── CallActivity: order change response
 │                                   │       │                                       📝 Calls reusable subflow: order change response
 │                                   │       │                                       └── CallActivity: transform message
 │                                   │       │                                           📝 Calls reusable subflow: transform message
 │                                   │       │                                           └── GroovyScript: final response
-│                                   │       │                                               📝 Executes custom logic: sets 1 header(s), modifies body
+│                                   │       │                                               📝 Executes Groovy script: script49.groovy (script file not loaded)
 │                                   │       │                                               └── ContentModifier: set ResponseLog
 │                                   │       │                                                   📝 Modifies message: sets body to constant
 │                                   │       │                                                      Properties: No properties set
@@ -672,7 +643,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters 
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: call notify email
 │           📝 Calls reusable subflow: Process_96162317
 │           └── CallActivity: call to check error business process
@@ -688,20 +660,19 @@ SAP CPI iFlow - Flow Tree Visualization
 │       └── CallActivity: call RR composite query
 │           📝 Calls reusable subflow: Process_62520215
 │           └── GroovyScript: Authorization Response Validation
-│               📝 Executes custom logic: sets 4 property/properties
-│                  Writes: query3, query4, query1
+│               📝 Executes Groovy script: script16.groovy (script file not loaded)
 │               └── Router: IsValid?
 │                   📝 Routes message based on 1 condition(s)
 │                      Routes: 1
 │                   ├── ContentModifier: set required fields [notvalid]
 │                   │   📝 Modifies message: sets 1 header(s), sets body to constant
-│                   │   🔀 Condition: ${property.query1} = 'false' or ${property.query2} = 'false' or ${property.query3} = 'false' or ${property.query4} = 'false'
+│                   │   🔀 Condition: ${property.query1} = 'false' or
+                ${property.query2} = 'false' or ${property.query3} = 'false' or ${property.query4} =
+                'false'
 │                   │      Properties: No properties set
 │                   │      Headers: CamelHTTPResponseCode = 500
 │                   │   └── GroovyScript: set Authorisation error
-│                   │       📝 Executes custom logic: sets 1 property/properties, reads 7 property/properties, modifies body
-│                   │          Writes: RequiredField
-│                   │          Reads: query1, auth_query2_1, auth_pal_query3
+│                   │       📝 Executes Groovy script: script17.groovy (script file not loaded)
 │                   │       └── CallActivity: call to async err handler flow
 │                   │           📝 Calls reusable subflow: Process_96162241
 │                   │           └── ContentModifier: Removeasyn header
@@ -719,7 +690,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters 
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: notify email
 │           📝 Calls reusable subflow: Process_96162317
 │           └── CallActivity: call to check business process
@@ -738,29 +710,20 @@ SAP CPI iFlow - Flow Tree Visualization
 │               ├── CallActivity: call Validation AGIIS
 │               │   📝 Calls reusable subflow: Process_79626264
 │               │   └── GroovyScript: set status code
-│               │       📝 Executes custom logic: sets 1 property/properties, modifies body
-│               │          Writes: stateCode
+│               │       📝 Executes Groovy script: script19.groovy (script file not loaded)
 │               │       └── GroovyScript: add invalid GLNs to ErrorList(pr setErrorList)
-│               │           📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties
-│               │              Writes: setErrorList
-│               │              Reads: setErrorList
+│               │           📝 Executes Groovy script: script20.groovy (script file not loaded)
 │               │           └── GroovyScript: set Grower and Partner function
-│               │               📝 Executes custom logic: reads 3 property/properties, modifies body
-│               │                  Reads: resellerGLN, stateCode, growerAddress
+│               │               📝 Executes Groovy script: script21.groovy (script file not loaded)
 │               │               └── RequestReply: cropEdge call
 │               │                   📝 Calls external system via Salesforce - GET Unknown
 │               │                      Target: CropEdge
 │               │                   └── GroovyScript: set ErrorList
-│               │                       📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties, modifies body
-│               │                          Writes: setErrorList
-│               │                          Reads: setErrorList
+│               │                       📝 Executes Groovy script: script23.groovy (script file not loaded)
 │               │                       └── GroovyScript: GetFailedGrowers
-│               │                           📝 Executes custom logic: sets 2 property/properties, modifies body
-│               │                              Writes: FailedRecordsEmpty, failedRecords
+│               │                           📝 Executes Groovy script: script22.groovy (script file not loaded)
 │               │                           └── GroovyScript: set ErrorList
-│               │                               📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties, modifies body
-│               │                                  Writes: setErrorList
-│               │                                  Reads: setErrorList
+│               │                               📝 Executes Groovy script: script24.groovy (script file not loaded)
 │               │                               └── ContentModifier: compositeRequest
 │               │                                   📝 Modifies message: sets body using expression
 │               │                                      Properties: No properties set
@@ -768,8 +731,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │               │                                   └── CallActivity: call to RR compositeRequest
 │               │                                       📝 Calls reusable subflow: Process_62520215
 │               │                                       └── GroovyScript: set resllerId and PMRXRef variables
-│               │                                           📝 Executes custom logic: sets 3 property/properties
-│               │                                              Writes: resellerId, PMRXRef_products, PMRXRef_GTINs
+│               │                                           📝 Executes Groovy script: script25.groovy (script file not loaded)
 │               │                                           └── Router: Valid ResllerID?
 │               │                                               📝 Routes message based on 1 condition(s)
 │               │                                                  Routes: 1
@@ -781,25 +743,19 @@ SAP CPI iFlow - Flow Tree Visualization
 │               │                                               │   └── CallActivity: call to RR CompositeQuery
 │               │                                               │       📝 Calls reusable subflow: Process_62520215
 │               │                                               │       └── GroovyScript: Set Product Gtins
-│               │                                               │           📝 Executes custom logic: sets 4 property/properties, reads 1 property/properties
-│               │                                               │              Writes: CheckEG, query8, isProductGtinsNotEmpty
-│               │                                               │              Reads: PMRXRef_GTINs
+│               │                                               │           📝 Executes Groovy script: script26.groovy (script file not loaded)
 │               │                                               │           └── Router: isProductGtinsNotEmpty?
 │               │                                               │               📝 Routes message based on 1 condition(s)
 │               │                                               │                  Routes: 1
 │               │                                               │               ├── GroovyScript: setErrorList
-│               │                                               │               │   📝 Executes custom logic: sets 1 property/properties, reads 2 property/properties, modifies body
-│               │                                               │               │      Writes: setErrorList
-│               │                                               │               │      Reads: ErrorCodes, setErrorList
+│               │                                               │               │   📝 Executes Groovy script: script27.groovy (script file not loaded)
 │               │                                               │               │   └── CallActivity: call check sales validation
 │               │                                               │               │       📝 Calls reusable subflow: Process_79626341
 │               │                                               │               │       └── EndEvent: End 
 │               │                                               │               │           📝 End of Validate_OrderFlow(1)
 │               │                                               │               └── GroovyScript: check GTINs [isProductGtinsNotEmpty]
-│               │                                               │                   📝 Executes custom logic: sets 3 property/properties, reads 4 property/properties
+│               │                                               │                   📝 Executes Groovy script: script28.groovy (script file not loaded)
 │               │                                               │                   🔀 Condition: ${property.isProductGtinsNotEmpty} = 'true'
-│               │                                               │                      Writes: CheckEG, GtinStatus, isValid
-│               │                                               │                      Reads: CheckEG, product_Gtins, GTIN
 │               │                                               │                   └── Router: check Gtins and EG status
 │               │                                               │                       📝 Routes message based on 1 condition(s)
 │               │                                               │                          Routes: 1
@@ -809,8 +765,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │               │                                               │                       │   └── EndEvent: End 
 │               │                                               │                       │       📝 End of Validate_OrderFlow(1)
 │               │                                               │                       └── GroovyScript: set Error List
-│               │                                               │                           📝 Executes custom logic: sets 1 property/properties
-│               │                                               │                              Writes: setErrorList
+│               │                                               │                           📝 Executes Groovy script: script29.groovy (script file not loaded)
 │               │                                               │                           └── CallActivity: call check sales validation
 │               │                                               │                               📝 Calls reusable subflow: Process_79626341
 │               │                                               │                               └── EndEvent: End 
@@ -843,9 +798,10 @@ SAP CPI iFlow - Flow Tree Visualization
 │              Routes: 3
 │           ├── CallActivity: set Response [PBWS]
 │           │   📝 Calls reusable subflow: set Response
-│           │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'
+│           │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS'
+                or ${property.businessProcess} = 'Pro-ProductBookingWS'
 │           │   └── GroovyScript: final response
-│           │       📝 Executes custom logic: sets 1 header(s), modifies body
+│           │       📝 Executes Groovy script: script45.groovy (script file not loaded)
 │           │       └── Router: m2m check
 │           │           📝 Routes message based on 1 condition(s)
 │           │              Routes: 1
@@ -866,9 +822,10 @@ SAP CPI iFlow - Flow Tree Visualization
 │           │               📝 End of Check Error Business Process
 │           ├── CallActivity: set Response [PBWS53]
 │           │   📝 Calls reusable subflow: set Response
-│           │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS53'
+│           │   🔀 Condition: ${property.businessProcess} =
+                'ProductBookingWS53'
 │           │   └── GroovyScript: final response
-│           │       📝 Executes custom logic: sets 1 header(s), modifies body
+│           │       📝 Executes Groovy script: script45.groovy (script file not loaded)
 │           │       └── Router: m2m check
 │           │           📝 Routes message based on 1 condition(s)
 │           │              Routes: 1
@@ -889,9 +846,10 @@ SAP CPI iFlow - Flow Tree Visualization
 │           │               📝 End of Check Error Business Process
 │           ├── CallActivity: set response [PBWS54]
 │           │   📝 Calls reusable subflow: set response
-│           │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS54'
+│           │   🔀 Condition: ${property.businessProcess} =
+                'ProductBookingWS54'
 │           │   └── GroovyScript: final Response
-│           │       📝 Executes custom logic: sets 1 header(s), modifies body
+│           │       📝 Executes Groovy script: script54.groovy (script file not loaded)
 │           │       └── Router: m2m check
 │           │           📝 Routes message based on 1 condition(s)
 │           │              Routes: 1
@@ -913,7 +871,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │           └── CallActivity: Set agvance
 │               📝 Calls reusable subflow: Set agvance
 │               └── GroovyScript: final Response
-│                   📝 Executes custom logic: sets 1 header(s), modifies body
+│                   📝 Executes Groovy script: script8.groovy (script file not loaded)
 │                   └── Router: m2m check
 │                       📝 Routes message based on 1 condition(s)
 │                          Routes: 1
@@ -939,7 +897,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │          Properties: No properties set
 │          Headers: Content-Type = application/json, CamelHTTPResponseCode = 500
 │       └── GroovyScript: err respone to caller
-│           📝 Executes custom logic: sets 1 header(s), modifies body
+│           📝 Executes Groovy script: script5.groovy (script file not loaded)
 │           └── EndEvent: End 
 │               📝 End of Business process exception handler
 ├── StartEvent: Error Start 
@@ -947,7 +905,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters 
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: notify mail
 │           📝 Calls reusable subflow: Process_96162317
 │           └── CallActivity: call check error business process error
@@ -965,11 +924,9 @@ SAP CPI iFlow - Flow Tree Visualization
 │              Properties: No properties set
 │              Headers: No headers set
 │           └── GroovyScript: set required params
-│               📝 Executes custom logic: sets 5 property/properties, sets 1 header(s), modifies body
-│                  Writes: Username, password, InputPayload
+│               📝 Executes Groovy script: script1.groovy (script file not loaded)
 │               └── GroovyScript: M2M Input Mapping
-│                   📝 Executes custom logic: sets 1 property/properties, modifies body
-│                      Writes: M2MInput
+│                   📝 Executes Groovy script: script53.groovy (script file not loaded)
 │                   └── Router: Router
 │                       📝 Routes message based on 3 condition(s)
 │                          Routes: 3
@@ -984,12 +941,13 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       │              Properties: No properties set
 │                       │              Headers: [Delete] $name=InputPayload = (dynamic), [Delete] $name=partnerIdentifier = (dynamic), [Delete] $name=RequiredField = (dynamic)
 │                       │           └── GroovyScript: err respone to caller
-│                       │               📝 Executes custom logic: sets 1 header(s), modifies body
+│                       │               📝 Executes Groovy script: script5.groovy (script file not loaded)
 │                       │               └── EndEvent: End 
 │                       │                   📝 End of CreateGrower
 │                       ├── CallActivity: call to key crop product booking [ProductBookingWS53 or ProductBookingWS54]
 │                       │   📝 Calls reusable subflow: Process_79626401
-│                       │   🔀 Condition: ${property.businessProcess} = 'ProductBookingWS53' or ${property.businessProcess} = 'ProductBookingWS54'
+│                       │   🔀 Condition: ${property.businessProcess} =
+                'ProductBookingWS53' or ${property.businessProcess} = 'ProductBookingWS54'
 │                       │   └── EndEvent: End 
 │                       │       📝 End of CreateGrower
 │                       ├── CallActivity: call Advance OrderChange [GrowerOrderWS]
@@ -999,7 +957,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       │       📝 End of CreateGrower
 │                       └── CallActivity: call to key crop product booking [ProductBookingWS or Pro-ProductBookingWS]
 │                           📝 Calls reusable subflow: Process_79626401
-│                           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'
+│                           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS'
+                or ${property.businessProcess} = 'Pro-ProductBookingWS'
 │                           └── EndEvent: End 
 │                               📝 End of CreateGrower
 ├── StartEvent: Error Start 
@@ -1007,7 +966,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters 
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: call to emailnotify
 │           📝 Calls reusable subflow: Process_96162317
 │           └── CallActivity: call to check business process
@@ -1020,9 +980,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │       📝 Calls external system via HTTP - GET {{address}}
 │          Target: AGIIS
 │       └── GroovyScript: getStatus
-│           📝 Executes custom logic: sets 1 property/properties, reads 1 property/properties, modifies body
-│              Writes: validateGLN
-│              Reads: growerGLNSeperatedCommas
+│           📝 Executes Groovy script: script18.groovy (script file not loaded)
 │           └── EndEvent: End 
 │               📝 End of ValidationAGIIS
 ├── StartEvent: Error Start 
@@ -1030,7 +988,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters  
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: call email notify
 │           📝 Calls reusable subflow: Process_96162317
 │           └── EndEvent: End 
@@ -1038,8 +997,7 @@ SAP CPI iFlow - Flow Tree Visualization
 ├── StartEvent: Start 
 │   📝 Entry point of Async flow for error
 │   └── GroovyScript: set required Field
-│       📝 Executes custom logic: sets 3 property/properties
-│          Writes: source, business, RequiredFiled
+│       📝 Executes Groovy script: script52.groovy (script file not loaded)
 │       └── ContentModifier: set body
 │           📝 Modifies message: sets 1 header(s), sets body using expression
 │              Properties: No properties set
@@ -1058,7 +1016,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters 
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: call to email notify
 │           📝 Calls reusable subflow: Process_96162317
 │           └── EndEvent: End 
@@ -1078,7 +1037,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: call to email notify
 │           📝 Calls reusable subflow: Process_96162317
 │           └── EndEvent: End 
@@ -1105,7 +1065,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │   └── ContentModifier: Set Error Parameters
 │       📝 Modifies message: sets 5 header(s), sets body using expression
 │          Properties: No properties set
-│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data Failure, emailType = failure
+│          Headers: errorMessage = (expression: ${exception.message}), errorType = Connection/Data
+                            Failure, emailType = failure
 │       └── CallActivity: call to notify email
 │           📝 Calls reusable subflow: Process_96162317
 │           └── CallActivity: call to check error business process
@@ -1115,8 +1076,7 @@ SAP CPI iFlow - Flow Tree Visualization
 └── StartEvent: Start 
     📝 Entry point of Validate_Agvance_Order
     └── GroovyScript: Groovy Script 1
-        📝 Executes custom logic: sets 1 property/properties
-           Writes: growerGLNSeperatedCommas
+        📝 Executes Groovy script: script56.groovy (script file not loaded)
         └── ContentModifier: set compoiste query
             📝 Modifies message: sets body using expression
                Properties: No properties set
@@ -1124,13 +1084,9 @@ SAP CPI iFlow - Flow Tree Visualization
             └── CallActivity: Call RR Composite query
                 📝 Calls reusable subflow: Process_62520215
                 └── GroovyScript: set Growers
-                    📝 Executes custom logic: sets 4 property/properties, reads 3 property/properties
-                       Writes: growerGLN, newGrowerGLNSeperatedcommas, setGrowers
-                       Reads: growerGLN, setErrorList, growerAddress
+                    📝 Executes Groovy script: script14.groovy (script file not loaded)
                     └── GroovyScript: checking condition
-                        📝 Executes custom logic: sets 1 property/properties, reads 5 property/properties
-                           Writes: conditionMet
-                           Reads: growerGLN, GTIN, resellerGLN
+                        📝 Executes Groovy script: script15.groovy (script file not loaded)
                         └── Router: isvalid?
                             📝 Routes message based on 1 condition(s)
                                Routes: 1

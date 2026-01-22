@@ -11,20 +11,21 @@
         box-sizing: border-box;
       }
       body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-family: "Inter", "Segoe UI", system-ui, sans-serif;
         display: flex;
         height: 100vh;
-        background: #f5f5f5;
+        background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
       }
       #sidebar {
         width: 400px;
         min-width: 200px;
-        background: white;
-        border-right: 1px solid #ddd;
+        background: #ffffff;
+        border-right: 1px solid #cbd5e0;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
         position: relative;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
       }
       #resizer {
         width: 5px;
@@ -74,11 +75,11 @@
         background: #0078d4;
       }
       #flowchart-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
         color: white;
         padding: 15px 20px;
-        border-radius: 8px 8px 0 0;
-        font-weight: 600;
+        border-radius: 12px 12px 0 0;
+        font-weight: 700;
         font-size: 16px;
         display: flex;
         align-items: center;
@@ -108,7 +109,7 @@
       }
       .control-btn {
         background: white;
-        border: 2px solid #667eea;
+        border: 2px solid #14b8a6;
         border-radius: 8px;
         width: 36px;
         height: 36px;
@@ -121,7 +122,7 @@
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
       }
       .control-btn:hover {
-        background: #667eea;
+        background: #14b8a6;
         color: white;
         transform: scale(1.1);
       }
@@ -129,18 +130,107 @@
         transform: scale(0.95);
       }
       #header {
-        background: #0078d4;
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
         color: white;
         padding: 20px;
         flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
       #header h1 {
         font-size: 24px;
         margin-bottom: 10px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
       }
       #header p {
         font-size: 14px;
         opacity: 0.9;
+      }
+      #search-container {
+        margin-top: 15px;
+        position: relative;
+      }
+      #search-input {
+        width: 100%;
+        padding: 10px 40px 10px 15px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        font-size: 13px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        outline: none;
+        transition: all 0.3s;
+        backdrop-filter: blur(10px);
+      }
+      #search-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+      #search-input:focus {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+      }
+      #search-clear {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        display: none;
+        line-height: 1;
+      }
+      #search-clear:hover {
+        opacity: 1;
+      }
+      #search-results {
+        margin-top: 8px;
+        font-size: 12px;
+        opacity: 0.9;
+        min-height: 18px;
+        font-weight: 500;
+      }
+      .search-highlight {
+        background: #fbbf24;
+        color: #1e293b;
+        font-weight: 600;
+        padding: 2px 4px;
+        border-radius: 3px;
+        box-shadow: 0 1px 3px rgba(251, 191, 36, 0.3);
+      }
+      #tree-controls {
+        display: flex;
+        gap: 8px;
+        margin-top: 15px;
+      }
+      .tree-control-btn {
+        background: rgba(20, 184, 166, 0.2);
+        border: 1px solid rgba(20, 184, 166, 0.4);
+        color: white;
+        padding: 7px 14px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+      }
+      .tree-control-btn:hover {
+        background: #14b8a6;
+        border-color: #14b8a6;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(20, 184, 166, 0.3);
+      }
+      .tree-control-btn:active {
+        transform: translateY(0);
       }
       #tree {
         padding: 20px;
@@ -156,11 +246,12 @@
         transition: background 0.2s;
       }
       .tree-node:hover {
-        background: #f0f0f0;
+        background: #f1f5f9;
       }
       .tree-node.selected {
-        background: #e3f2fd;
-        border-left: 3px solid #0078d4;
+        background: linear-gradient(90deg, #e0f2fe 0%, #f0f9ff 100%);
+        border-left: 3px solid #14b8a6;
+        box-shadow: 0 2px 4px rgba(20, 184, 166, 0.1);
       }
       .node-content {
         display: flex;
@@ -188,30 +279,76 @@
         margin-left: 32px;
         border-left: 2px solid #e0e0e0;
         padding-left: 8px;
+        overflow: hidden;
+        transition: max-height 0.3s ease, opacity 0.3s ease;
+      }
+      .tree-children.collapsed {
+        max-height: 0 !important;
+        opacity: 0;
+        margin-bottom: 0;
+      }
+      .expand-toggle {
+        font-size: 14px;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e0f2fe;
+        border-radius: 4px;
+        transition: all 0.2s;
+        font-weight: bold;
+        color: #0891b2;
+        flex-shrink: 0;
+      }
+      .expand-toggle:hover {
+        background: #14b8a6;
+        color: white;
+        transform: scale(1.1);
+      }
+      .expand-toggle.collapsed {
+        transform: rotate(-90deg);
+      }
+      .expand-toggle.collapsed:hover {
+        transform: rotate(-90deg) scale(1.1);
+      }
+      .node-wrapper {
+        margin-bottom: 4px;
+      }
+      .children-count {
+        font-size: 10px;
+        background: #14b8a6;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-weight: 600;
+        margin-left: 4px;
       }
       #details {
         background: white;
         padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
       }
       #details h2 {
-        color: #0078d4;
+        color: #1e293b;
         margin-bottom: 20px;
         font-size: 24px;
         display: flex;
         align-items: center;
         gap: 10px;
+        font-weight: 700;
       }
       #details .section {
         margin-bottom: 25px;
       }
       #details .section h3 {
         font-size: 16px;
-        color: #333;
+        color: #1e293b;
         margin-bottom: 12px;
-        border-bottom: 2px solid #0078d4;
+        border-bottom: 2px solid #14b8a6;
         padding-bottom: 8px;
+        font-weight: 600;
       }
       #details .section p {
         color: #666;
@@ -219,11 +356,11 @@
         font-size: 14px;
       }
       #details .detail-item {
-        background: #f9f9f9;
+        background: #f8fafc;
         padding: 12px 15px;
         margin: 8px 0;
-        border-left: 3px solid #0078d4;
-        border-radius: 4px;
+        border-left: 3px solid #14b8a6;
+        border-radius: 6px;
       }
       #details .detail-label {
         font-weight: 600;
@@ -289,24 +426,93 @@
       }
       .process-badge {
         display: inline-block;
-        background: #e8f4f8;
-        color: #0078d4;
+        background: #e0f2fe;
+        color: #0891b2;
         padding: 2px 8px;
         border-radius: 10px;
         font-size: 10px;
         font-weight: 600;
         margin-left: 5px;
-        border: 1px solid #b3d9e6;
+        border: 1px solid #7dd3fc;
+      }
+      .collapsible-section {
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+      }
+      .collapsible-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 12px 16px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        color: #1e293b;
+        transition: all 0.3s;
+        user-select: none;
+      }
+      .collapsible-header:hover {
+        background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+        color: #0891b2;
+      }
+      .collapsible-header .icon {
+        font-size: 14px;
+        transition: transform 0.3s;
+        color: #0891b2;
+      }
+      .collapsible-header.collapsed .icon {
+        transform: rotate(-90deg);
+      }
+      .collapsible-content {
+        max-height: 500px;
+        overflow-y: auto;
+        transition: max-height 0.3s ease;
+        background: #f8fafc;
+      }
+      .collapsible-content.collapsed {
+        max-height: 0;
+      }
+      .collapsible-items {
+        padding: 10px;
+      }
+      .collapsible-item {
+        padding: 10px 12px;
+        margin: 6px 0;
+        background: white;
+        border-left: 3px solid #14b8a6;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+      .collapsible-item:hover {
+        background: #e0f2fe;
+        transform: translateX(4px);
+        box-shadow: 0 2px 6px rgba(20, 184, 166, 0.2);
+      }
+      .start-end-indicator {
+        font-size: 11px;
+        color: #475569;
+        font-weight: 600;
+        margin-left: 10px;
+        padding: 4px 8px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 6px;
+        border: 1px solid #fbbf24;
       }
 
       /* Flowchart Styles */
       .flow-node {
         position: absolute;
         background: white;
-        border: 2px solid #667eea;
+        border: 2px solid #14b8a6;
         border-radius: 12px;
         padding: 16px 20px;
-        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+        box-shadow: 0 3px 10px rgba(20, 184, 166, 0.2);
         cursor: pointer;
         transition: all 0.3s ease;
         min-width: 200px;
@@ -315,16 +521,16 @@
       }
       .flow-node:hover {
         transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        border-color: #764ba2;
+        box-shadow: 0 6px 20px rgba(20, 184, 166, 0.4);
+        border-color: #0891b2;
         z-index: 100;
       }
       .flow-node.main-process {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
         color: white;
         border: none;
         font-weight: 600;
-        box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 6px 18px rgba(20, 184, 166, 0.4);
         border: 3px solid rgba(255, 255, 255, 0.3);
       }
       .flow-node.main-process .flow-node-id {
@@ -362,7 +568,7 @@
         pointer-events: none;
       }
       .flow-arrow {
-        stroke: #8b9cec;
+        stroke: #5eead4;
         stroke-width: 2.5;
         fill: none;
         marker-end: url(#arrowhead);
@@ -413,8 +619,27 @@
     <div id="sidebar">
       <div id="resizer"></div>
       <div id="header">
-        <h1>🔄 SAP CPI iFlow</h1>
+        <h1>🔄 SAP CPI iFlow Analyzer</h1>
         <p id="metadata">Loading...</p>
+        <div id="search-container">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="🔍 Search nodes, scripts, conditions..."
+            oninput="performSearch(this.value)"
+            onkeydown="handleSearchKeydown(event)"
+          />
+          <button id="search-clear" onclick="clearSearch()">×</button>
+          <div id="search-results"></div>
+        </div>
+        <div id="tree-controls">
+          <button class="tree-control-btn" onclick="expandAll()">
+            ▼ Expand All
+          </button>
+          <button class="tree-control-btn" onclick="collapseAll()">
+            ▶ Collapse All
+          </button>
+        </div>
       </div>
       <div id="tree"></div>
     </div>
@@ -756,27 +981,53 @@
           });
       }
 
-      // Render tree recursively
-      function renderTree(nodes, container) {
+      // Render tree recursively with collapse/expand functionality
+      function renderTree(nodes, container, depth = 0) {
           if (!nodes || nodes.length === 0) return;
 
           nodes.forEach(node => {
-              const nodeDiv = document.createElement('div');
+              const nodeWrapper = document.createElement('div');
+              nodeWrapper.className = 'node-wrapper';
 
               const nodeContent = document.createElement('div');
               nodeContent.className = 'tree-node';
+
+              const hasChildren = node.children && node.children.length > 0;
+              const childCount = hasChildren ? node.children.length : 0;
+
+              // Create expand/collapse toggle for nodes with children
+              const toggleIcon = hasChildren ? `<span class="expand-toggle" data-node-id="${node.id || Math.random()}">▼</span>` : '<span style="width: 20px;"></span>';
+
               const processName = (node.type === 'StartEvent' || node.type === 'EndEvent') && node.details && node.details.processName
                   ? `<span class="process-badge">${escapeHtml(node.details.processName)}</span>`
                   : '';
+
+              const childrenCountBadge = hasChildren ? `<span class="children-count">${childCount}</span>` : '';
+
+              // Display script name with function names for GroovyScript
+              let displayName = node.name || 'Unnamed';
+              if (node.type === 'GroovyScript' && node.details && node.details.scriptDisplayName) {
+                  displayName = node.details.scriptDisplayName;
+              }
+
               nodeContent.innerHTML = `
                   <div class="node-content">
+                      ${toggleIcon}
                       <span class="node-icon">${getIcon(node.type)}</span>
-                      <span class="node-label">${escapeHtml(node.name || 'Unnamed')}</span>
+                      <span class="node-label">${escapeHtml(displayName)}</span>
+                      ${childrenCountBadge}
                       ${processName}
                       <span class="node-type">${node.type}</span>
                   </div>
               `;
+
+              // Click handler for node content (excluding toggle)
               nodeContent.onclick = (e) => {
+                  // Check if click was on the toggle button
+                  if (e.target.classList.contains('expand-toggle')) {
+                      return; // Let toggle handler handle it
+                  }
+
                   e.stopPropagation();
                   document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
                   nodeContent.classList.add('selected');
@@ -788,17 +1039,60 @@
                   }
               };
 
-              nodeDiv.appendChild(nodeContent);
+              nodeWrapper.appendChild(nodeContent);
 
               // Render children if they exist
-              if (node.children && node.children.length > 0) {
+              if (hasChildren) {
                   const childrenContainer = document.createElement('div');
                   childrenContainer.className = 'tree-children';
-                  renderTree(node.children, childrenContainer);
-                  nodeDiv.appendChild(childrenContainer);
+                  childrenContainer.id = `children-${node.id || Math.random()}`;
+
+                  // Set initial max-height for smooth animation
+                  renderTree(node.children, childrenContainer, depth + 1);
+
+                  // Calculate and set max-height after rendering
+                  nodeWrapper.appendChild(childrenContainer);
+
+                  // Setup toggle functionality
+                  const toggle = nodeContent.querySelector('.expand-toggle');
+                  if (toggle) {
+                      toggle.onclick = (e) => {
+                          e.stopPropagation();
+                          const isCollapsed = childrenContainer.classList.contains('collapsed');
+
+                          if (isCollapsed) {
+                              // Expand
+                              childrenContainer.style.maxHeight = childrenContainer.scrollHeight + 'px';
+                              childrenContainer.classList.remove('collapsed');
+                              toggle.classList.remove('collapsed');
+                              setTimeout(() => {
+                                  childrenContainer.style.maxHeight = 'none';
+                              }, 300);
+                          } else {
+                              // Collapse
+                              childrenContainer.style.maxHeight = childrenContainer.scrollHeight + 'px';
+                              setTimeout(() => {
+                                  childrenContainer.style.maxHeight = '0';
+                                  childrenContainer.classList.add('collapsed');
+                                  toggle.classList.add('collapsed');
+                              }, 10);
+                          }
+                      };
+                  }
+
+                  // Initially expand first level, collapse deeper levels for routers
+                  if (depth > 0 && (node.type === 'Router' || childCount > 5)) {
+                      setTimeout(() => {
+                          childrenContainer.style.maxHeight = '0';
+                          childrenContainer.classList.add('collapsed');
+                          toggle.classList.add('collapsed');
+                      }, 10);
+                  } else {
+                      childrenContainer.style.maxHeight = 'none';
+                  }
               }
 
-              container.appendChild(nodeDiv);
+              container.appendChild(nodeWrapper);
           });
       }
 
@@ -826,7 +1120,16 @@
 
       function showDetails(node) {
           const detailsDiv = document.getElementById('details');
-          let html = `<h2><span>${getIcon(node.type)}</span> ${escapeHtml(node.name || 'Unnamed')}</h2>`;
+
+          // Add start/end indicator if applicable
+          let startEndIndicator = '';
+          if (node.type === 'StartEvent') {
+              startEndIndicator = '<span class="start-end-indicator">▶ START</span>';
+          } else if (node.type === 'EndEvent') {
+              startEndIndicator = '<span class="start-end-indicator">⏹ END</span>';
+          }
+
+          let html = `<h2><span>${getIcon(node.type)}</span> ${escapeHtml(node.name || 'Unnamed')}${startEndIndicator}</h2>`;
 
           // Type badge
           html += `<div class="section">`;
@@ -926,9 +1229,495 @@
               .trim();
       }
 
+      // Search functionality
+      let searchResults = [];
+      let currentSearchTerm = '';
+
+      function performSearch(searchTerm) {
+          searchTerm = searchTerm.trim();
+          currentSearchTerm = searchTerm;
+          const clearBtn = document.getElementById('search-clear');
+          const resultsDiv = document.getElementById('search-results');
+
+          if (searchTerm.length === 0) {
+              clearBtn.style.display = 'none';
+              resultsDiv.textContent = '';
+              clearSearchHighlights();
+              searchResults = [];
+              return;
+          }
+
+          clearBtn.style.display = 'block';
+          searchResults = [];
+
+          // Search recursively through flow data
+          function searchInNode(node, path = []) {
+              const currentPath = [...path, node.name || node.id || 'Unknown'];
+              const searchLower = searchTerm.toLowerCase();
+
+              // Search in node name
+              if (node.name && node.name.toLowerCase().includes(searchLower)) {
+                  searchResults.push({
+                      type: 'name',
+                      nodeType: node.type,
+                      path: currentPath.join(' > '),
+                      value: node.name,
+                      node: node
+                  });
+              }
+
+              // Search in node summary
+              if (node.summary && node.summary.toLowerCase().includes(searchLower)) {
+                  searchResults.push({
+                      type: 'summary',
+                      nodeType: node.type,
+                      path: currentPath.join(' > '),
+                      value: node.summary,
+                      node: node
+                  });
+              }
+
+              // Search in details
+              if (node.details) {
+                  Object.entries(node.details).forEach(([key, value]) => {
+                      if (typeof value === 'string' && value.toLowerCase().includes(searchLower)) {
+                          searchResults.push({
+                              type: 'detail',
+                              nodeType: node.type,
+                              path: currentPath.join(' > '),
+                              key: key,
+                              value: value,
+                              node: node
+                          });
+                      } else if (key === 'scriptName' && value && value.toLowerCase().includes(searchLower)) {
+                          searchResults.push({
+                              type: 'script',
+                              nodeType: node.type,
+                              path: currentPath.join(' > '),
+                              value: value,
+                              node: node
+                          });
+                      } else if (key === 'scriptContent' && value && value.toLowerCase().includes(searchLower)) {
+                          // Search inside script content
+                          searchResults.push({
+                              type: 'scriptContent',
+                              nodeType: node.type,
+                              path: currentPath.join(' > '),
+                              value: `Found in script: ${value.substring(0, 100)}...`,
+                              node: node
+                          });
+                      } else if (key === 'functionNames' && Array.isArray(value)) {
+                          // Search in function names
+                          value.forEach(funcName => {
+                              if (funcName.toLowerCase().includes(searchLower)) {
+                                  searchResults.push({
+                                      type: 'function',
+                                      nodeType: node.type,
+                                      path: currentPath.join(' > '),
+                                      value: `Function: ${funcName}`,
+                                      node: node
+                                  });
+                              }
+                          });
+                      } else if (key === 'variables' && Array.isArray(value)) {
+                          // Search in variable names
+                          value.forEach(varName => {
+                              if (varName.toLowerCase().includes(searchLower)) {
+                                  searchResults.push({
+                                      type: 'variable',
+                                      nodeType: node.type,
+                                      path: currentPath.join(' > '),
+                                      value: `Variable: ${varName}`,
+                                      node: node
+                                  });
+                              }
+                          });
+                      }
+                  });
+              }
+
+              // Search in condition
+              if (node.condition && node.condition.toLowerCase().includes(searchLower)) {
+                  searchResults.push({
+                      type: 'condition',
+                      nodeType: node.type,
+                      path: currentPath.join(' > '),
+                      value: node.condition,
+                      node: node
+                  });
+              }
+
+              // Recursively search children
+              if (node.children && node.children.length > 0) {
+                  node.children.forEach(child => searchInNode(child, currentPath));
+              }
+          }
+
+          flowData.forEach(node => searchInNode(node));
+
+          // Display results
+          if (searchResults.length === 0) {
+              resultsDiv.textContent = `No results found for "${searchTerm}"`;
+              resultsDiv.style.color = '#fca5a5';
+          } else {
+              resultsDiv.textContent = `Found ${searchResults.length} match${searchResults.length > 1 ? 'es' : ''} (Press Enter to navigate)`;
+              resultsDiv.style.color = '#86efac';
+              highlightSearchResults();
+              expandSearchResults();
+          }
+      }
+
+      let currentSearchIndex = -1;
+
+      function handleSearchKeydown(event) {
+          if (event.key === 'Enter' && searchResults.length > 0) {
+              event.preventDefault();
+              navigateToNextSearchResult();
+          }
+      }
+
+      function navigateToNextSearchResult() {
+          if (searchResults.length === 0) return;
+
+          // Move to next result
+          currentSearchIndex = (currentSearchIndex + 1) % searchResults.length;
+          const result = searchResults[currentSearchIndex];
+
+          // Update results display
+          const resultsDiv = document.getElementById('search-results');
+          resultsDiv.textContent = `Match ${currentSearchIndex + 1} of ${searchResults.length} (Press Enter for next)`;
+
+          // Find and select the node in tree
+          selectNodeById(result.node.id);
+          showDetails(result.node);
+
+          // Scroll the selected node into view
+          setTimeout(() => {
+              const selectedNode = document.querySelector('.tree-node.selected');
+              if (selectedNode) {
+                  selectedNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+          }, 100);
+      }
+
+      function selectNodeById(nodeId) {
+          // Remove previous selection
+          document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
+
+          // Find and select the node
+          const allNodes = document.querySelectorAll('.tree-node');
+          for (let nodeEl of allNodes) {
+              // Check if this node represents our target
+              const nodeContent = nodeEl.querySelector('.node-content');
+              if (nodeContent) {
+                  // We need to match by checking the onclick handler or storing data attribute
+                  nodeEl.click();
+                  break;
+              }
+          }
+      }
+
+      function expandSearchResults() {
+          if (searchResults.length === 0) return;
+
+          // Expand all nodes that contain search results
+          searchResults.forEach(result => {
+              expandNodePath(result.node);
+          });
+      }
+
+      function expandNodePath(targetNode) {
+          // Find the path to this node and expand all parents
+          function findAndExpandPath(nodes, target, path = []) {
+              for (let node of nodes) {
+                  const currentPath = [...path, node];
+
+                  if (node.id === target.id) {
+                      // Found it! Expand all nodes in path
+                      currentPath.forEach(pathNode => {
+                          expandNodeInTree(pathNode.id);
+                      });
+                      return true;
+                  }
+
+                  if (node.children && node.children.length > 0) {
+                      if (findAndExpandPath(node.children, target, currentPath)) {
+                          return true;
+                      }
+                  }
+              }
+              return false;
+          }
+
+          findAndExpandPath(flowData, targetNode);
+      }
+
+      function expandNodeInTree(nodeId) {
+          // Find the children container for this node
+          const childrenContainer = document.getElementById(`children-${nodeId}`);
+          if (childrenContainer && childrenContainer.classList.contains('collapsed')) {
+              childrenContainer.style.maxHeight = childrenContainer.scrollHeight + 'px';
+              childrenContainer.classList.remove('collapsed');
+
+              // Find and update toggle
+              const nodeWrapper = childrenContainer.parentElement;
+              const toggle = nodeWrapper.querySelector('.expand-toggle');
+              if (toggle) {
+                  toggle.classList.remove('collapsed');
+              }
+
+              setTimeout(() => {
+                  childrenContainer.style.maxHeight = 'none';
+              }, 300);
+          }
+      }
+
+      function clearSearch() {
+          document.getElementById('search-input').value = '';
+          document.getElementById('search-clear').style.display = 'none';
+          document.getElementById('search-results').textContent = '';
+          clearSearchHighlights();
+          searchResults = [];
+          currentSearchTerm = '';
+          currentSearchIndex = -1;
+      }      function highlightSearchResults() {
+          clearSearchHighlights();
+
+          if (currentSearchTerm.length === 0) return;
+
+          // Highlight in tree
+          const treeNodes = document.querySelectorAll('.node-label');
+          treeNodes.forEach(labelEl => {
+              const text = labelEl.textContent;
+              if (text.toLowerCase().includes(currentSearchTerm.toLowerCase())) {
+                  const regex = new RegExp(`(${escapeRegex(currentSearchTerm)})`, 'gi');
+                  labelEl.innerHTML = text.replace(regex, '<span class="search-highlight">$1</span>');
+              }
+          });
+
+          // Highlight in details panel
+          const detailsDiv = document.getElementById('details');
+          if (detailsDiv && detailsDiv.textContent.toLowerCase().includes(currentSearchTerm.toLowerCase())) {
+              highlightInElement(detailsDiv);
+          }
+      }
+
+      function highlightInElement(element) {
+          if (!element || !currentSearchTerm) return;
+
+          const walker = document.createTreeWalker(
+              element,
+              NodeFilter.SHOW_TEXT,
+              null,
+              false
+          );
+
+          const nodesToReplace = [];
+          let node;
+
+          while (node = walker.nextNode()) {
+              if (node.nodeValue && node.nodeValue.toLowerCase().includes(currentSearchTerm.toLowerCase())) {
+                  nodesToReplace.push(node);
+              }
+          }
+
+          nodesToReplace.forEach(textNode => {
+              const parent = textNode.parentNode;
+              if (parent && parent.tagName !== 'SCRIPT' && parent.tagName !== 'STYLE') {
+                  const text = textNode.nodeValue;
+                  const regex = new RegExp(`(${escapeRegex(currentSearchTerm)})`, 'gi');
+                  const span = document.createElement('span');
+                  span.innerHTML = text.replace(regex, '<span class="search-highlight">$1</span>');
+                  parent.replaceChild(span, textNode);
+              }
+          });
+      }
+
+      function clearSearchHighlights() {
+          // Clear highlights in tree
+          document.querySelectorAll('.search-highlight').forEach(el => {
+              const text = el.textContent;
+              const parent = el.parentNode;
+              if (parent) {
+                  const textNode = document.createTextNode(text);
+                  parent.replaceChild(textNode, el);
+                  parent.normalize();
+              }
+          });
+
+          // Re-render tree labels properly
+          const treeNodes = document.querySelectorAll('.node-label');
+          treeNodes.forEach(labelEl => {
+              if (labelEl.querySelector('.search-highlight')) {
+                  labelEl.textContent = labelEl.textContent; // Reset to plain text
+              }
+          });
+      }
+
+      function escapeRegex(str) {
+          return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
+
+      // Group senders and receivers
+      function groupParticipants(flowData) {
+          const senders = [];
+          const receivers = [];
+          const processesByName = {};
+          const others = [];
+
+          function collectNodesByProcess(node, processName = null) {
+              // Determine the current process name
+              let currentProcessName = processName;
+              if (node.details && node.details.processName) {
+                  currentProcessName = node.details.processName;
+              }
+
+              // Categorize nodes
+              if (node.type === 'Sender') {
+                  senders.push(node);
+              } else if (node.type === 'Receiver') {
+                  receivers.push(node);
+              } else if (currentProcessName) {
+                  // This node belongs to a process
+                  if (!processesByName[currentProcessName]) {
+                      processesByName[currentProcessName] = {
+                          nodes: [],
+                          processName: currentProcessName
+                      };
+                  }
+                  processesByName[currentProcessName].nodes.push(node);
+              } else {
+                  // No process association
+                  others.push(node);
+              }
+
+              // Recursively process children
+              if (node.children && node.children.length > 0) {
+                  node.children.forEach(child => collectNodesByProcess(child, currentProcessName));
+              }
+          }
+
+          flowData.forEach(node => collectNodesByProcess(node));
+
+          return { senders, receivers, processesByName, others };
+      }
+
+      function createCollapsibleSection(title, icon, items, container) {
+          if (items.length === 0) return;
+
+          const section = document.createElement('div');
+          section.className = 'collapsible-section';
+
+          const header = document.createElement('div');
+          header.className = 'collapsible-header';
+          header.innerHTML = `
+              <span>${icon} ${title} (${items.length})</span>
+              <span class="icon">▼</span>
+          `;
+
+          const content = document.createElement('div');
+          content.className = 'collapsible-content';
+
+          const itemsContainer = document.createElement('div');
+          itemsContainer.className = 'collapsible-items';
+
+          items.forEach(item => {
+              const itemDiv = document.createElement('div');
+              itemDiv.className = 'collapsible-item';
+              const adapterInfo = item.details?.adapterType || 'Unknown Adapter';
+              itemDiv.innerHTML = `<strong>${item.name || 'Unnamed'}</strong><br><span style="font-size: 11px; opacity: 0.8;">${adapterInfo}</span>`;
+              itemDiv.onclick = () => {
+                  document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
+                  showDetails(item);
+              };
+              itemsContainer.appendChild(itemDiv);
+          });
+
+          content.appendChild(itemsContainer);
+          section.appendChild(header);
+          section.appendChild(content);
+          container.appendChild(section);
+
+          // Toggle functionality
+          header.onclick = () => {
+              const isCollapsed = content.classList.contains('collapsed');
+              if (isCollapsed) {
+                  content.classList.remove('collapsed');
+                  header.classList.remove('collapsed');
+              } else {
+                  content.classList.add('collapsed');
+                  header.classList.add('collapsed');
+              }
+          };
+      }
+
       // Initialize
       if (flowData && flowData.length > 0) {
-          renderTree(flowData, document.getElementById('tree'));
+          const treeContainer = document.getElementById('tree');
+
+          // Group participants
+          const { senders, receivers, processesByName, others } = groupParticipants(flowData);
+
+          // Create collapsible sections for senders and receivers
+          createCollapsibleSection('Senders', '📥', senders, treeContainer);
+          createCollapsibleSection('Receivers', '📤', receivers, treeContainer);
+
+          // Create collapsible sections for each process with all its nodes
+          Object.keys(processesByName).forEach(processName => {
+              const processInfo = processesByName[processName];
+              const nodes = processInfo.nodes;
+
+              if (nodes.length > 0) {
+                  const section = document.createElement('div');
+                  section.className = 'collapsible-section';
+
+                  const header = document.createElement('div');
+                  header.className = 'collapsible-header';
+
+                  // Count start and end events
+                  const startCount = nodes.filter(n => n.type === 'StartEvent').length;
+                  const endCount = nodes.filter(n => n.type === 'EndEvent').length;
+
+                  header.innerHTML = `
+                      <span>🔄 ${processName} <span style="font-size: 10px; opacity: 0.7;">(${startCount} start, ${endCount} end, ${nodes.length} total)</span></span>
+                      <span class="icon">▼</span>
+                  `;
+
+                  const content = document.createElement('div');
+                  content.className = 'collapsible-content';
+
+                  const itemsContainer = document.createElement('div');
+                  itemsContainer.className = 'collapsible-items';
+                  itemsContainer.style.padding = '0';
+
+                  // Use renderTree to display all nodes hierarchically
+                  renderTree(nodes, itemsContainer, 0);
+
+                  content.appendChild(itemsContainer);
+                  section.appendChild(header);
+                  section.appendChild(content);
+                  treeContainer.appendChild(section);
+
+                  // Toggle functionality
+                  header.onclick = () => {
+                      const isCollapsed = content.classList.contains('collapsed');
+                      if (isCollapsed) {
+                          content.classList.remove('collapsed');
+                          header.classList.remove('collapsed');
+                      } else {
+                          content.classList.add('collapsed');
+                          header.classList.add('collapsed');
+                      }
+                  };
+              }
+          });          // Render other nodes normally
+          if (others.length > 0) {
+              const othersContainer = document.createElement('div');
+              othersContainer.style.marginTop = '10px';
+              renderTree(others, othersContainer);
+              treeContainer.appendChild(othersContainer);
+          }
+
           buildFlowchart(); // Build the process flow diagram
       } else {
           document.getElementById('tree').innerHTML = '<div class="empty-state"><p>No flow data available</p></div>';
@@ -1028,6 +1817,55 @@
           nodesContainer.style.transformOrigin = 'top left';
           svgContainer.style.transform = `scale(${currentZoom})`;
           svgContainer.style.transformOrigin = 'top left';
+      }
+
+      // Expand/Collapse All functionality
+      function expandAll() {
+          // Expand collapsible sections
+          document.querySelectorAll('.collapsible-content').forEach(content => {
+              content.classList.remove('collapsed');
+          });
+          document.querySelectorAll('.collapsible-header').forEach(header => {
+              header.classList.remove('collapsed');
+          });
+
+          // Expand tree nodes
+          document.querySelectorAll('.tree-children').forEach(container => {
+              if (container.classList.contains('collapsed')) {
+                  container.style.maxHeight = container.scrollHeight + 'px';
+                  container.classList.remove('collapsed');
+                  setTimeout(() => {
+                      container.style.maxHeight = 'none';
+                  }, 300);
+              }
+          });
+          document.querySelectorAll('.expand-toggle').forEach(toggle => {
+              toggle.classList.remove('collapsed');
+          });
+      }
+
+      function collapseAll() {
+          // Collapse collapsible sections
+          document.querySelectorAll('.collapsible-content').forEach(content => {
+              content.classList.add('collapsed');
+          });
+          document.querySelectorAll('.collapsible-header').forEach(header => {
+              header.classList.add('collapsed');
+          });
+
+          // Collapse tree nodes
+          document.querySelectorAll('.tree-children').forEach(container => {
+              if (!container.classList.contains('collapsed')) {
+                  container.style.maxHeight = container.scrollHeight + 'px';
+                  setTimeout(() => {
+                      container.style.maxHeight = '0';
+                      container.classList.add('collapsed');
+                  }, 10);
+              }
+          });
+          document.querySelectorAll('.expand-toggle').forEach(toggle => {
+              toggle.classList.add('collapsed');
+          });
       }
     </script>
   </body>
