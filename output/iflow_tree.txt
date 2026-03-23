@@ -163,9 +163,9 @@ SAP CPI iFlow - Flow Tree Visualization
 │                       │                       │       │                                                       └── EndEvent: End 
 │                       │                       │       │                                                           📝 Flow end
 │                       │                       │       └── GroovyScript: sf Request [ProductBookingWS or Pro-ProductBookingWS]
-│                       │                       │           📝 Executes: Sets 1 properties, Modifies body, JSON processing, XML processing
+│                       │                       │           📝 Executes: Sets 2 properties, Modifies body, JSON processing, XML processing
 │                       │                       │           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'
-│                       │                       │              Writes: sfRequest
+│                       │                       │              Writes: growerStatus, sfRequest
 │                       │                       │           └── GroovyScript: sfRequest(2) 
 │                       │                       │               📝 Executes: Sets 1 properties, Modifies body, JSON processing, XML processing
 │                       │                       │                  Writes: sfRequest
@@ -309,9 +309,9 @@ SAP CPI iFlow - Flow Tree Visualization
 │                                               │       │                                                       └── EndEvent: End 
 │                                               │       │                                                           📝 Flow end
 │                                               │       └── GroovyScript: sf Request [ProductBookingWS or Pro-ProductBookingWS]
-│                                               │           📝 Executes: Sets 1 properties, Modifies body, JSON processing, XML processing
+│                                               │           📝 Executes: Sets 2 properties, Modifies body, JSON processing, XML processing
 │                                               │           🔀 Condition: ${property.businessProcess} = 'ProductBookingWS' or ${property.businessProcess} = 'Pro-ProductBookingWS'
-│                                               │              Writes: sfRequest
+│                                               │              Writes: growerStatus, sfRequest
 │                                               │           └── GroovyScript: sfRequest(2) 
 │                                               │               📝 Executes: Sets 1 properties, Modifies body, JSON processing, XML processing
 │                                               │                  Writes: sfRequest
@@ -1002,7 +1002,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │       └── GroovyScript: getStatus
 │           📝 Executes: Sets 1 properties, Reads 1 properties, Modifies body, JSON processing, XML processing
 │              Writes: validateGLN
-│              Reads: growerGLNSeperatedCommas
+│              Reads: newGrowerGLNSeperatedcommas
 │           └── EndEvent: End 
 │               📝 Flow end
 ├── SubProcess: Exception Subprocess 
@@ -1104,7 +1104,7 @@ SAP CPI iFlow - Flow Tree Visualization
 │   📝 Flow entry point
 │   └── GroovyScript: Groovy Script 1
 │       📝 Executes: Sets 1 properties, 2 external call(s)
-│          Writes: growerGLNSeperatedCommas
+│          Writes: growerGLNSeperatedCommasSF
 │       └── ContentModifier: set compoiste query
 │           📝 Modifies message: modifies body
 │              Properties: No properties set
@@ -1112,8 +1112,8 @@ SAP CPI iFlow - Flow Tree Visualization
 │           └── ServiceTask: Call RR Composite query
 │               📝 Performs ProcessCallElement operation
 │               └── GroovyScript: set Growers
-│                   📝 Executes: Sets 4 properties, Reads 3 properties, JSON processing, XML processing
-│                      Writes: growerAddress, growerGLN, newGrowerGLNSeperatedcommas
+│                   📝 Executes: Sets 9 properties, Reads 3 properties, JSON processing, XML processing
+│                      Writes: blockOrders, growerAddress, growerGLN
 │                      Reads: growerAddress, growerGLN, setErrorList
 │                   └── GroovyScript: checking condition
 │                       📝 Executes: Sets 1 properties, Reads 5 properties, JSON processing, XML processing
