@@ -1,1872 +1,1792 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SAP CPI iFlow Visualization</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font-family: "Inter", "Segoe UI", system-ui, sans-serif;
-        display: flex;
-        height: 100vh;
-        background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
-      }
-      #sidebar {
-        width: 400px;
-        min-width: 200px;
-        background: #ffffff;
-        border-right: 1px solid #cbd5e0;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
-      }
-      #resizer {
-        width: 5px;
-        cursor: col-resize;
-        background: transparent;
-        position: absolute;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        z-index: 10;
-      }
-      #resizer:hover {
-        background: #0078d4;
-      }
-      #content {
-        flex: 1;
-        padding: 20px;
-        overflow-y: auto;
-        display: flex;
-        gap: 20px;
-      }
-      #details-container {
-        flex: 1;
-        min-width: 0;
-      }
-      #flowchart-panel {
-        width: 450px;
-        min-width: 300px;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        display: flex;
-        flex-direction: column;
-        position: relative;
-      }
-      #flowchart-resizer {
-        width: 5px;
-        cursor: col-resize;
-        background: transparent;
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        z-index: 10;
-      }
-      #flowchart-resizer:hover {
-        background: #0078d4;
-      }
-      #flowchart-header {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-        color: white;
-        padding: 15px 20px;
-        border-radius: 12px 12px 0 0;
-        font-weight: 700;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      #flowchart-canvas {
-        flex: 1;
-        overflow: auto;
-        padding: 20px;
-        position: relative;
-        background: linear-gradient(
-            90deg,
-            rgba(102, 126, 234, 0.03) 1px,
-            transparent 1px
-          ),
-          linear-gradient(rgba(102, 126, 234, 0.03) 1px, transparent 1px);
-        background-size: 40px 40px;
-        background-position: -1px -1px;
-      }
-      #flowchart-controls {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        display: flex;
-        gap: 8px;
-        z-index: 1000;
-      }
-      .control-btn {
-        background: white;
-        border: 2px solid #14b8a6;
-        border-radius: 8px;
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 18px;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      }
-      .control-btn:hover {
-        background: #14b8a6;
-        color: white;
-        transform: scale(1.1);
-      }
-      .control-btn:active {
-        transform: scale(0.95);
-      }
-      #header {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-        color: white;
-        padding: 20px;
-        flex-shrink: 0;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      }
-      #header h1 {
-        font-size: 24px;
-        margin-bottom: 10px;
-        font-weight: 700;
-        letter-spacing: -0.5px;
-      }
-      #header p {
-        font-size: 14px;
-        opacity: 0.9;
-      }
-      #search-container {
-        margin-top: 15px;
-        position: relative;
-      }
-      #search-input {
-        width: 100%;
-        padding: 10px 40px 10px 15px;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
-        font-size: 13px;
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        outline: none;
-        transition: all 0.3s;
-        backdrop-filter: blur(10px);
-      }
-      #search-input::placeholder {
-        color: rgba(255, 255, 255, 0.6);
-      }
-      #search-input:focus {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: #14b8a6;
-        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
-      }
-      #search-clear {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: white;
-        font-size: 20px;
-        cursor: pointer;
-        opacity: 0.6;
-        transition: opacity 0.2s;
-        padding: 0;
-        width: 24px;
-        height: 24px;
-        display: none;
-        line-height: 1;
-      }
-      #search-clear:hover {
-        opacity: 1;
-      }
-      #search-results {
-        margin-top: 8px;
-        font-size: 12px;
-        opacity: 0.9;
-        min-height: 18px;
-        font-weight: 500;
-      }
-      .search-highlight {
-        background: #fbbf24;
-        color: #1e293b;
-        font-weight: 600;
-        padding: 2px 4px;
-        border-radius: 3px;
-        box-shadow: 0 1px 3px rgba(251, 191, 36, 0.3);
-      }
-      #tree-controls {
-        display: flex;
-        gap: 8px;
-        margin-top: 15px;
-      }
-      .tree-control-btn {
-        background: rgba(20, 184, 166, 0.2);
-        border: 1px solid rgba(20, 184, 166, 0.4);
-        color: white;
-        padding: 7px 14px;
-        border-radius: 6px;
-        font-size: 12px;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-weight: 600;
-        backdrop-filter: blur(10px);
-      }
-      .tree-control-btn:hover {
-        background: #14b8a6;
-        border-color: #14b8a6;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(20, 184, 166, 0.3);
-      }
-      .tree-control-btn:active {
-        transform: translateY(0);
-      }
-      #tree {
-        padding: 20px;
-        flex: 1;
-        overflow-y: auto;
-      }
-      .tree-node {
-        margin-bottom: 8px;
-        cursor: pointer;
-        user-select: none;
-        padding: 8px;
-        border-radius: 4px;
-        transition: background 0.2s;
-      }
-      .tree-node:hover {
-        background: #f1f5f9;
-      }
-      .tree-node.selected {
-        background: linear-gradient(90deg, #e0f2fe 0%, #f0f9ff 100%);
-        border-left: 3px solid #14b8a6;
-        box-shadow: 0 2px 4px rgba(20, 184, 166, 0.1);
-      }
-      .node-content {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .node-icon {
-        font-size: 18px;
-        width: 24px;
-        text-align: center;
-      }
-      .node-label {
-        font-size: 14px;
-        font-weight: 500;
-        flex: 1;
-      }
-      .node-type {
-        color: #666;
-        font-size: 11px;
-        background: #f0f0f0;
-        padding: 2px 8px;
-        border-radius: 12px;
-      }
-      .tree-children {
-        margin-left: 32px;
-        border-left: 2px solid #e0e0e0;
-        padding-left: 8px;
-        overflow: hidden;
-        transition: max-height 0.3s ease, opacity 0.3s ease;
-      }
-      .tree-children.collapsed {
-        max-height: 0 !important;
-        opacity: 0;
-        margin-bottom: 0;
-      }
-      .expand-toggle {
-        font-size: 14px;
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #e0f2fe;
-        border-radius: 4px;
-        transition: all 0.2s;
-        font-weight: bold;
-        color: #0891b2;
-        flex-shrink: 0;
-      }
-      .expand-toggle:hover {
-        background: #14b8a6;
-        color: white;
-        transform: scale(1.1);
-      }
-      .expand-toggle.collapsed {
-        transform: rotate(-90deg);
-      }
-      .expand-toggle.collapsed:hover {
-        transform: rotate(-90deg) scale(1.1);
-      }
-      .node-wrapper {
-        margin-bottom: 4px;
-      }
-      .children-count {
-        font-size: 10px;
-        background: #14b8a6;
-        color: white;
-        padding: 2px 6px;
-        border-radius: 10px;
-        font-weight: 600;
-        margin-left: 4px;
-      }
-      #details {
-        background: white;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-      }
-      #details h2 {
-        color: #1e293b;
-        margin-bottom: 20px;
-        font-size: 24px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 700;
-      }
-      #details .section {
-        margin-bottom: 25px;
-      }
-      #details .section h3 {
-        font-size: 16px;
-        color: #1e293b;
-        margin-bottom: 12px;
-        border-bottom: 2px solid #14b8a6;
-        padding-bottom: 8px;
-        font-weight: 600;
-      }
-      #details .section p {
-        color: #666;
-        line-height: 1.8;
-        font-size: 14px;
-      }
-      #details .detail-item {
-        background: #f8fafc;
-        padding: 12px 15px;
-        margin: 8px 0;
-        border-left: 3px solid #14b8a6;
-        border-radius: 6px;
-      }
-      #details .detail-label {
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 5px;
-        font-size: 13px;
-      }
-      #details .detail-value {
-        color: #666;
-        font-size: 13px;
-        word-break: break-word;
-      }
-      #details .detail-list {
-        list-style: none;
-        padding: 0;
-      }
-      #details .detail-list li {
-        padding: 8px 0;
-        border-bottom: 1px solid #eee;
-      }
-      #details .detail-list li:last-child {
-        border-bottom: none;
-      }
-      #details .detail-list code {
-        font-family: "Consolas", "Monaco", monospace;
-        font-size: 12px;
-        line-height: 1.6;
-        white-space: pre-wrap;
-        word-break: break-all;
-      }
-      .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: #999;
-      }
-      .empty-state h2 {
-        font-size: 20px;
-        margin-bottom: 10px;
-      }
-      .badge {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 600;
-        margin-right: 5px;
-      }
-      .badge-success {
-        background: #d4edda;
-        color: #155724;
-      }
-      .badge-info {
-        background: #d1ecf1;
-        color: #0c5460;
-      }
-      .badge-warning {
-        background: #fff3cd;
-        color: #856404;
-      }
-      .badge-danger {
-        background: #f8d7da;
-        color: #721c24;
-      }
-      .process-badge {
-        display: inline-block;
-        background: #e0f2fe;
-        color: #0891b2;
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 10px;
-        font-weight: 600;
-        margin-left: 5px;
-        border: 1px solid #7dd3fc;
-      }
-      .collapsible-section {
-        margin-bottom: 12px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        overflow: hidden;
-        background: white;
-      }
-      .collapsible-header {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        padding: 12px 16px;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 600;
-        color: #1e293b;
-        transition: all 0.3s;
-        user-select: none;
-      }
-      .collapsible-header:hover {
-        background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-        color: #0891b2;
-      }
-      .collapsible-header .icon {
-        font-size: 14px;
-        transition: transform 0.3s;
-        color: #0891b2;
-      }
-      .collapsible-header.collapsed .icon {
-        transform: rotate(-90deg);
-      }
-      .collapsible-content {
-        max-height: 500px;
-        overflow-y: auto;
-        transition: max-height 0.3s ease;
-        background: #f8fafc;
-      }
-      .collapsible-content.collapsed {
-        max-height: 0;
-      }
-      .collapsible-items {
-        padding: 10px;
-      }
-      .collapsible-item {
-        padding: 10px 12px;
-        margin: 6px 0;
-        background: white;
-        border-left: 3px solid #14b8a6;
-        border-radius: 6px;
-        font-size: 13px;
-        cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      }
-      .collapsible-item:hover {
-        background: #e0f2fe;
-        transform: translateX(4px);
-        box-shadow: 0 2px 6px rgba(20, 184, 166, 0.2);
-      }
-      .start-end-indicator {
-        font-size: 11px;
-        color: #475569;
-        font-weight: 600;
-        margin-left: 10px;
-        padding: 4px 8px;
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border-radius: 6px;
-        border: 1px solid #fbbf24;
-      }
 
-      /* Flowchart Styles */
-      .flow-node {
-        position: absolute;
-        background: white;
-        border: 2px solid #14b8a6;
-        border-radius: 12px;
-        padding: 16px 20px;
-        box-shadow: 0 3px 10px rgba(20, 184, 166, 0.2);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        min-width: 200px;
-        max-width: 280px;
-        font-size: 13px;
+<html class="h-full" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>iFlow Analyzer - Brilliant Light</title>
+    <!-- Tailwind CSS v3 CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        overflow: hidden;
       }
-      .flow-node:hover {
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 6px 20px rgba(20, 184, 166, 0.4);
-        border-color: #0891b2;
-        z-index: 100;
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
       }
-      .flow-node.main-process {
-        background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
-        color: white;
-        border: none;
-        font-weight: 600;
-        box-shadow: 0 6px 18px rgba(20, 184, 166, 0.4);
-        border: 3px solid rgba(255, 255, 255, 0.3);
+      .dot-grid {
+        background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+        background-size: 24px 24px;
       }
-      .flow-node.main-process .flow-node-id {
-        color: rgba(255, 255, 255, 0.8);
+      .sidebar-resizer {
+        cursor: col-resize;
+        transition: background-color 0.2s;
       }
-      .flow-node.subprocess {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-        border: 2px solid #b3c0ff;
-        box-shadow: 0 2px 8px rgba(163, 180, 234, 0.2);
+      .sidebar-resizer:hover {
+        background-color: #0070f3;
       }
-      .flow-node.highlighted {
-        border-color: #ff6b6b;
-        border-width: 3px;
-        box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
       }
-      .flow-node-title {
-        font-size: 13px;
-        font-weight: 600;
-        margin-bottom: 4px;
-        word-wrap: break-word;
-        line-height: 1.3;
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
       }
-      .flow-node-type {
-        font-size: 10px;
-        opacity: 0.7;
-        font-style: italic;
+      .panel-hidden {
+        display: none !important;
       }
-      .flow-node-id {
-        font-size: 9px;
-        opacity: 0.5;
-        margin-top: 2px;
-      }
-      .flow-connection {
-        position: absolute;
-        pointer-events: none;
-      }
-      .flow-arrow {
-        stroke: #5eead4;
-        stroke-width: 2.5;
-        fill: none;
-        marker-end: url(#arrowhead);
-        opacity: 0.6;
-        transition: all 0.3s ease;
-      }
-      .flow-arrow:hover {
-        stroke-width: 3;
-        opacity: 1;
-      }
-      .flow-arrow.highlighted {
-        stroke: #ff4757;
-        stroke-width: 4;
-        opacity: 1;
-        animation: dash 1.5s linear infinite;
-        filter: drop-shadow(0 0 4px rgba(255, 71, 87, 0.6));
-      }
-      @keyframes dash {
-        to {
-          stroke-dashoffset: -20;
+      @media (max-width: 1280px) {
+        #details-panel {
+          width: 20rem;
         }
       }
-      .legend {
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        padding: 10px;
-        font-size: 11px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      @media (max-width: 1024px) {
+        body {
+          overflow: auto;
+        }
+        #details-panel {
+          display: none;
+        }
       }
-      .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin: 5px 0;
-      }
-      .legend-box {
-        width: 20px;
-        height: 20px;
-        border-radius: 4px;
+      @media (max-width: 860px) {
+        #flow-explorer {
+          display: none;
+        }
       }
     </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              sap: {
+                blue: "#0070f3",
+                teal: "#008d91",
+                dark: "#1c2d3d",
+                light: "#f0f2f5",
+              },
+            },
+          },
+        },
+      };
+    </script>
   </head>
-  <body>
-    <div id="sidebar">
-      <div id="resizer"></div>
-      <div id="header">
-        <h1>🔄 SAP CPI iFlow Analyzer</h1>
-        <p id="metadata">Loading...</p>
-        <div id="search-container">
-          <input
-            type="text"
-            id="search-input"
-            placeholder="🔍 Search nodes, scripts, conditions..."
-            oninput="performSearch(this.value)"
-            onkeydown="handleSearchKeydown(event)"
-          />
-          <button id="search-clear" onclick="clearSearch()">×</button>
-          <div id="search-results"></div>
+  <body class="h-full bg-slate-50 text-slate-900 flex flex-col">
+    <!-- Top Navigation Bar -->
+    <header
+      class="flex-none h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between z-50"
+    >
+      <div class="flex items-center gap-4">
+        <div class="bg-sap-blue p-2 rounded-xl shadow-md shadow-blue-100">
+          <span
+            class="material-symbols-outlined text-white text-xl leading-none"
+            >bolt</span
+          >
         </div>
-        <div id="tree-controls">
-          <button class="tree-control-btn" onclick="expandAll()">
-            ▼ Expand All
-          </button>
-          <button class="tree-control-btn" onclick="collapseAll()">
-            ▶ Collapse All
-          </button>
+        <div>
+          <h1
+            class="text-base font-bold tracking-tight text-slate-800 leading-none"
+          >
+            iFlow Analyzer
+          </h1>
+          <p
+            class="text-[10px] font-medium uppercase tracking-wider text-slate-400 mt-0.5"
+          >
+            SAP Integration Suite
+          </p>
         </div>
       </div>
-      <div id="tree"></div>
-    </div>
-    <div id="content">
-      <div id="details-container">
-        <div id="details">
-          <div class="empty-state">
-            <h2>👈 Select a node from the tree</h2>
-            <p>Click on any node in the left panel to view its details</p>
+      <div class="flex items-center gap-4">
+        <button
+          id="toggle-explorer"
+          class="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors"
+          title="Toggle Explorer"
+        >
+          <span class="material-symbols-outlined text-lg">left_panel_open</span>
+        </button>
+        <button
+          id="toggle-details"
+          class="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors"
+          title="Toggle Details"
+        >
+          <span class="material-symbols-outlined text-lg"
+            >right_panel_open</span
+          >
+        </button>
+        <button
+          class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors"
+        >
+          <span class="material-symbols-outlined text-lg">save</span>
+          Save
+        </button>
+        <div class="h-8 w-px bg-slate-200 mx-2"></div>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <p class="text-xs font-bold text-slate-700 leading-none">
+              Developer Admin
+            </p>
+            <p class="text-[10px] text-slate-400">Project Workspace</p>
+          </div>
+          <div
+            class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center"
+          >
+            <span class="material-symbols-outlined text-slate-400">person</span>
           </div>
         </div>
       </div>
-      <div id="flowchart-panel">
-        <div id="flowchart-resizer"></div>
-        <div id="flowchart-header">📊 Process Flow Diagram</div>
-        <div id="flowchart-canvas">
-          <div id="flowchart-controls">
-            <div class="control-btn" onclick="zoomIn()" title="Zoom In">+</div>
-            <div class="control-btn" onclick="zoomOut()" title="Zoom Out">
-              −
-            </div>
-            <div class="control-btn" onclick="resetZoom()" title="Reset View">
-              ⟲
+    </header>
+    <!-- Main Content Area -->
+    <div class="flex-1 flex overflow-hidden">
+      <!-- Sidebar (Flow Explorer) -->
+      <aside
+        class="w-72 bg-white border-r border-slate-200 flex flex-col flex-none relative"
+        id="flow-explorer"
+      >
+        <div class="p-4 border-b border-slate-100">
+          <div class="relative">
+            <input
+              id="component-search"
+              class="w-full bg-slate-100/50 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-sap-blue/20 transition-all placeholder:text-slate-400"
+              placeholder="Search components..."
+              type="text"
+            />
+            <span
+              class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"
+              >search</span
+            >
+          </div>
+        </div>
+        <div
+          class="flex-1 overflow-y-auto p-4 space-y-6"
+          id="flow-explorer-content"
+        >
+          <div>
+            <p
+              class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-3"
+            >
+              Flow Explorer
+            </p>
+            <div class="space-y-1">
+              <div
+                class="flex items-center gap-3 p-2.5 bg-blue-50/50 text-sap-blue rounded-xl font-semibold text-sm"
+              >
+                <span class="material-symbols-outlined text-lg"
+                  >inventory_2</span
+                >
+                Main Flow
+              </div>
+              <div class="ml-4 pl-4 border-l border-slate-100 space-y-1 mt-1">
+                <button
+                  class="w-full text-left p-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2 group"
+                >
+                  <span
+                    class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-sap-blue transition-colors"
+                  ></span>
+                  HTTPS_Sender_1
+                </button>
+                <button
+                  class="w-full text-left p-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2 group"
+                >
+                  <span
+                    class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-sap-blue transition-colors"
+                  ></span>
+                  PreProcess_Script
+                </button>
+                <button
+                  class="w-full text-left p-2 text-sm font-semibold text-sap-blue bg-blue-50/30 rounded-lg flex items-center gap-2"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-sap-blue"></span>
+                  GetUserData_SFSF
+                </button>
+              </div>
             </div>
           </div>
-          <svg id="flowchart-svg" width="100%" height="100%">
+          <div>
+            <p
+              class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-3"
+            >
+              Recent Items
+            </p>
+            <div class="space-y-1">
+              <div
+                class="p-2.5 flex items-center gap-3 text-sm text-slate-600 hover:bg-slate-50 rounded-xl cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-slate-400 text-lg"
+                  >schema</span
+                >
+                CustomerSync_v2
+              </div>
+              <div
+                class="p-2.5 flex items-center gap-3 text-sm text-slate-600 hover:bg-slate-50 rounded-xl cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-slate-400 text-lg"
+                  >description</span
+                >
+                Auth_Policy.xml
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Resize handle -->
+        <div
+          class="sidebar-resizer absolute top-0 right-0 bottom-0 w-1 z-10"
+        ></div>
+      </aside>
+      <!-- Process Canvas -->
+      <main class="flex-1 relative bg-slate-50 flex flex-col overflow-hidden">
+        <!-- Canvas Toolbar -->
+        <div
+          class="absolute top-6 left-1/2 -translate-x-1/2 glass-effect p-1.5 rounded-2xl flex items-center gap-1 shadow-lg z-20"
+        >
+          <button
+            class="p-2 hover:bg-white rounded-xl text-slate-600 transition-colors"
+            title="Select"
+          >
+            <span class="material-symbols-outlined">near_me</span>
+          </button>
+          <button
+            class="p-2 hover:bg-white rounded-xl text-slate-600 transition-colors"
+            title="Add Node"
+          >
+            <span class="material-symbols-outlined">add_box</span>
+          </button>
+          <div class="w-px h-6 bg-slate-200 mx-1"></div>
+          <button
+            class="p-2 hover:bg-white rounded-xl text-slate-600 transition-colors"
+            title="Pan"
+          >
+            <span class="material-symbols-outlined">pan_tool</span>
+          </button>
+          <button
+            class="p-2 hover:bg-white rounded-xl text-slate-600 transition-colors"
+            title="Zoom Out"
+            id="zoom-out-btn"
+          >
+            <span class="material-symbols-outlined">remove</span>
+          </button>
+          <span
+            class="text-xs font-bold text-slate-500 px-2"
+            id="canvas-zoom-label"
+            >100%</span
+          >
+          <button
+            class="p-2 hover:bg-white rounded-xl text-slate-600 transition-colors"
+            title="Zoom In"
+            id="zoom-in-btn"
+          >
+            <span class="material-symbols-outlined">add</span>
+          </button>
+          <button
+            class="p-2 hover:bg-white rounded-xl text-slate-600 transition-colors"
+            title="Reset Zoom"
+            id="zoom-reset-btn"
+          >
+            <span class="material-symbols-outlined">restart_alt</span>
+          </button>
+          <div class="w-px h-6 bg-slate-200 mx-1"></div>
+          <button
+            class="p-2 hover:bg-white rounded-xl text-slate-600 transition-colors"
+            title="Focus connected nodes"
+            id="focus-mode-btn"
+          >
+            <span class="material-symbols-outlined">center_focus_strong</span>
+          </button>
+          <button
+            class="px-2 py-1 text-xs bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50"
+            title="Toggle high-level or detailed view"
+            id="canvas-view-btn"
+          >
+            Show Details
+          </button>
+          <select
+            id="subflow-filter"
+            class="text-xs bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-600"
+            title="Filter by subflow"
+          >
+            <option value="all">All Subflows</option>
+          </select>
+        </div>
+        <!-- Canvas Viewport -->
+        <div
+          class="flex-1 dot-grid overflow-auto hide-scrollbar p-32 relative"
+          id="canvas-viewport"
+        >
+          <!-- Mock SVG Connections -->
+          <svg
+            class="absolute inset-0 w-[2000px] h-[2000px] pointer-events-none"
+          >
             <defs>
               <marker
                 id="arrowhead"
-                markerWidth="12"
-                markerHeight="12"
-                refX="10"
-                refY="4"
+                markerheight="7"
+                markerwidth="10"
                 orient="auto"
+                refx="9"
+                refy="3.5"
               >
-                <polygon points="0 0, 12 4, 0 8" fill="#8b9cec" />
-              </marker>
-              <marker
-                id="arrowhead-highlight"
-                markerWidth="12"
-                markerHeight="12"
-                refX="10"
-                refY="4"
-                orient="auto"
-              >
-                <polygon points="0 0, 12 4, 0 8" fill="#ff4757" />
+                <polygon fill="#cbd5e1" points="0 0, 10 3.5, 0 7"></polygon>
               </marker>
             </defs>
+            <path
+              d="M 360 250 L 560 250"
+              fill="none"
+              marker-end="url(#arrowhead)"
+              stroke="#cbd5e1"
+              stroke-width="2"
+            ></path>
+            <path
+              d="M 760 250 L 960 250"
+              fill="none"
+              marker-end="url(#arrowhead)"
+              stroke="#cbd5e1"
+              stroke-width="2"
+            ></path>
           </svg>
-          <div id="flowchart-nodes"></div>
-          <div class="legend">
-            <div class="legend-item">
+          <div class="relative w-[2000px] h-[2000px]">
+            <!-- HTTPS Sender Node -->
+            <div
+              class="absolute left-200 top-200 translate-x-[150px] translate-y-[50px]"
+            >
               <div
-                class="legend-box"
-                style="
-                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                "
-              ></div>
-              <span>Main Process</span>
+                class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 w-44 flex flex-col items-center gap-2 hover:border-sap-blue transition-all cursor-pointer hover:shadow-lg hover:-translate-y-1 group"
+              >
+                <div class="bg-blue-50 p-3 rounded-xl text-sap-blue">
+                  <span class="material-symbols-outlined">swap_horiz</span>
+                </div>
+                <div class="text-center">
+                  <p class="text-xs font-bold text-slate-700">HTTPS Sender</p>
+                  <p class="text-[10px] text-slate-400">Entry Point</p>
+                </div>
+              </div>
             </div>
-            <div class="legend-item">
+            <!-- Script Node -->
+            <div
+              class="absolute left-400 top-200 translate-x-[350px] translate-y-[50px]"
+            >
               <div
-                class="legend-box"
-                style="background: #f8f9ff; border: 2px solid #a8b4ea"
-              ></div>
-              <span>Subprocess</span>
+                class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 w-44 flex flex-col items-center gap-2 hover:border-sap-teal transition-all cursor-pointer hover:shadow-lg hover:-translate-y-1 group"
+              >
+                <div class="bg-teal-50 p-3 rounded-xl text-sap-teal">
+                  <span class="material-symbols-outlined">description</span>
+                </div>
+                <div class="text-center">
+                  <p class="text-xs font-bold text-slate-700">Groovy Script</p>
+                  <p class="text-[10px] text-slate-400">Pre-Processing</p>
+                </div>
+              </div>
             </div>
-            <div class="legend-item">
-              <div style="width: 30px; height: 2px; background: #667eea"></div>
-              <span>Process Call</span>
+            <!-- Active Node: Request Reply -->
+            <div
+              class="absolute left-600 top-200 translate-x-[550px] translate-y-[50px]"
+            >
+              <div
+                class="bg-sap-blue p-4 rounded-2xl shadow-xl shadow-blue-200 w-48 flex flex-col items-center gap-2 transition-all cursor-pointer hover:scale-105 ring-4 ring-blue-50"
+              >
+                <div class="bg-white/20 p-3 rounded-xl text-white">
+                  <span class="material-symbols-outlined">sync_alt</span>
+                </div>
+                <div class="text-center">
+                  <p class="text-xs font-bold text-white">Request Reply</p>
+                  <p class="text-[10px] text-white/70 uppercase font-medium">
+                    OData Call
+                  </p>
+                </div>
+                <div
+                  class="absolute -top-2 -right-2 w-6 h-6 bg-green-500 border-4 border-white rounded-full"
+                ></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+        <!-- Canvas Bottom Bar -->
+        <div
+          class="h-10 border-t border-slate-200 bg-white/80 backdrop-blur px-4 flex items-center justify-between text-[10px] text-slate-500 font-medium"
+        >
+          <div class="flex items-center gap-4">
+            <span id="iflow-meta-counts"
+              >Processes: 0, Participants: 0, Message Flows: 0</span
+            >
+            <span class="flex items-center gap-1"
+              ><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Live
+              Status</span
+            >
+          </div>
+          <div>v1.2.4-stable</div>
+        </div>
+      </main>
+      <!-- Details Panel -->
+      <aside
+        id="details-panel"
+        class="w-96 bg-white border-l border-slate-200 flex flex-col flex-none shadow-[-4px_0_15px_-10px_rgba(0,0,0,0.05)]"
+      >
+        <div
+          class="p-6 border-b border-slate-100 flex items-center justify-between"
+        >
+          <h2 class="text-lg font-bold text-slate-800">Node Details</h2>
+          <button
+            class="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-6 space-y-8">
+          <!-- Header Info -->
+          <div>
+            <span
+              id="detail-type-badge"
+              class="inline-block px-2.5 py-0.5 bg-blue-50 text-sap-blue rounded-full text-[10px] font-bold uppercase tracking-wider mb-2"
+              >Request Reply</span
+            >
+            <h3
+              class="text-2xl font-bold text-slate-900 leading-tight"
+              id="detail-node-name"
+            >
+              GetUserData_SFSF
+            </h3>
+            <p class="text-xs text-slate-500 mt-1" id="detail-node-summary"></p>
+          </div>
+          <!-- Section: Config -->
+          <div>
+            <p
+              class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4"
+            >
+              Configuration
+            </p>
+            <div class="space-y-3">
+              <div
+                class="bg-slate-50/80 p-4 rounded-2xl border border-slate-100/50"
+              >
+                <p
+                  class="text-[10px] font-medium text-slate-400 uppercase mb-1"
+                >
+                  Adapter Type
+                </p>
+                <p class="text-sm font-semibold text-slate-700">
+                  <span id="detail-adapter">SuccessFactors OData V2</span>
+                </p>
+              </div>
+              <div
+                class="bg-slate-50/80 p-4 rounded-2xl border border-slate-100/50"
+              >
+                <p
+                  class="text-[10px] font-medium text-slate-400 uppercase mb-1"
+                >
+                  Endpoint Address
+                </p>
+                <p
+                  id="detail-endpoint"
+                  class="text-xs font-mono text-sap-blue break-all leading-relaxed"
+                >
+                  https://api.successfactors.com/odata/v2/User
+                </p>
+              </div>
+            </div>
+          </div>
+          <!-- Section: Parameters -->
+          <div>
+            <p
+              class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4"
+            >
+              Parameters
+            </p>
+            <div class="divide-y divide-slate-100" id="detail-params">
+              <div class="py-3 flex justify-between items-center">
+                <span class="text-sm text-slate-500">Operation</span>
+                <span class="text-sm font-semibold text-slate-800"
+                  >Query (GET)</span
+                >
+              </div>
+              <div class="py-3 flex justify-between items-center">
+                <span class="text-sm text-slate-500">Authentication</span>
+                <span
+                  class="px-2 py-0.5 bg-green-50 text-green-600 rounded-md text-[10px] font-bold border border-green-100"
+                  >OAuth2SAML</span
+                >
+              </div>
+              <div class="py-3 flex justify-between items-center">
+                <span class="text-sm text-slate-500">Page Size</span>
+                <span class="text-sm font-semibold text-slate-800"
+                  >200 items</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- Section: Associated Script -->
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <p
+                class="text-[10px] font-bold text-slate-400 uppercase tracking-widest"
+              >
+                Post-Process Script
+              </p>
+              <button
+                class="text-[10px] font-bold text-sap-blue hover:underline"
+              >
+                Open Editor
+              </button>
+            </div>
+            <div class="bg-slate-900 rounded-2xl p-4 overflow-hidden">
+              <pre
+                class="text-[11px] text-blue-300 font-mono leading-relaxed overflow-x-auto hide-scrollbar"
+              ><code id="detail-script-code">import com.sap.gateway.ip.core.customdev.util.Message;
+def Message processData(Message message) {
+  def body = message.getBody(java.lang.String);
+  message.setBody(body.toUpperCase());
+  return message;
+}</code></pre>
+            </div>
+          </div>
+        </div>
+        <!-- Panel Footer Actions -->
+        <div class="p-6 bg-slate-50/50 border-t border-slate-100 flex gap-3">
+          <button
+            class="flex-1 bg-sap-blue hover:bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-200 transition-all active:scale-95"
+          >
+            Edit Component
+          </button>
+          <button
+            class="p-3 bg-white text-slate-600 rounded-xl border border-slate-200 hover:bg-slate-50 transition-all active:scale-95"
+          >
+            <span class="material-symbols-outlined text-lg">share</span>
+          </button>
+        </div>
+      </aside>
     </div>
-
     <script>
-      const flowData = {{FLOW_DATA}};
-      const metadata = {{METADATA}};
+      // Simple Sidebar Resizer (Desktop only)
+      const sidebar = document.getElementById("flow-explorer");
+      const resizer = sidebar.querySelector(".sidebar-resizer");
 
-      console.log('Flow Data:', flowData);
-      console.log('Metadata:', metadata);
+      resizer.addEventListener("mousedown", initResize);
 
-      // Display metadata
-      document.getElementById('metadata').textContent =
-          `File: ${metadata.filename} | Processes: ${metadata.processes} | Participants: ${metadata.participants}`;
-
-      // Global variables for flowchart
-      let processCallMap = new Map(); // Map of process -> called subprocesses
-      let allProcesses = new Set(); // All unique processes
-      let currentHighlightedPath = [];
-
-      // Extract process call relationships
-      function extractProcessCalls(nodes, parentProcess = null) {
-          nodes.forEach(node => {
-              // Track processes
-              if (node.details && node.details.processName) {
-                  allProcesses.add(node.details.processName);
-
-                  // Store process ID to name mapping
-                  if (node.details.processId && node.details.processName) {
-                      if (!window.processIdToName) window.processIdToName = new Map();
-                      window.processIdToName.set(node.details.processId, node.details.processName);
-                  }
-              }
-
-              // Track CallActivity relationships
-              if (node.type === 'CallActivity' && node.details && node.details.subflowName) {
-                  const callingProcess = parentProcess || 'Main Flow';
-                  const calledProcess = node.details.subflowName;
-
-                  if (!processCallMap.has(callingProcess)) {
-                      processCallMap.set(callingProcess, []);
-                  }
-                  processCallMap.get(callingProcess).push({
-                      name: node.name,
-                      subflowId: calledProcess,
-                      nodeId: node.id
-                  });
-
-                  allProcesses.add(calledProcess);
-              }
-
-              // Recursively process children
-              if (node.children && node.children.length > 0) {
-                  const nextParent = (node.details && node.details.processName) ? node.details.processName : parentProcess;
-                  extractProcessCalls(node.children, nextParent);
-              }
-          });
+      function initResize(e) {
+        window.addEventListener("mousemove", resize);
+        window.addEventListener("mouseup", stopResize);
+        document.body.style.cursor = "col-resize";
       }
 
-      // Build flowchart visualization
-      function buildFlowchart() {
-          extractProcessCalls(flowData);
+      function resize(e) {
+        const width = e.clientX;
+        if (width > 200 && width < 500) {
+          sidebar.style.width = width + "px";
+        }
+      }
 
-          console.log('Process Call Map:', processCallMap);
-          console.log('All Processes:', allProcesses);
+      function stopResize() {
+        window.removeEventListener("mousemove", resize);
+        window.removeEventListener("mouseup", stopResize);
+        document.body.style.cursor = "default";
+      }
 
-          const canvas = document.getElementById('flowchart-nodes');
-          const svg = document.getElementById('flowchart-svg');
-          canvas.innerHTML = '';
-          svg.innerHTML = svg.innerHTML; // Keep defs
+      // Handle Canvas Dragging
+      const container = document.getElementById("canvas-viewport");
+      let isDragging = false;
+      let startX, startY, scrollLeft, scrollTop;
 
-          if (processCallMap.size === 0) {
-              canvas.innerHTML = `
-                  <div style="padding: 40px; text-align: center; color: #999;">
-                      <div style="font-size: 48px; margin-bottom: 20px;">📊</div>
-                      <h3 style="color: #666; margin-bottom: 10px;">No Process Calls Detected</h3>
-                      <p style="font-size: 14px;">This iFlow doesn't contain any CallActivity elements that reference subprocesses.</p>
-                      <p style="font-size: 12px; margin-top: 10px; color: #999;">Process calls appear when one flow calls another via CallActivity.</p>
-                  </div>
-              `;
-              return;
+      container.addEventListener("mousedown", (e) => {
+        if (e.target.closest(".canvas-node")) return;
+        isDragging = true;
+        container.style.cursor = "grabbing";
+        startX = e.pageX - container.offsetLeft;
+        startY = e.pageY - container.offsetTop;
+        scrollLeft = container.scrollLeft;
+        scrollTop = container.scrollTop;
+      });
+
+      window.addEventListener("mouseup", () => {
+        isDragging = false;
+        container.style.cursor = "default";
+      });
+
+      container.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - container.offsetLeft;
+        const y = e.pageY - container.offsetTop;
+        const walkX = x - startX;
+        const walkY = y - startY;
+        container.scrollLeft = scrollLeft - walkX;
+        container.scrollTop = scrollTop - walkY;
+      });
+    </script>
+    <script>
+      window.addEventListener("load", () => {
+        const payload = window.IFLOW_ANALYZER_DATA || {};
+        const metadata = payload.metadata || {};
+        const complexity = payload.complexity || {};
+        const roots = Array.isArray(payload.flow_tree) ? payload.flow_tree : [];
+        const processList = Array.isArray(payload.processes)
+          ? payload.processes
+          : [];
+        const processById = new Map(
+          processList.map((p) => [p.id, p.name || p.id || "Unnamed Process"])
+        );
+        const elementToProcess = new Map();
+        processList.forEach((p) => {
+          (p.elements || []).forEach((el) => {
+            if (el && el.id) {
+              elementToProcess.set(el.id, p.id);
+            }
+          });
+        });
+
+        const countsEl = document.getElementById("iflow-meta-counts");
+        if (countsEl) {
+          const processes = metadata.processes ?? metadata.process_count ?? 0;
+          const participants =
+            metadata.participants ?? metadata.participant_count ?? 0;
+          const messageFlows =
+            metadata.message_flows ?? metadata.message_flow_count ?? 0;
+          countsEl.textContent = `Processes: ${processes}, Participants: ${participants}, Message Flows: ${messageFlows}`;
+        }
+
+        const versionEl = document.querySelector(
+          ".h-10.border-t.border-slate-200 > div:last-child"
+        );
+        if (versionEl && complexity.label && complexity.score !== undefined) {
+          versionEl.textContent = `${complexity.label} (${complexity.score}/100)`;
+        }
+
+        const explorerContent = document.getElementById(
+          "flow-explorer-content"
+        );
+        const viewport = document.getElementById("canvas-viewport");
+        const searchInput = document.getElementById("component-search");
+        const explorerPanel = document.getElementById("flow-explorer");
+        const detailsPanel = document.getElementById("details-panel");
+        const toggleExplorerBtn = document.getElementById("toggle-explorer");
+        const toggleDetailsBtn = document.getElementById("toggle-details");
+        const zoomOutBtn = document.getElementById("zoom-out-btn");
+        const zoomInBtn = document.getElementById("zoom-in-btn");
+        const zoomResetBtn = document.getElementById("zoom-reset-btn");
+        const zoomLabel = document.getElementById("canvas-zoom-label");
+        const focusModeBtn = document.getElementById("focus-mode-btn");
+        const canvasViewBtn = document.getElementById("canvas-view-btn");
+        const subflowFilter = document.getElementById("subflow-filter");
+
+        const detailTypeBadge = document.getElementById("detail-type-badge");
+        const detailNodeName = document.getElementById("detail-node-name");
+        const detailNodeSummary = document.getElementById(
+          "detail-node-summary"
+        );
+        const detailAdapter = document.getElementById("detail-adapter");
+        const detailEndpoint = document.getElementById("detail-endpoint");
+        const detailParams = document.getElementById("detail-params");
+        const detailScriptCode = document.getElementById("detail-script-code");
+
+        function escapeHtml(value) {
+          return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+        }
+
+        function flattenTree(nodes, parentId = null, depth = 0, list = []) {
+          for (const node of nodes) {
+            const children = Array.isArray(node.children) ? node.children : [];
+            const detectedSubflow =
+              elementToProcess.get(node.id) ||
+              node.details?.processId ||
+              node.details?.processRef ||
+              node.details?.localProcessId ||
+              node.details?.subflowId ||
+              "main";
+            list.push({
+              id: node.id,
+              name: node.name || node.id || "Unnamed",
+              type: node.type || "Component",
+              summary: node.summary || "",
+              details: node.details || {},
+              parentId,
+              depth,
+              subflowKey: detectedSubflow,
+            });
+            flattenTree(children, node.id, depth + 1, list);
           }
+          return list;
+        }
 
-          // Layout configuration - More spacing for clarity
-          const nodeWidth = 220;
-          const nodeHeight = 80;
-          const horizontalGap = 180;
-          const verticalGap = 120;
-          const startX = 30;
-          const startY = 40;
-
-          // Create hierarchical layout
-          let processLevels = new Map();
-          let processPositions = new Map();
-          let level = 0;
-
-          // Level 0: Main processes (those that call others)
-          const mainProcesses = Array.from(processCallMap.keys());
-          mainProcesses.forEach((proc, idx) => {
-              processLevels.set(proc, 0);
-              processPositions.set(proc, {
-                  x: startX,
-                  y: startY + idx * (nodeHeight + verticalGap),
-                  level: 0
-              });
-          });
-
-          // Level 1+: Called processes with better distribution
-          let subprocessY = startY;
-          let maxX = startX;
-          const subprocesses = new Set();
-
-          // Collect all unique subprocesses
-          processCallMap.forEach((calls) => {
-              calls.forEach((call) => {
-                  subprocesses.add(call.subflowId);
-              });
-          });
-
-          // Position subprocesses vertically with even spacing
-          Array.from(subprocesses).forEach((subprocId, idx) => {
-              const x = startX + nodeWidth + horizontalGap;
-              const y = subprocessY + (idx * (nodeHeight + verticalGap));
-
-              processPositions.set(subprocId, {
-                  x: x,
-                  y: y,
-                  level: 1
-              });
-
-              if (x > maxX) maxX = x;
-          });          // Set SVG size
-          const totalHeight = Math.max(...Array.from(processPositions.values()).map(p => p.y)) + nodeHeight + 100;
-          const totalWidth = maxX + nodeWidth + 100;
-          svg.setAttribute('height', totalHeight);
-          svg.setAttribute('width', totalWidth);
-
-          // Draw connections first (so they appear behind nodes)
-          const lines = [];
-          processCallMap.forEach((calls, mainProc) => {
-              const fromPos = processPositions.get(mainProc);
-              if (!fromPos) return;
-
-              calls.forEach(call => {
-                  const toPos = processPositions.get(call.subflowId);
-                  if (!toPos) return;
-
-                  const x1 = fromPos.x + nodeWidth;
-                  const y1 = fromPos.y + nodeHeight / 2;
-                  const x2 = toPos.x;
-                  const y2 = toPos.y + nodeHeight / 2;
-
-                  // Create smooth curved path with better control points
-                  const controlOffset = horizontalGap * 0.4;
-                  const path = `M ${x1} ${y1} C ${x1 + controlOffset} ${y1}, ${x2 - controlOffset} ${y2}, ${x2} ${y2}`;
-
-                  const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                  pathElement.setAttribute('d', path);
-                  pathElement.setAttribute('class', 'flow-arrow');
-                  pathElement.setAttribute('data-from', mainProc);
-                  pathElement.setAttribute('data-to', call.subflowId);
-                  pathElement.setAttribute('stroke-dasharray', '8,4');
-                  svg.appendChild(pathElement);
-
-                  lines.push({
-                      element: pathElement,
-                      from: mainProc,
-                      to: call.subflowId
-                  });
-              });
-          });
-
-          // Draw nodes
-          processPositions.forEach((pos, procId) => {
-              const isMainProcess = processCallMap.has(procId);
-              const node = document.createElement('div');
-              node.className = 'flow-node ' + (isMainProcess ? 'main-process' : 'subprocess');
-              node.style.left = pos.x + 'px';
-              node.style.top = pos.y + 'px';
-              node.style.width = nodeWidth + 'px';
-              node.setAttribute('data-process-id', procId);
-
-              // Try to get human-readable name
-              let displayName = procId;
-              if (window.processIdToName && window.processIdToName.has(procId)) {
-                  displayName = window.processIdToName.get(procId);
-              } else {
-                  displayName = procId.replace('Process_', 'P-');
-              }
-
-              // Tooltip with full ID
-              node.title = `Process ID: ${procId}\nClick to highlight connections`;
-
-              // Count incoming and outgoing connections
-              let outgoingCount = processCallMap.has(procId) ? processCallMap.get(procId).length : 0;
-              let incomingCount = 0;
-              processCallMap.forEach((calls) => {
-                  if (calls.find(c => c.subflowId === procId)) incomingCount++;
-              });
-
-              const connectionInfo = outgoingCount > 0 ? `→ Calls ${outgoingCount}` :
-                                    incomingCount > 0 ? `← Called by ${incomingCount}` : '';
-
-              node.innerHTML = `
-                  <div class="flow-node-title">${escapeHtml(displayName)}</div>
-                  <div class="flow-node-type">${isMainProcess ? '🔄 Main Process' : '📞 Subprocess'}</div>
-                  ${connectionInfo ? `<div style="font-size: 10px; opacity: 0.7; margin-top: 4px;">${connectionInfo}</div>` : ''}
-              `;
-
-              node.onclick = () => highlightProcessFlow(procId);
-              canvas.appendChild(node);
-          });
-
-          // Store lines for highlighting
-          window.flowChartLines = lines;
-      }
-
-      // Highlight process flow
-      function highlightProcessFlow(processId) {
-          // Clear previous highlights
-          document.querySelectorAll('.flow-node').forEach(n => n.classList.remove('highlighted'));
-          document.querySelectorAll('.flow-arrow').forEach(a => {
-              a.classList.remove('highlighted');
-              a.setAttribute('marker-end', 'url(#arrowhead)');
-          });
-
-          // Highlight selected node
-          const selectedNode = document.querySelector(`[data-process-id="${processId}"]`);
-          if (selectedNode) {
-              selectedNode.classList.add('highlighted');
+        function subflowName(key) {
+          if (!key || key === "main") {
+            return `${
+              metadata.iflow_name || metadata.filename || "iFlow"
+            } / Participants`;
           }
+          return processById.get(key) || key;
+        }
 
-          // Highlight outgoing connections
-          if (processCallMap.has(processId)) {
-              const calls = processCallMap.get(processId);
-              calls.forEach(call => {
-                  // Highlight called subprocess
-                  const calledNode = document.querySelector(`[data-process-id="${call.subflowId}"]`);
-                  if (calledNode) {
-                      calledNode.classList.add('highlighted');
-                  }
+        function iconForType(type) {
+          const key = String(type || "").toLowerCase();
+          if (key.includes("script")) return "description";
+          if (key.includes("router")) return "alt_route";
+          if (key.includes("requestreply") || key.includes("request"))
+            return "sync_alt";
+          if (key.includes("mapping")) return "account_tree";
+          if (key.includes("sender") || key.includes("participant"))
+            return "swap_horiz";
+          if (key.includes("start")) return "play_arrow";
+          if (key.includes("end")) return "stop";
+          return "widgets";
+        }
 
-                  // Highlight connection line
-                  const line = window.flowChartLines.find(l => l.from === processId && l.to === call.subflowId);
-                  if (line) {
-                      line.element.classList.add('highlighted');
-                      line.element.setAttribute('marker-end', 'url(#arrowhead-highlight)');
-                  }
-              });
-          }
-
-          // Highlight incoming connections (who calls this process)
-          processCallMap.forEach((calls, mainProc) => {
-              const callsThis = calls.find(c => c.subflowId === processId);
-              if (callsThis) {
-                  const callingNode = document.querySelector(`[data-process-id="${mainProc}"]`);
-                  if (callingNode) {
-                      callingNode.classList.add('highlighted');
-                  }
-
-                  const line = window.flowChartLines.find(l => l.from === mainProc && l.to === processId);
-                  if (line) {
-                      line.element.classList.add('highlighted');
-                      line.element.setAttribute('marker-end', 'url(#arrowhead-highlight)');
-                  }
-              }
-          });
-      }
-
-      // Render tree recursively with collapse/expand functionality
-      function renderTree(nodes, container, depth = 0) {
-          if (!nodes || nodes.length === 0) return;
-
-          nodes.forEach(node => {
-              const nodeWrapper = document.createElement('div');
-              nodeWrapper.className = 'node-wrapper';
-
-              const nodeContent = document.createElement('div');
-              nodeContent.className = 'tree-node';
-
-              const hasChildren = node.children && node.children.length > 0;
-              const childCount = hasChildren ? node.children.length : 0;
-
-              // Create expand/collapse toggle for nodes with children
-              const toggleIcon = hasChildren ? `<span class="expand-toggle" data-node-id="${node.id || Math.random()}">▼</span>` : '<span style="width: 20px;"></span>';
-
-              const processName = (node.type === 'StartEvent' || node.type === 'EndEvent') && node.details && node.details.processName
-                  ? `<span class="process-badge">${escapeHtml(node.details.processName)}</span>`
-                  : '';
-
-              const childrenCountBadge = hasChildren ? `<span class="children-count">${childCount}</span>` : '';
-
-              // Display script name with function names for GroovyScript
-              let displayName = node.name || 'Unnamed';
-              if (node.type === 'GroovyScript' && node.details && node.details.scriptDisplayName) {
-                  displayName = node.details.scriptDisplayName;
-              }
-
-              nodeContent.innerHTML = `
-                  <div class="node-content">
-                      ${toggleIcon}
-                      <span class="node-icon">${getIcon(node.type)}</span>
-                      <span class="node-label">${escapeHtml(displayName)}</span>
-                      ${childrenCountBadge}
-                      ${processName}
-                      <span class="node-type">${node.type}</span>
-                  </div>
-              `;
-
-              // Click handler for node content (excluding toggle)
-              nodeContent.onclick = (e) => {
-                  // Check if click was on the toggle button
-                  if (e.target.classList.contains('expand-toggle')) {
-                      return; // Let toggle handler handle it
-                  }
-
-                  e.stopPropagation();
-                  document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
-                  nodeContent.classList.add('selected');
-                  showDetails(node);
-
-                  // Highlight in flowchart if it's a CallActivity
-                  if (node.type === 'CallActivity' && node.details && node.details.subflowName) {
-                      highlightProcessFlow(node.details.subflowName);
-                  }
-              };
-
-              nodeWrapper.appendChild(nodeContent);
-
-              // Render children if they exist
-              if (hasChildren) {
-                  const childrenContainer = document.createElement('div');
-                  childrenContainer.className = 'tree-children';
-                  childrenContainer.id = `children-${node.id || Math.random()}`;
-
-                  // Set initial max-height for smooth animation
-                  renderTree(node.children, childrenContainer, depth + 1);
-
-                  // Calculate and set max-height after rendering
-                  nodeWrapper.appendChild(childrenContainer);
-
-                  // Setup toggle functionality
-                  const toggle = nodeContent.querySelector('.expand-toggle');
-                  if (toggle) {
-                      toggle.onclick = (e) => {
-                          e.stopPropagation();
-                          const isCollapsed = childrenContainer.classList.contains('collapsed');
-
-                          if (isCollapsed) {
-                              // Expand
-                              childrenContainer.style.maxHeight = childrenContainer.scrollHeight + 'px';
-                              childrenContainer.classList.remove('collapsed');
-                              toggle.classList.remove('collapsed');
-                              setTimeout(() => {
-                                  childrenContainer.style.maxHeight = 'none';
-                              }, 300);
-                          } else {
-                              // Collapse
-                              childrenContainer.style.maxHeight = childrenContainer.scrollHeight + 'px';
-                              setTimeout(() => {
-                                  childrenContainer.style.maxHeight = '0';
-                                  childrenContainer.classList.add('collapsed');
-                                  toggle.classList.add('collapsed');
-                              }, 10);
-                          }
-                      };
-                  }
-
-                  // Initially expand first level, collapse deeper levels for routers
-                  if (depth > 0 && (node.type === 'Router' || childCount > 5)) {
-                      setTimeout(() => {
-                          childrenContainer.style.maxHeight = '0';
-                          childrenContainer.classList.add('collapsed');
-                          toggle.classList.add('collapsed');
-                      }, 10);
-                  } else {
-                      childrenContainer.style.maxHeight = 'none';
-                  }
-              }
-
-              container.appendChild(nodeWrapper);
-          });
-      }
-
-      function getIcon(type) {
-          const icons = {
-              'Sender': '📥',
-              'Receiver': '📤',
-              'StartEvent': '▶️',
-              'EndEvent': '⏹️',
-              'ContentModifier': '✏️',
-              'GroovyScript': '📜',
-              'Router': '🔀',
-              'RequestReply': '🔄',
-              'CallActivity': '📞',
-              'ServiceTask': '⚙️'
+        function styleForType(type) {
+          const key = String(type || "").toLowerCase();
+          if (key.includes("script"))
+            return { box: "border-teal-200", icon: "text-sap-teal bg-teal-50" };
+          if (key.includes("router"))
+            return {
+              box: "border-amber-200",
+              icon: "text-amber-600 bg-amber-50",
+            };
+          if (key.includes("request"))
+            return { box: "border-blue-200", icon: "text-sap-blue bg-blue-50" };
+          return {
+            box: "border-slate-200",
+            icon: "text-slate-600 bg-slate-100",
           };
-          return icons[type] || '📦';
-      }
+        }
 
-      function escapeHtml(text) {
-          const div = document.createElement('div');
-          div.textContent = text;
-          return div.innerHTML;
-      }
+        function endpointFromDetails(details) {
+          return (
+            details.endpoint ||
+            details.endpointAddress ||
+            details.address ||
+            details.url ||
+            details.endpointUri ||
+            "N/A"
+          );
+        }
 
-      function showDetails(node) {
-          const detailsDiv = document.getElementById('details');
+        function extractTargetProcessId(node) {
+          const details = node.details || {};
+          const props = details.properties || {};
+          return (
+            details.processId ||
+            details.localProcessId ||
+            details.subflowId ||
+            details.processRef ||
+            props.processId ||
+            props.localProcessId ||
+            props.subflowId ||
+            props.processRef ||
+            ""
+          );
+        }
 
-          // Add start/end indicator if applicable
-          let startEndIndicator = '';
-          if (node.type === 'StartEvent') {
-              startEndIndicator = '<span class="start-end-indicator">▶ START</span>';
-          } else if (node.type === 'EndEvent') {
-              startEndIndicator = '<span class="start-end-indicator">⏹ END</span>';
+        const allNodes = flattenTree(roots);
+        let filteredNodes = allNodes;
+        let selectedId = allNodes[0]?.id || null;
+        let manualExplorerState = null;
+        let manualDetailsState = null;
+        let zoomLevel = 1;
+        let focusMode = false;
+        let canvasViewMode = "high";
+        let selectedSubflowFilter = "all";
+        let selectedCall = null;
+        let selectedFlowKey = null;
+        const collapsedSubflows = new Set();
+
+        const parentToChildren = new Map();
+        const childToParent = new Map();
+        allNodes.forEach((n) => {
+          if (n.parentId) {
+            if (!parentToChildren.has(n.parentId)) {
+              parentToChildren.set(n.parentId, []);
+            }
+            parentToChildren.get(n.parentId).push(n.id);
+            childToParent.set(n.id, n.parentId);
           }
+        });
 
-          let html = `<h2><span>${getIcon(node.type)}</span> ${escapeHtml(node.name || 'Unnamed')}${startEndIndicator}</h2>`;
-
-          // Type badge
-          html += `<div class="section">`;
-          html += `<span class="badge badge-info">${node.type}</span>`;
-          if (node.route_name) {
-              html += `<span class="badge badge-warning">Route: ${escapeHtml(node.route_name)}</span>`;
+        function updateZoomLabel() {
+          if (zoomLabel) {
+            zoomLabel.textContent = `${Math.round(zoomLevel * 100)}%`;
           }
-          html += `</div>`;
+        }
 
-          // Summary
-          if (node.summary) {
-              html += `<div class="section">
-                  <h3>📝 Summary</h3>
-                  <p>${escapeHtml(node.summary)}</p>
-              </div>`;
+        function getSubflowKeys(nodes) {
+          const keys = [];
+          nodes.forEach((node) => {
+            const key = node.subflowKey || "main";
+            if (!keys.includes(key)) {
+              keys.push(key);
+            }
+          });
+          return keys;
+        }
+
+        function refreshSubflowFilterOptions() {
+          if (!subflowFilter) return;
+          const keys = getSubflowKeys(allNodes);
+          subflowFilter.innerHTML = `<option value="all">All Subflows</option>${keys
+            .map(
+              (key) =>
+                `<option value="${escapeHtml(key)}">${escapeHtml(
+                  subflowName(key)
+                )}</option>`
+            )
+            .join("")}`;
+          subflowFilter.value = selectedSubflowFilter;
+        }
+
+        function getBaseVisibleNodes() {
+          if (selectedSubflowFilter === "all") {
+            return filteredNodes;
           }
+          return filteredNodes.filter(
+            (node) => (node.subflowKey || "main") === selectedSubflowFilter
+          );
+        }
 
-          // Condition (for router branches)
-          if (node.condition) {
-              html += `<div class="section">
-                  <h3>🔀 Condition</h3>
-                  <div class="detail-item">
-                      <div class="detail-value"><code>${escapeHtml(node.condition)}</code></div>
-                  </div>
-              </div>`;
+        function getCanvasNodes() {
+          const base = getBaseVisibleNodes();
+          if (!focusMode || !selectedId) {
+            return base;
           }
+          const relatedIds = new Set([selectedId]);
+          const parentId = childToParent.get(selectedId);
+          if (parentId) relatedIds.add(parentId);
+          (parentToChildren.get(selectedId) || []).forEach((child) =>
+            relatedIds.add(child)
+          );
+          return base.filter((node) => relatedIds.has(node.id));
+        }
 
-          // Details
-          if (node.details && Object.keys(node.details).length > 0) {
-              html += `<div class="section"><h3>🔍 Details</h3>`;
+        function getCallRelations(nodes) {
+          return nodes
+            .map((n) => ({
+              node: n,
+              targetProcessId: extractTargetProcessId(n),
+            }))
+            .filter(({ targetProcessId }) => !!targetProcessId)
+            .map((n) => ({
+              sourceNodeId: n.node.id,
+              sourceNodeName: n.node.name,
+              fromSubflow: n.node.subflowKey || "main",
+              toSubflow: n.targetProcessId,
+            }));
+        }
 
-              for (const [key, value] of Object.entries(node.details)) {
-                  if (value === null || value === undefined || value === '') continue;
-
-                  if (Array.isArray(value) && value.length > 0) {
-                      // Check if this is an array of objects (like router conditions)
-                      if (typeof value[0] === 'object' && value[0] !== null) {
-                          html += `<div class="detail-item">
-                              <div class="detail-label">${formatLabel(key)}</div>`;
-
-                          // Special handling for conditions array
-                          if (key === 'conditions') {
-                              html += `<ul class="detail-list">`;
-                              value.forEach(cond => {
-                                  const routeName = cond.route || 'Default Route';
-                                  const condition = cond.condition || 'No condition';
-                                  html += `<li>
-                                      <strong style="color: #0078d4;">${escapeHtml(routeName)}:</strong><br>
-                                      <code style="background: #f5f5f5; padding: 4px 8px; display: block; margin-top: 4px; border-radius: 4px; font-size: 12px;">${escapeHtml(condition)}</code>
-                                  </li>`;
-                              });
-                              html += `</ul>`;
-                          } else {
-                              // Generic object array display
-                              html += `<div class="detail-value"><pre>${escapeHtml(JSON.stringify(value, null, 2))}</pre></div>`;
-                          }
-                          html += `</div>`;
-                      } else {
-                          // Simple array of primitives
-                          html += `<div class="detail-item">
-                              <div class="detail-label">${formatLabel(key)}</div>
-                              <ul class="detail-list">
-                                  ${value.map(v => `<li>${escapeHtml(String(v))}</li>`).join('')}
-                              </ul>
-                          </div>`;
-                      }
-                  } else if (typeof value === 'object' && value !== null) {
-                      // Handle nested objects
-                      if (key !== 'allProperties' && key !== 'properties') {
-                          html += `<div class="detail-item">
-                              <div class="detail-label">${formatLabel(key)}</div>
-                              <div class="detail-value"><pre style="background: #f9f9f9; padding: 10px; border-radius: 4px; overflow-x: auto;">${escapeHtml(JSON.stringify(value, null, 2))}</pre></div>
-                          </div>`;
-                      }
-                  } else if (value !== false && value !== 0) {
-                      html += `<div class="detail-item">
-                          <div class="detail-label">${formatLabel(key)}</div>
-                          <div class="detail-value">${escapeHtml(String(value))}</div>
-                      </div>`;
-                  } else if (value === true) {
-                      html += `<div class="detail-item">
-                          <div class="detail-label">${formatLabel(key)}</div>
-                          <div class="detail-value"><span class="badge badge-success">Yes</span></div>
-                      </div>`;
-                  }
-              }
-              html += `</div>`;
+        function updateSelectedCallByNodeId(nodeId) {
+          const node = allNodes.find((n) => n.id === nodeId);
+          if (!node) {
+            selectedCall = null;
+            return;
           }
-
-          detailsDiv.innerHTML = html;
-      }
-
-      function formatLabel(str) {
-          return str
-              .replace(/([A-Z])/g, ' $1')
-              .replace(/^./, s => s.toUpperCase())
-              .trim();
-      }
-
-      // Search functionality
-      let searchResults = [];
-      let currentSearchTerm = '';
-
-      function performSearch(searchTerm) {
-          searchTerm = searchTerm.trim();
-          currentSearchTerm = searchTerm;
-          const clearBtn = document.getElementById('search-clear');
-          const resultsDiv = document.getElementById('search-results');
-
-          if (searchTerm.length === 0) {
-              clearBtn.style.display = 'none';
-              resultsDiv.textContent = '';
-              clearSearchHighlights();
-              searchResults = [];
-              return;
-          }
-
-          clearBtn.style.display = 'block';
-          searchResults = [];
-
-          // Search recursively through flow data
-          function searchInNode(node, path = []) {
-              const currentPath = [...path, node.name || node.id || 'Unknown'];
-              const searchLower = searchTerm.toLowerCase();
-
-              // Search in node name
-              if (node.name && node.name.toLowerCase().includes(searchLower)) {
-                  searchResults.push({
-                      type: 'name',
-                      nodeType: node.type,
-                      path: currentPath.join(' > '),
-                      value: node.name,
-                      node: node
-                  });
-              }
-
-              // Search in node summary
-              if (node.summary && node.summary.toLowerCase().includes(searchLower)) {
-                  searchResults.push({
-                      type: 'summary',
-                      nodeType: node.type,
-                      path: currentPath.join(' > '),
-                      value: node.summary,
-                      node: node
-                  });
-              }
-
-              // Search in details
-              if (node.details) {
-                  Object.entries(node.details).forEach(([key, value]) => {
-                      if (typeof value === 'string' && value.toLowerCase().includes(searchLower)) {
-                          searchResults.push({
-                              type: 'detail',
-                              nodeType: node.type,
-                              path: currentPath.join(' > '),
-                              key: key,
-                              value: value,
-                              node: node
-                          });
-                      } else if (key === 'scriptName' && value && value.toLowerCase().includes(searchLower)) {
-                          searchResults.push({
-                              type: 'script',
-                              nodeType: node.type,
-                              path: currentPath.join(' > '),
-                              value: value,
-                              node: node
-                          });
-                      } else if (key === 'scriptContent' && value && value.toLowerCase().includes(searchLower)) {
-                          // Search inside script content
-                          searchResults.push({
-                              type: 'scriptContent',
-                              nodeType: node.type,
-                              path: currentPath.join(' > '),
-                              value: `Found in script: ${value.substring(0, 100)}...`,
-                              node: node
-                          });
-                      } else if (key === 'functionNames' && Array.isArray(value)) {
-                          // Search in function names
-                          value.forEach(funcName => {
-                              if (funcName.toLowerCase().includes(searchLower)) {
-                                  searchResults.push({
-                                      type: 'function',
-                                      nodeType: node.type,
-                                      path: currentPath.join(' > '),
-                                      value: `Function: ${funcName}`,
-                                      node: node
-                                  });
-                              }
-                          });
-                      } else if (key === 'variables' && Array.isArray(value)) {
-                          // Search in variable names
-                          value.forEach(varName => {
-                              if (varName.toLowerCase().includes(searchLower)) {
-                                  searchResults.push({
-                                      type: 'variable',
-                                      nodeType: node.type,
-                                      path: currentPath.join(' > '),
-                                      value: `Variable: ${varName}`,
-                                      node: node
-                                  });
-                              }
-                          });
-                      }
-                  });
-              }
-
-              // Search in condition
-              if (node.condition && node.condition.toLowerCase().includes(searchLower)) {
-                  searchResults.push({
-                      type: 'condition',
-                      nodeType: node.type,
-                      path: currentPath.join(' > '),
-                      value: node.condition,
-                      node: node
-                  });
-              }
-
-              // Recursively search children
-              if (node.children && node.children.length > 0) {
-                  node.children.forEach(child => searchInNode(child, currentPath));
-              }
-          }
-
-          flowData.forEach(node => searchInNode(node));
-
-          // Display results
-          if (searchResults.length === 0) {
-              resultsDiv.textContent = `No results found for "${searchTerm}"`;
-              resultsDiv.style.color = '#fca5a5';
+          const target = extractTargetProcessId(node);
+          if (target) {
+            selectedCall = {
+              fromSubflow: node.subflowKey || "main",
+              toSubflow: target,
+            };
+            selectedFlowKey = null;
           } else {
-              resultsDiv.textContent = `Found ${searchResults.length} match${searchResults.length > 1 ? 'es' : ''} (Press Enter to navigate)`;
-              resultsDiv.style.color = '#86efac';
-              highlightSearchResults();
-              expandSearchResults();
+            selectedCall = null;
+            selectedFlowKey = null;
           }
-      }
+        }
 
-      let currentSearchIndex = -1;
-
-      function handleSearchKeydown(event) {
-          if (event.key === 'Enter' && searchResults.length > 0) {
-              event.preventDefault();
-              navigateToNextSearchResult();
+        function applyResponsivePanels() {
+          if (!explorerPanel || !detailsPanel) {
+            return;
           }
-      }
 
-      function navigateToNextSearchResult() {
-          if (searchResults.length === 0) return;
-
-          // Move to next result
-          currentSearchIndex = (currentSearchIndex + 1) % searchResults.length;
-          const result = searchResults[currentSearchIndex];
-
-          // Update results display
-          const resultsDiv = document.getElementById('search-results');
-          resultsDiv.textContent = `Match ${currentSearchIndex + 1} of ${searchResults.length} (Press Enter for next)`;
-
-          // Find and select the node in tree
-          selectNodeById(result.node.id);
-          showDetails(result.node);
-
-          // Scroll the selected node into view
-          setTimeout(() => {
-              const selectedNode = document.querySelector('.tree-node.selected');
-              if (selectedNode) {
-                  selectedNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-          }, 100);
-      }
-
-      function selectNodeById(nodeId) {
-          // Remove previous selection
-          document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
-
-          // Find and select the node
-          const allNodes = document.querySelectorAll('.tree-node');
-          for (let nodeEl of allNodes) {
-              // Check if this node represents our target
-              const nodeContent = nodeEl.querySelector('.node-content');
-              if (nodeContent) {
-                  // We need to match by checking the onclick handler or storing data attribute
-                  nodeEl.click();
-                  break;
-              }
+          if (window.innerWidth < 860) {
+            explorerPanel.classList.add("panel-hidden");
+          } else if (manualExplorerState === null) {
+            explorerPanel.classList.remove("panel-hidden");
           }
-      }
 
-      function expandSearchResults() {
-          if (searchResults.length === 0) return;
+          if (window.innerWidth < 1024) {
+            detailsPanel.classList.add("panel-hidden");
+          } else if (manualDetailsState === null) {
+            detailsPanel.classList.remove("panel-hidden");
+          }
+        }
 
-          // Expand all nodes that contain search results
-          searchResults.forEach(result => {
-              expandNodePath(result.node);
+        if (toggleExplorerBtn && explorerPanel) {
+          toggleExplorerBtn.addEventListener("click", () => {
+            explorerPanel.classList.toggle("panel-hidden");
+            manualExplorerState =
+              explorerPanel.classList.contains("panel-hidden");
           });
-      }
+        }
 
-      function expandNodePath(targetNode) {
-          // Find the path to this node and expand all parents
-          function findAndExpandPath(nodes, target, path = []) {
-              for (let node of nodes) {
-                  const currentPath = [...path, node];
+        if (toggleDetailsBtn && detailsPanel) {
+          toggleDetailsBtn.addEventListener("click", () => {
+            detailsPanel.classList.toggle("panel-hidden");
+            manualDetailsState =
+              detailsPanel.classList.contains("panel-hidden");
+          });
+        }
 
-                  if (node.id === target.id) {
-                      // Found it! Expand all nodes in path
-                      currentPath.forEach(pathNode => {
-                          expandNodeInTree(pathNode.id);
-                      });
-                      return true;
-                  }
+        if (zoomOutBtn) {
+          zoomOutBtn.addEventListener("click", () => {
+            zoomLevel = Math.max(0.5, +(zoomLevel - 0.1).toFixed(2));
+            updateZoomLabel();
+            renderCanvas();
+          });
+        }
 
-                  if (node.children && node.children.length > 0) {
-                      if (findAndExpandPath(node.children, target, currentPath)) {
-                          return true;
-                      }
-                  }
-              }
-              return false;
+        if (zoomInBtn) {
+          zoomInBtn.addEventListener("click", () => {
+            zoomLevel = Math.min(1.8, +(zoomLevel + 0.1).toFixed(2));
+            updateZoomLabel();
+            renderCanvas();
+          });
+        }
+
+        if (zoomResetBtn) {
+          zoomResetBtn.addEventListener("click", () => {
+            zoomLevel = 1;
+            updateZoomLabel();
+            renderCanvas();
+          });
+        }
+
+        if (focusModeBtn) {
+          focusModeBtn.addEventListener("click", () => {
+            focusMode = !focusMode;
+            focusModeBtn.classList.toggle("bg-blue-50", focusMode);
+            focusModeBtn.classList.toggle("text-sap-blue", focusMode);
+            renderCanvas();
+          });
+        }
+
+        if (canvasViewBtn) {
+          canvasViewBtn.addEventListener("click", () => {
+            canvasViewMode = canvasViewMode === "high" ? "detailed" : "high";
+            canvasViewBtn.textContent =
+              canvasViewMode === "high" ? "Show Details" : "Show High-Level";
+            renderCanvas();
+          });
+        }
+
+        if (subflowFilter) {
+          subflowFilter.addEventListener("change", (e) => {
+            selectedSubflowFilter = e.target.value || "all";
+            selectedCall = null;
+            selectedFlowKey = null;
+            renderExplorer();
+            renderCanvas();
+          });
+        }
+
+        window.addEventListener("resize", () => {
+          applyResponsivePanels();
+          renderCanvas();
+        });
+        applyResponsivePanels();
+        updateZoomLabel();
+
+        function renderDetails(node) {
+          if (!node) {
+            return;
           }
 
-          findAndExpandPath(flowData, targetNode);
-      }
+          detailTypeBadge.textContent = node.type;
+          detailNodeName.textContent = node.name;
+          const flowLabel = subflowName(node.subflowKey);
+          const targetProcessId = extractTargetProcessId(node);
+          const callLabel = targetProcessId
+            ? ` | Calls -> ${subflowName(targetProcessId)}`
+            : "";
+          detailNodeSummary.textContent = `${flowLabel} | ${
+            node.summary ||
+            metadata.iflow_description ||
+            metadata.filename ||
+            ""
+          }${callLabel}`;
+          detailAdapter.textContent = node.details.adapterType || "N/A";
+          detailEndpoint.textContent = endpointFromDetails(node.details);
 
-      function expandNodeInTree(nodeId) {
-          // Find the children container for this node
-          const childrenContainer = document.getElementById(`children-${nodeId}`);
-          if (childrenContainer && childrenContainer.classList.contains('collapsed')) {
-              childrenContainer.style.maxHeight = childrenContainer.scrollHeight + 'px';
-              childrenContainer.classList.remove('collapsed');
+          const entries = Object.entries(node.details || {})
+            .filter(
+              ([k]) =>
+                ![
+                  "scriptContent",
+                  "script",
+                  "endpoint",
+                  "endpointAddress",
+                  "address",
+                  "url",
+                  "endpointUri",
+                ].includes(k)
+            )
+            .slice(0, 8);
 
-              // Find and update toggle
-              const nodeWrapper = childrenContainer.parentElement;
-              const toggle = nodeWrapper.querySelector('.expand-toggle');
-              if (toggle) {
-                  toggle.classList.remove('collapsed');
-              }
-
-              setTimeout(() => {
-                  childrenContainer.style.maxHeight = 'none';
-              }, 300);
+          if (entries.length) {
+            detailParams.innerHTML = entries
+              .map(
+                ([k, v]) =>
+                  `\n                  <div class="py-3 flex justify-between items-center gap-4">\n                    <span class="text-sm text-slate-500">${escapeHtml(
+                    k
+                  )}</span>\n                    <span class="text-sm font-semibold text-slate-800 text-right break-all">${escapeHtml(
+                    Array.isArray(v)
+                      ? v.join(", ")
+                      : JSON.stringify(v).replace(/^\"|\"$/g, "")
+                  )}</span>\n                  </div>`
+              )
+              .join("");
+          } else {
+            detailParams.innerHTML = `\n              <div class="py-3 flex justify-between items-center">\n                <span class="text-sm text-slate-500">Type</span>\n                <span class="text-sm font-semibold text-slate-800">${escapeHtml(
+              node.type
+            )}</span>\n              </div>`;
           }
-      }
 
-      function clearSearch() {
-          document.getElementById('search-input').value = '';
-          document.getElementById('search-clear').style.display = 'none';
-          document.getElementById('search-results').textContent = '';
-          clearSearchHighlights();
-          searchResults = [];
-          currentSearchTerm = '';
-          currentSearchIndex = -1;
-      }      function highlightSearchResults() {
-          clearSearchHighlights();
+          const scriptText =
+            node.details.scriptContent ||
+            node.details.script ||
+            "No script attached to this node.";
+          detailScriptCode.textContent = scriptText;
+        }
 
-          if (currentSearchTerm.length === 0) return;
+        function renderExplorer() {
+          if (!explorerContent) return;
 
-          // Highlight in tree
-          const treeNodes = document.querySelectorAll('.node-label');
-          treeNodes.forEach(labelEl => {
-              const text = labelEl.textContent;
-              if (text.toLowerCase().includes(currentSearchTerm.toLowerCase())) {
-                  const regex = new RegExp(`(${escapeRegex(currentSearchTerm)})`, 'gi');
-                  labelEl.innerHTML = text.replace(regex, '<span class="search-highlight">$1</span>');
-              }
+          const iflowLabel =
+            metadata.iflow_name || metadata.filename || "Main Flow";
+          const explorerNodes = getBaseVisibleNodes();
+          const grouped = new Map();
+          explorerNodes.forEach((node) => {
+            const key = node.subflowKey || "main";
+            if (!grouped.has(key)) {
+              grouped.set(key, []);
+            }
+            grouped.get(key).push(node);
           });
 
-          // Highlight in details panel
-          const detailsDiv = document.getElementById('details');
-          if (detailsDiv && detailsDiv.textContent.toLowerCase().includes(currentSearchTerm.toLowerCase())) {
-              highlightInElement(detailsDiv);
-          }
-      }
+          const sectionHtml = Array.from(grouped.entries())
+            .map(([key, nodes]) => {
+              const startCount = nodes.filter(
+                (n) => n.type === "StartEvent"
+              ).length;
+              const endCount = nodes.filter(
+                (n) => n.type === "EndEvent"
+              ).length;
+              const collapsed = collapsedSubflows.has(key);
+              const items = nodes
+                .map((node) => {
+                  const active = node.id === selectedId;
+                  const indent = Math.min(node.depth * 10, 40);
+                  return `
+                    <button data-node-id="${escapeHtml(node.id)}"
+                      class="flow-item w-full text-left p-2 text-sm rounded-lg flex items-center justify-between gap-2 ${
+                        active
+                          ? "font-semibold text-sap-blue bg-blue-50/30"
+                          : "text-slate-600 hover:bg-slate-50"
+                      }"
+                      style="padding-left:${10 + indent}px">
+                      <span class="truncate flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full ${
+                          active ? "bg-sap-blue" : "bg-slate-300"
+                        }"></span>
+                        ${escapeHtml(node.name)}
+                      </span>
+                      <span class="text-[10px] text-slate-400">${escapeHtml(
+                        node.type
+                      )}</span>
+                    </button>`;
+                })
+                .join("");
 
-      function highlightInElement(element) {
-          if (!element || !currentSearchTerm) return;
+              return `
+                <div class="rounded-xl border border-slate-100 bg-white">
+                  <div class="px-3 py-2 border-b border-slate-100 bg-slate-50/80 rounded-t-xl flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                      <p class="text-xs font-semibold text-slate-700 truncate">${escapeHtml(
+                        subflowName(key)
+                      )}</p>
+                      <p class="text-[10px] text-slate-500">Start: ${startCount} | End: ${endCount} | Components: ${
+                nodes.length
+              }</p>
+                    </div>
+                    <button class="subflow-toggle p-1 rounded-md hover:bg-slate-200" data-subflow-key="${escapeHtml(
+                      key
+                    )}" title="${collapsed ? "Expand" : "Collapse"}">
+                      <span class="material-symbols-outlined text-base text-slate-500">${
+                        collapsed ? "expand_more" : "expand_less"
+                      }</span>
+                    </button>
+                  </div>
+                  <div class="p-2 space-y-1 ${
+                    collapsed ? "hidden" : ""
+                  }">${items}</div>
+                </div>
+              `;
+            })
+            .join("");
 
-          const walker = document.createTreeWalker(
-              element,
-              NodeFilter.SHOW_TEXT,
-              null,
-              false
+          const callRelations = getCallRelations(allNodes).filter((r) =>
+            selectedSubflowFilter === "all"
+              ? true
+              : r.fromSubflow === selectedSubflowFilter ||
+                r.toSubflow === selectedSubflowFilter
           );
 
-          const nodesToReplace = [];
-          let node;
+          const relationHtml = callRelations.length
+            ? callRelations
+                .slice(0, 80)
+                .map(
+                  (r) => `
+                <button data-focus-subflow="${escapeHtml(
+                  r.toSubflow
+                )}" data-from-subflow="${escapeHtml(
+                    r.fromSubflow
+                  )}" data-node-id="${escapeHtml(
+                    r.sourceNodeId
+                  )}" class="flow-relation w-full text-left p-2 rounded-lg text-xs ${
+                    (selectedCall &&
+                      selectedCall.fromSubflow === r.fromSubflow &&
+                      selectedCall.toSubflow === r.toSubflow) ||
+                    (selectedFlowKey &&
+                      (selectedFlowKey === r.fromSubflow ||
+                        selectedFlowKey === r.toSubflow))
+                      ? "bg-orange-50 border border-orange-200"
+                      : "hover:bg-slate-50"
+                  }">
+                  <span class="font-semibold text-slate-700">${escapeHtml(
+                    r.sourceNodeName
+                  )}</span>
+                  <span class="text-slate-500 block">${escapeHtml(
+                    subflowName(r.fromSubflow)
+                  )} -> ${escapeHtml(subflowName(r.toSubflow))}</span>
+                </button>`
+                )
+                .join("")
+            : '<p class="text-xs text-slate-400 px-2 py-1">No subflow calls detected in this view.</p>';
 
-          while (node = walker.nextNode()) {
-              if (node.nodeValue && node.nodeValue.toLowerCase().includes(currentSearchTerm.toLowerCase())) {
-                  nodesToReplace.push(node);
-              }
-          }
-
-          nodesToReplace.forEach(textNode => {
-              const parent = textNode.parentNode;
-              if (parent && parent.tagName !== 'SCRIPT' && parent.tagName !== 'STYLE') {
-                  const text = textNode.nodeValue;
-                  const regex = new RegExp(`(${escapeRegex(currentSearchTerm)})`, 'gi');
-                  const span = document.createElement('span');
-                  span.innerHTML = text.replace(regex, '<span class="search-highlight">$1</span>');
-                  parent.replaceChild(span, textNode);
-              }
-          });
-      }
-
-      function clearSearchHighlights() {
-          // Clear highlights in tree
-          document.querySelectorAll('.search-highlight').forEach(el => {
-              const text = el.textContent;
-              const parent = el.parentNode;
-              if (parent) {
-                  const textNode = document.createTextNode(text);
-                  parent.replaceChild(textNode, el);
-                  parent.normalize();
-              }
-          });
-
-          // Re-render tree labels properly
-          const treeNodes = document.querySelectorAll('.node-label');
-          treeNodes.forEach(labelEl => {
-              if (labelEl.querySelector('.search-highlight')) {
-                  labelEl.textContent = labelEl.textContent; // Reset to plain text
-              }
-          });
-      }
-
-      function escapeRegex(str) {
-          return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      }
-
-      // Group senders and receivers
-      function groupParticipants(flowData) {
-          const senders = [];
-          const receivers = [];
-          const processesByName = {};
-          const others = [];
-
-          function collectNodesByProcess(node, processName = null) {
-              // Determine the current process name
-              let currentProcessName = processName;
-              if (node.details && node.details.processName) {
-                  currentProcessName = node.details.processName;
-              }
-
-              // Categorize nodes
-              if (node.type === 'Sender') {
-                  senders.push(node);
-              } else if (node.type === 'Receiver') {
-                  receivers.push(node);
-              } else if (currentProcessName) {
-                  // This node belongs to a process
-                  if (!processesByName[currentProcessName]) {
-                      processesByName[currentProcessName] = {
-                          nodes: [],
-                          processName: currentProcessName
-                      };
-                  }
-                  processesByName[currentProcessName].nodes.push(node);
-              } else {
-                  // No process association
-                  others.push(node);
-              }
-
-              // Recursively process children
-              if (node.children && node.children.length > 0) {
-                  node.children.forEach(child => collectNodesByProcess(child, currentProcessName));
-              }
-          }
-
-          flowData.forEach(node => collectNodesByProcess(node));
-
-          return { senders, receivers, processesByName, others };
-      }
-
-      function createCollapsibleSection(title, icon, items, container) {
-          if (items.length === 0) return;
-
-          const section = document.createElement('div');
-          section.className = 'collapsible-section';
-
-          const header = document.createElement('div');
-          header.className = 'collapsible-header';
-          header.innerHTML = `
-              <span>${icon} ${title} (${items.length})</span>
-              <span class="icon">▼</span>
+          explorerContent.innerHTML = `
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-3">Flow Explorer</p>
+              <div class="space-y-1">
+                <div class="flex items-center gap-3 p-2.5 bg-blue-50/50 text-sap-blue rounded-xl font-semibold text-sm">
+                  <span class="material-symbols-outlined text-lg">inventory_2</span>
+                  ${escapeHtml(iflowLabel)}
+                </div>
+                <div class="flex items-center gap-2 mt-2 px-1">
+                  <button id="expand-all-subflows" class="text-[10px] px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-md text-slate-600">Expand All</button>
+                  <button id="collapse-all-subflows" class="text-[10px] px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-md text-slate-600">Collapse All</button>
+                </div>
+                <div class="mt-2 space-y-2 max-h-[58vh] overflow-auto hide-scrollbar">${
+                  sectionHtml ||
+                  '<p class="text-xs text-slate-400 px-2 py-2">No nodes found.</p>'
+                }</div>
+              </div>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-3">Analysis</p>
+              <div class="space-y-1">
+                <div class="p-2.5 flex items-center justify-between text-sm text-slate-600 bg-slate-50 rounded-xl">
+                  <span>Total Components</span>
+                  <span class="font-semibold text-slate-800">${
+                    allNodes.length
+                  }</span>
+                </div>
+                <div class="p-2.5 flex items-center justify-between text-sm text-slate-600 bg-slate-50 rounded-xl">
+                  <span>Complexity</span>
+                  <span class="font-semibold text-slate-800">${escapeHtml(
+                    complexity.label || "N/A"
+                  )}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-3">Flow Calls</p>
+              <div class="space-y-1 max-h-52 overflow-auto hide-scrollbar">${relationHtml}</div>
+            </div>
           `;
 
-          const content = document.createElement('div');
-          content.className = 'collapsible-content';
-
-          const itemsContainer = document.createElement('div');
-          itemsContainer.className = 'collapsible-items';
-
-          items.forEach(item => {
-              const itemDiv = document.createElement('div');
-              itemDiv.className = 'collapsible-item';
-              const adapterInfo = item.details?.adapterType || 'Unknown Adapter';
-              itemDiv.innerHTML = `<strong>${item.name || 'Unnamed'}</strong><br><span style="font-size: 11px; opacity: 0.8;">${adapterInfo}</span>`;
-              itemDiv.onclick = () => {
-                  document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('selected'));
-                  showDetails(item);
-              };
-              itemsContainer.appendChild(itemDiv);
+          explorerContent.querySelectorAll(".flow-item").forEach((el) => {
+            el.addEventListener("click", () => {
+              selectedId = el.getAttribute("data-node-id");
+              updateSelectedCallByNodeId(selectedId);
+              renderExplorer();
+              renderCanvas();
+              renderDetails(
+                filteredNodes.find((x) => x.id === selectedId) ||
+                  allNodes.find((x) => x.id === selectedId)
+              );
+            });
           });
 
-          content.appendChild(itemsContainer);
-          section.appendChild(header);
-          section.appendChild(content);
-          container.appendChild(section);
-
-          // Toggle functionality
-          header.onclick = () => {
-              const isCollapsed = content.classList.contains('collapsed');
-              if (isCollapsed) {
-                  content.classList.remove('collapsed');
-                  header.classList.remove('collapsed');
+          explorerContent.querySelectorAll(".subflow-toggle").forEach((el) => {
+            el.addEventListener("click", () => {
+              const key = el.getAttribute("data-subflow-key");
+              if (collapsedSubflows.has(key)) {
+                collapsedSubflows.delete(key);
               } else {
-                  content.classList.add('collapsed');
-                  header.classList.add('collapsed');
+                collapsedSubflows.add(key);
               }
-          };
-      }
+              renderExplorer();
+            });
+          });
 
-      // Initialize
-      if (flowData && flowData.length > 0) {
-          const treeContainer = document.getElementById('tree');
+          const expandBtn = document.getElementById("expand-all-subflows");
+          const collapseBtn = document.getElementById("collapse-all-subflows");
+          if (expandBtn) {
+            expandBtn.addEventListener("click", () => {
+              collapsedSubflows.clear();
+              renderExplorer();
+            });
+          }
+          if (collapseBtn) {
+            collapseBtn.addEventListener("click", () => {
+              Array.from(grouped.keys()).forEach((key) =>
+                collapsedSubflows.add(key)
+              );
+              renderExplorer();
+            });
+          }
 
-          // Group participants
-          const { senders, receivers, processesByName, others } = groupParticipants(flowData);
-
-          // Create collapsible sections for senders and receivers
-          createCollapsibleSection('Senders', '📥', senders, treeContainer);
-          createCollapsibleSection('Receivers', '📤', receivers, treeContainer);
-
-          // Create collapsible sections for each process with all its nodes
-          Object.keys(processesByName).forEach(processName => {
-              const processInfo = processesByName[processName];
-              const nodes = processInfo.nodes;
-
-              if (nodes.length > 0) {
-                  const section = document.createElement('div');
-                  section.className = 'collapsible-section';
-
-                  const header = document.createElement('div');
-                  header.className = 'collapsible-header';
-
-                  // Count start and end events
-                  const startCount = nodes.filter(n => n.type === 'StartEvent').length;
-                  const endCount = nodes.filter(n => n.type === 'EndEvent').length;
-
-                  header.innerHTML = `
-                      <span>🔄 ${processName} <span style="font-size: 10px; opacity: 0.7;">(${startCount} start, ${endCount} end, ${nodes.length} total)</span></span>
-                      <span class="icon">▼</span>
-                  `;
-
-                  const content = document.createElement('div');
-                  content.className = 'collapsible-content';
-
-                  const itemsContainer = document.createElement('div');
-                  itemsContainer.className = 'collapsible-items';
-                  itemsContainer.style.padding = '0';
-
-                  // Use renderTree to display all nodes hierarchically
-                  renderTree(nodes, itemsContainer, 0);
-
-                  content.appendChild(itemsContainer);
-                  section.appendChild(header);
-                  section.appendChild(content);
-                  treeContainer.appendChild(section);
-
-                  // Toggle functionality
-                  header.onclick = () => {
-                      const isCollapsed = content.classList.contains('collapsed');
-                      if (isCollapsed) {
-                          content.classList.remove('collapsed');
-                          header.classList.remove('collapsed');
-                      } else {
-                          content.classList.add('collapsed');
-                          header.classList.add('collapsed');
-                      }
-                  };
+          explorerContent.querySelectorAll(".flow-relation").forEach((el) => {
+            el.addEventListener("click", () => {
+              selectedSubflowFilter =
+                el.getAttribute("data-focus-subflow") || "all";
+              selectedId = el.getAttribute("data-node-id") || selectedId;
+              selectedCall = {
+                fromSubflow: el.getAttribute("data-from-subflow") || "main",
+                toSubflow: el.getAttribute("data-focus-subflow") || "main",
+              };
+              selectedFlowKey = null;
+              if (subflowFilter) {
+                subflowFilter.value = selectedSubflowFilter;
               }
-          });          // Render other nodes normally
-          if (others.length > 0) {
-              const othersContainer = document.createElement('div');
-              othersContainer.style.marginTop = '10px';
-              renderTree(others, othersContainer);
-              treeContainer.appendChild(othersContainer);
-          }
-
-          buildFlowchart(); // Build the process flow diagram
-      } else {
-          document.getElementById('tree').innerHTML = '<div class="empty-state"><p>No flow data available</p></div>';
-      }
-
-      // Resizable sidebar
-      const sidebar = document.getElementById('sidebar');
-      const resizer = document.getElementById('resizer');
-      let isResizing = false;
-
-      resizer.addEventListener('mousedown', (e) => {
-          isResizing = true;
-          document.body.style.cursor = 'col-resize';
-          document.body.style.userSelect = 'none';
-      });
-
-      document.addEventListener('mousemove', (e) => {
-          if (!isResizing) return;
-
-          const newWidth = e.clientX;
-          const maxWidth = window.innerWidth - 300; // Leave at least 300px for content
-          if (newWidth >= 200 && newWidth <= maxWidth) {
-              sidebar.style.width = newWidth + 'px';
-          }
-      });      document.addEventListener('mouseup', () => {
-          if (isResizing) {
-              isResizing = false;
-              document.body.style.cursor = '';
-              document.body.style.userSelect = '';
-          }
-      });
-
-      // Resizable flowchart panel
-      const flowchartPanel = document.getElementById('flowchart-panel');
-      const flowchartResizer = document.getElementById('flowchart-resizer');
-      let isResizingFlowchart = false;
-
-      flowchartResizer.addEventListener('mousedown', (e) => {
-          isResizingFlowchart = true;
-          document.body.style.cursor = 'col-resize';
-          document.body.style.userSelect = 'none';
-      });
-
-      document.addEventListener('mousemove', (e) => {
-          if (!isResizingFlowchart) return;
-
-          const containerWidth = document.getElementById('content').offsetWidth;
-          const newWidth = containerWidth - e.clientX + document.getElementById('content').offsetLeft;
-          const minWidth = 300;
-          const maxWidth = containerWidth - 400; // Leave at least 400px for details
-
-          if (newWidth >= minWidth && newWidth <= maxWidth) {
-              flowchartPanel.style.width = newWidth + 'px';
-          }
-      });
-
-      document.addEventListener('mouseup', () => {
-          if (isResizingFlowchart) {
-              isResizingFlowchart = false;
-              document.body.style.cursor = '';
-              document.body.style.userSelect = '';
-          }
-      });
-
-      // Zoom functionality
-      let currentZoom = 1;
-      const zoomStep = 0.15;
-      const minZoom = 0.5;
-      const maxZoom = 2;
-
-      function zoomIn() {
-          if (currentZoom < maxZoom) {
-              currentZoom = Math.min(currentZoom + zoomStep, maxZoom);
-              applyZoom();
-          }
-      }
-
-      function zoomOut() {
-          if (currentZoom > minZoom) {
-              currentZoom = Math.max(currentZoom - zoomStep, minZoom);
-              applyZoom();
-          }
-      }
-
-      function resetZoom() {
-          currentZoom = 1;
-          applyZoom();
-          // Also scroll to top-left
-          const canvas = document.getElementById('flowchart-canvas');
-          canvas.scrollTo(0, 0);
-      }
-
-      function applyZoom() {
-          const nodesContainer = document.getElementById('flowchart-nodes');
-          const svgContainer = document.getElementById('flowchart-svg');
-          nodesContainer.style.transform = `scale(${currentZoom})`;
-          nodesContainer.style.transformOrigin = 'top left';
-          svgContainer.style.transform = `scale(${currentZoom})`;
-          svgContainer.style.transformOrigin = 'top left';
-      }
-
-      // Expand/Collapse All functionality
-      function expandAll() {
-          // Expand collapsible sections
-          document.querySelectorAll('.collapsible-content').forEach(content => {
-              content.classList.remove('collapsed');
+              renderExplorer();
+              renderCanvas();
+              renderDetails(allNodes.find((x) => x.id === selectedId));
+            });
           });
-          document.querySelectorAll('.collapsible-header').forEach(header => {
-              header.classList.remove('collapsed');
-          });
+        }
 
-          // Expand tree nodes
-          document.querySelectorAll('.tree-children').forEach(container => {
-              if (container.classList.contains('collapsed')) {
-                  container.style.maxHeight = container.scrollHeight + 'px';
-                  container.classList.remove('collapsed');
-                  setTimeout(() => {
-                      container.style.maxHeight = 'none';
-                  }, 300);
+        function renderCanvas() {
+          if (!viewport) return;
+
+          const canvasNodes = getCanvasNodes();
+          if (!canvasNodes.some((n) => n.id === selectedId)) {
+            selectedId = canvasNodes[0]?.id || selectedId;
+          }
+
+          if (canvasViewMode === "high") {
+            const keys = Array.from(
+              new Set(canvasNodes.map((n) => n.subflowKey || "main"))
+            );
+            const relations = getCallRelations(canvasNodes).filter(
+              (r) => keys.includes(r.fromSubflow) && keys.includes(r.toSubflow)
+            );
+            const relationCountByKey = new Map();
+            const incomingCountByKey = new Map();
+            relations.forEach((r) => {
+              relationCountByKey.set(
+                r.fromSubflow,
+                (relationCountByKey.get(r.fromSubflow) || 0) + 1
+              );
+              incomingCountByKey.set(
+                r.toSubflow,
+                (incomingCountByKey.get(r.toSubflow) || 0) + 1
+              );
+            });
+
+            const neighbors = new Map(keys.map((k) => [k, new Set()]));
+            relations.forEach((r) => {
+              if (neighbors.has(r.fromSubflow) && neighbors.has(r.toSubflow)) {
+                neighbors.get(r.fromSubflow).add(r.toSubflow);
+                neighbors.get(r.toSubflow).add(r.fromSubflow);
               }
-          });
-          document.querySelectorAll('.expand-toggle').forEach(toggle => {
-              toggle.classList.remove('collapsed');
-          });
-      }
+            });
 
-      function collapseAll() {
-          // Collapse collapsible sections
-          document.querySelectorAll('.collapsible-content').forEach(content => {
-              content.classList.add('collapsed');
-          });
-          document.querySelectorAll('.collapsible-header').forEach(header => {
-              header.classList.add('collapsed');
-          });
+            // Spread chained calls across both columns by alternating call depth.
+            const levelByKey = new Map();
+            const degree = (key) =>
+              (relationCountByKey.get(key) || 0) +
+              (incomingCountByKey.get(key) || 0);
+            const visited = new Set();
 
-          // Collapse tree nodes
-          document.querySelectorAll('.tree-children').forEach(container => {
-              if (!container.classList.contains('collapsed')) {
-                  container.style.maxHeight = container.scrollHeight + 'px';
-                  setTimeout(() => {
-                      container.style.maxHeight = '0';
-                      container.classList.add('collapsed');
-                  }, 10);
+            function pickSeed(candidates) {
+              const sorted = [...candidates].sort(
+                (a, b) => degree(b) - degree(a)
+              );
+              return sorted[0] || null;
+            }
+
+            const preferredSeed =
+              (selectedFlowKey &&
+                keys.includes(selectedFlowKey) &&
+                selectedFlowKey) ||
+              (keys.includes("main") && "main") ||
+              pickSeed(keys);
+
+            const seeds = [];
+            if (preferredSeed) {
+              seeds.push(preferredSeed);
+            }
+
+            while (visited.size < keys.length) {
+              let seed = seeds.pop();
+              if (!seed || visited.has(seed)) {
+                const remaining = keys.filter((k) => !visited.has(k));
+                seed = pickSeed(remaining);
               }
+              if (!seed) break;
+
+              const queue = [{ key: seed, level: 0 }];
+              visited.add(seed);
+              if (!levelByKey.has(seed)) {
+                levelByKey.set(seed, 0);
+              }
+
+              while (queue.length) {
+                const current = queue.shift();
+                const currentLevel =
+                  levelByKey.get(current.key) ?? current.level;
+                const nextNodes = Array.from(
+                  neighbors.get(current.key) || []
+                ).sort((a, b) => degree(b) - degree(a));
+
+                nextNodes.forEach((nextKey) => {
+                  if (!visited.has(nextKey)) {
+                    visited.add(nextKey);
+                    levelByKey.set(nextKey, currentLevel + 1);
+                    queue.push({ key: nextKey, level: currentLevel + 1 });
+                  }
+                });
+              }
+            }
+
+            keys.forEach((k) => {
+              if (!levelByKey.has(k)) {
+                levelByKey.set(k, 0);
+              }
+            });
+
+            const ordered = keys
+              .map((key) => ({
+                key,
+                level: levelByKey.get(key) || 0,
+                side: (levelByKey.get(key) || 0) % 2 === 0 ? "left" : "right",
+              }))
+              .sort((a, b) => {
+                if (a.side !== b.side) return a.side === "left" ? -1 : 1;
+                if (a.level !== b.level) return a.level - b.level;
+                return degree(b.key) - degree(a.key);
+              });
+
+            const leftKeys = ordered
+              .filter((entry) => entry.side === "left")
+              .map((entry) => entry.key);
+            const rightKeys = ordered
+              .filter((entry) => entry.side === "right")
+              .map((entry) => entry.key);
+
+            const cardWidth = 320;
+            const yGap = 210;
+            const leftX = 100;
+            const rightX = 940;
+            const stageWidth = 1400;
+            const centerX = stageWidth / 2;
+            const positions = new Map();
+            ordered.forEach((entry) => {
+              const row =
+                entry.side === "left"
+                  ? leftKeys.indexOf(entry.key)
+                  : rightKeys.indexOf(entry.key);
+              positions.set(entry.key, {
+                x: entry.side === "left" ? leftX : rightX,
+                y: 80 + row * yGap,
+                side: entry.side,
+              });
+            });
+
+            const stageHeight = Math.max(
+              900,
+              120 + Math.max(leftKeys.length, rightKeys.length) * yGap
+            );
+
+            const edgeMap = new Map();
+            relations.forEach((r) => {
+              const edgeKey = `${r.fromSubflow}=>${r.toSubflow}`;
+              edgeMap.set(edgeKey, (edgeMap.get(edgeKey) || 0) + 1);
+            });
+
+            const edges = Array.from(edgeMap.entries())
+              .map(([edgeKey, count]) => {
+                const [fromKey, toKey] = edgeKey.split("=>");
+                const from = positions.get(fromKey);
+                const to = positions.get(toKey);
+                if (!from || !to) return "";
+                const x1 = from.side === "left" ? from.x + cardWidth : from.x;
+                const y1 = from.y + 60;
+                const x2 = to.side === "left" ? to.x + cardWidth : to.x;
+                const y2 = to.y + 60;
+                const isActiveByCall =
+                  !!selectedCall &&
+                  selectedCall.fromSubflow === fromKey &&
+                  selectedCall.toSubflow === toKey;
+                const isActiveByFlow =
+                  !!selectedFlowKey &&
+                  (selectedFlowKey === fromKey || selectedFlowKey === toKey);
+                const isActive = isActiveByCall || isActiveByFlow;
+                const hasSelection = !!selectedCall || !!selectedFlowKey;
+                const stroke = isActive ? "#f97316" : "#2dd4bf";
+                const opacity = hasSelection ? (isActive ? 1 : 0.2) : 0.85;
+                return `<path d="M ${x1} ${y1} C ${centerX} ${y1}, ${centerX} ${y2}, ${x2} ${y2}" fill="none" marker-end="url(#call-arrowhead)" stroke="${stroke}" stroke-width="${Math.min(
+                  2 + count * 0.25,
+                  6
+                )}" stroke-dasharray="8 5" opacity="${opacity}"></path>`;
+              })
+              .join("");
+
+            const cards = ordered
+              .map((entry) => {
+                const key = entry.key;
+                const pos = positions.get(key);
+                const calls = relationCountByKey.get(key) || 0;
+                const count = canvasNodes.filter(
+                  (n) => (n.subflowKey || "main") === key
+                ).length;
+                const isHighlighted =
+                  (!!selectedCall &&
+                    (selectedCall.fromSubflow === key ||
+                      selectedCall.toSubflow === key)) ||
+                  (!!selectedFlowKey && selectedFlowKey === key);
+                const toneClass =
+                  key === "main"
+                    ? "bg-teal-600 hover:bg-teal-700 border-teal-300 text-white"
+                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800";
+                const textSubClass =
+                  key === "main" ? "text-teal-100" : "text-slate-500";
+                const inCalls = incomingCountByKey.get(key) || 0;
+                return `
+                <button data-subflow-key="${escapeHtml(
+                  key
+                )}" class="high-flow-card absolute ${toneClass} border-2 rounded-2xl p-6 text-left shadow-lg ${
+                  isHighlighted
+                    ? "ring-4 ring-orange-200 shadow-orange-200/80"
+                    : ""
+                }" style="left:${pos.x}px; top:${
+                  pos.y
+                }px; width:${cardWidth}px;">
+                  <p class="text-[11px] uppercase tracking-wide ${textSubClass}">Call Level ${
+                  entry.level
+                }</p>
+                  <p class="text-2xl font-bold leading-tight mt-1">${escapeHtml(
+                    subflowName(key)
+                  )}</p>
+                  <p class="mt-2 text-sm ${textSubClass}">Components: ${count}</p>
+                  <p class="mt-1 text-sm ${textSubClass}">Calls Out: ${calls} | Calls In: ${inCalls}</p>
+                </button>`;
+              })
+              .join("");
+
+            const headers = `
+              <div class="absolute" style="left:${leftX}px; top:20px; width:${cardWidth}px;">
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Flow Group A</p>
+              </div>
+              <div class="absolute" style="left:${rightX}px; top:20px; width:${cardWidth}px;">
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Flow Group B</p>
+              </div>
+            `;
+
+            viewport.innerHTML = `
+            <div class="relative" style="width:${Math.round(
+              stageWidth * zoomLevel
+            )}px; height:${Math.round(stageHeight * zoomLevel)}px;">
+              <div class="relative" style="width:${stageWidth}px; height:${stageHeight}px; transform:scale(${zoomLevel}); transform-origin: top left;">
+                <svg class="absolute inset-0 pointer-events-none" width="${stageWidth}" height="${stageHeight}">
+                  <defs>
+                    <marker id="call-arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+                      <polygon fill="#2dd4bf" points="0 0, 10 3.5, 0 7"></polygon>
+                    </marker>
+                  </defs>
+                  ${edges}
+                </svg>
+                ${headers}
+                ${cards}
+              </div>
+            </div>
+          `;
+
+            viewport.querySelectorAll(".high-flow-card").forEach((el) => {
+              el.addEventListener("click", () => {
+                const clickedKey = el.getAttribute("data-subflow-key") || "all";
+                if (selectedSubflowFilter === "all") {
+                  selectedFlowKey =
+                    selectedFlowKey === clickedKey ? null : clickedKey;
+                  selectedCall = null;
+                  renderExplorer();
+                  renderCanvas();
+                  return;
+                }
+
+                selectedSubflowFilter = clickedKey;
+                selectedCall = null;
+                selectedFlowKey = null;
+                if (subflowFilter) {
+                  subflowFilter.value = selectedSubflowFilter;
+                }
+                const first = canvasNodes.find(
+                  (n) => (n.subflowKey || "main") === selectedSubflowFilter
+                );
+                if (first) selectedId = first.id;
+                renderExplorer();
+                renderCanvas();
+                renderDetails(allNodes.find((x) => x.id === selectedId));
+              });
+            });
+
+            return;
+          }
+
+          const nodeWidth = 192;
+          const nodeHeight = 120;
+          const xGap = 280;
+          const yGap = 160;
+          const groupGap = 170;
+          const positions = new Map();
+          const subflowMeta = [];
+          const orderedSubflows = [];
+
+          canvasNodes.forEach((node) => {
+            const key = node.subflowKey || "main";
+            if (!orderedSubflows.includes(key)) {
+              orderedSubflows.push(key);
+            }
           });
-          document.querySelectorAll('.expand-toggle').forEach(toggle => {
-              toggle.classList.add('collapsed');
+
+          let yCursor = 80;
+          let maxDepth = 0;
+
+          orderedSubflows.forEach((subKey) => {
+            const subNodes = canvasNodes.filter(
+              (node) => (node.subflowKey || "main") === subKey
+            );
+
+            const depthRows = new Map();
+            subNodes.forEach((node) => {
+              const depth = Math.max(0, node.depth || 0);
+              const row = depthRows.get(depth) || 0;
+              const x = 110 + depth * xGap;
+              const y = yCursor + row * yGap;
+              positions.set(node.id, { x, y });
+              depthRows.set(depth, row + 1);
+              maxDepth = Math.max(maxDepth, depth);
+            });
+
+            const maxRows = Math.max(...Array.from(depthRows.values()), 1);
+            const subHeight = maxRows * yGap + 80;
+            subflowMeta.push({
+              key: subKey,
+              name: subflowName(subKey),
+              top: yCursor - 28,
+              height: subHeight,
+              count: subNodes.length,
+            });
+            yCursor += subHeight + groupGap;
           });
-      }
+
+          const stageHeight = Math.max(1300, yCursor + 80);
+          const stageWidth = Math.max(
+            2000,
+            360 + maxDepth * xGap + nodeWidth + 120
+          );
+
+          const subflowAnchors = new Map();
+          orderedSubflows.forEach((key) => {
+            const nodes = canvasNodes
+              .filter((n) => (n.subflowKey || "main") === key)
+              .map((n) => ({ node: n, pos: positions.get(n.id) }))
+              .filter((x) => x.pos)
+              .sort((a, b) => a.pos.y - b.pos.y);
+            if (nodes.length) {
+              subflowAnchors.set(key, nodes[0].pos);
+            }
+          });
+
+          const edges = canvasNodes
+            .filter((node) => node.parentId && positions.has(node.parentId))
+            .map((node) => {
+              const from = positions.get(node.parentId);
+              const to = positions.get(node.id);
+              const x1 = from.x + nodeWidth;
+              const y1 = from.y + nodeHeight / 2;
+              const x2 = to.x;
+              const y2 = to.y + nodeHeight / 2;
+              const midX = (x1 + x2) / 2;
+              const connected = selectedId
+                ? node.id === selectedId || node.parentId === selectedId
+                : false;
+              const stroke = connected ? "#ef4444" : "#94a3b8";
+              const strokeWidth = connected ? 3 : 2;
+              const opacity = selectedId ? (connected ? 1 : 0.25) : 0.75;
+              return `<path class="flow-edge" d="M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}" fill="none" marker-end="url(#arrowhead)" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-dasharray="${
+                connected ? "0" : "4 4"
+              }" opacity="${opacity}"></path>`;
+            })
+            .join("");
+
+          const callEdges = canvasNodes
+            .map((node) => ({
+              node,
+              targetProcessId: extractTargetProcessId(node),
+            }))
+            .filter(({ targetProcessId }) => !!targetProcessId)
+            .map((node) => {
+              const from = positions.get(node.node.id);
+              const to = subflowAnchors.get(node.targetProcessId);
+              if (!from || !to) {
+                return "";
+              }
+              const x1 = from.x + nodeWidth / 2;
+              const y1 = from.y + nodeHeight;
+              const x2 = to.x + nodeWidth / 2;
+              const y2 = to.y - 10;
+              const active = selectedId && node.node.id === selectedId;
+              return `<path d="M ${x1} ${y1} C ${x1} ${y1 + 40}, ${x2} ${
+                y2 - 40
+              }, ${x2} ${y2}" fill="none" marker-end="url(#call-arrowhead)" stroke="${
+                active ? "#f97316" : "#f59e0b"
+              }" stroke-width="${
+                active ? 3 : 2
+              }" stroke-dasharray="6 4" opacity="${active ? 1 : 0.75}"></path>`;
+            })
+            .join("");
+
+          const subflowBands = subflowMeta
+            .map(
+              (meta) => `
+                <div class="absolute left-8 right-8 border border-slate-200/70 bg-white/50 rounded-2xl" style="top:${
+                  meta.top
+                }px; height:${meta.height}px;">
+                  <div class="absolute -top-3 left-4 px-3 py-1 rounded-full text-[10px] font-semibold bg-white border border-slate-200 text-slate-600">
+                    ${escapeHtml(meta.name)} | Components: ${meta.count}
+                  </div>
+                </div>
+              `
+            )
+            .join("");
+
+          const cards = canvasNodes
+            .map((node) => {
+              const pos = positions.get(node.id);
+              const active = node.id === selectedId;
+              const style = styleForType(node.type);
+              const title = escapeHtml(node.type);
+              const summary = escapeHtml(node.summary || "No summary");
+              return `
+                <div class="absolute" style="left:${pos.x}px; top:${pos.y}px;">
+                  <button data-node-id="${escapeHtml(node.id)}"
+                    class="canvas-node ${
+                      active
+                        ? "bg-sap-blue text-white shadow-xl shadow-blue-200 ring-4 ring-blue-50"
+                        : `bg-white text-slate-900 border ${style.box} shadow-sm hover:shadow-lg hover:-translate-y-1`
+                    } p-4 rounded-2xl w-48 flex flex-col items-center gap-2 transition-all">
+                    <div class="p-3 rounded-xl ${
+                      active ? "bg-white/20 text-white" : style.icon
+                    }">
+                      <span class="material-symbols-outlined">${iconForType(
+                        node.type
+                      )}</span>
+                    </div>
+                    <div class="text-center">
+                      <p class="text-xs font-bold ${
+                        active ? "text-white" : "text-slate-700"
+                      }">${title}</p>
+                      <p class="text-[10px] ${
+                        active ? "text-white/70" : "text-slate-400"
+                      } uppercase font-medium line-clamp-2">${summary}</p>
+                    </div>
+                  </button>
+                </div>`;
+            })
+            .join("");
+
+          viewport.innerHTML = `
+            <div class="relative" style="width:${Math.round(
+              stageWidth * zoomLevel
+            )}px; height:${Math.round(stageHeight * zoomLevel)}px;">
+              <div class="relative" style="width:${stageWidth}px; height:${stageHeight}px; transform:scale(${zoomLevel}); transform-origin: top left;">
+                <svg class="absolute inset-0 pointer-events-none" width="${stageWidth}" height="${stageHeight}">
+                  <defs>
+                    <marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+                      <polygon fill="#cbd5e1" points="0 0, 10 3.5, 0 7"></polygon>
+                    </marker>
+                    <marker id="call-arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+                      <polygon fill="#f59e0b" points="0 0, 10 3.5, 0 7"></polygon>
+                    </marker>
+                  </defs>
+                  ${edges}
+                  ${callEdges}
+                </svg>
+                ${subflowBands}
+                ${
+                  cards ||
+                  '<p class="absolute left-10 top-10 text-sm text-slate-500">No nodes to render.</p>'
+                }
+              </div>
+            </div>
+          `;
+
+          viewport.querySelectorAll(".canvas-node").forEach((el) => {
+            el.addEventListener("click", () => {
+              selectedId = el.getAttribute("data-node-id");
+              updateSelectedCallByNodeId(selectedId);
+              renderExplorer();
+              renderCanvas();
+              renderDetails(
+                canvasNodes.find((x) => x.id === selectedId) ||
+                  allNodes.find((x) => x.id === selectedId)
+              );
+            });
+          });
+        }
+
+        if (searchInput) {
+          searchInput.addEventListener("input", (e) => {
+            const query = String(e.target.value || "")
+              .trim()
+              .toLowerCase();
+            filteredNodes = !query
+              ? allNodes
+              : allNodes.filter(
+                  (node) =>
+                    node.name.toLowerCase().includes(query) ||
+                    node.type.toLowerCase().includes(query) ||
+                    node.summary.toLowerCase().includes(query)
+                );
+
+            if (!filteredNodes.some((x) => x.id === selectedId)) {
+              selectedId = filteredNodes[0]?.id || null;
+            }
+
+            renderExplorer();
+            renderCanvas();
+            renderDetails(
+              filteredNodes.find((x) => x.id === selectedId) ||
+                allNodes.find((x) => x.id === selectedId)
+            );
+          });
+        }
+
+        refreshSubflowFilterOptions();
+        updateSelectedCallByNodeId(selectedId);
+        renderExplorer();
+        renderCanvas();
+        renderDetails(allNodes.find((x) => x.id === selectedId));
+      });
     </script>
   </body>
 </html>

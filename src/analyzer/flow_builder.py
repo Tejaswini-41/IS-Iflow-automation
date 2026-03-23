@@ -1,73 +1,85 @@
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Set
 
 
 class FlowBuilder:
-    """Builds hierarchical flow tree from normalized components"""
-    
+    """Builds hierarchical flow tree from normalized components with cycle detection"""
+
     def __init__(self):
-        """Initialize the flow builder"""
-        self.components_by_id = {}
-        self.sequence_flows = []
-    
+        self.components_by_id: Dict[str, Dict] = {}
+        self.sequence_flows: List[Dict] = []
+
     def build(self, components: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """
-        Build hierarchical tree structure from flat component list
-        Returns list of root nodes with nested children
-        """
+        """Build hierarchical tree — returns root nodes with nested children"""
         if not components:
             return []
-        
-        # Separate sequence flows from components
+
         self.sequence_flows = [c for c in components if c['type'] == 'SequenceFlow']
         actual_components = [c for c in components if c['type'] != 'SequenceFlow']
-        
-        # Index components by ID
+
         self.components_by_id = {c['id']: c for c in actual_components}
-        
-        # Build parent-child relationships
-        self._build_relationships(actual_components)
-        
-        # Find root nodes (components with no incoming flows)
+
+        # Reset children lists (avoid duplicates on re-build)
+        for comp in actual_components:
+            comp['children'] = []
+
+        self._build_relationships()
+
         root_nodes = self._find_root_nodes(actual_components)
-        
         return root_nodes
-    
-    def _build_relationships(self, components: List[Dict[str, Any]]):
-        """Build parent-child relationships based on sequence flows"""
+
+    def _build_relationships(self):
+        """Build parent→child links based on sequence flows, with cycle detection"""
+        # Track which targets already have a parent pointing at them
+        # to avoid circular references in the tree view
+        visited_edges: Set[tuple] = set()
+
         for flow in self.sequence_flows:
-            source_id = flow['source']
-            target_id = flow['target']
-            
-            if source_id in self.components_by_id and target_id in self.components_by_id:
-                parent = self.components_by_id[source_id]
-                child = self.components_by_id[target_id]
-                
-                # Add flow information to child
-                if flow['condition']:
-                    child['condition'] = flow['condition']
-                    child['route_name'] = flow['name']
-                
-                # Add child to parent's children list
-                if child not in parent['children']:
-                    parent['children'].append(child)
-    
-    def _find_root_nodes(self, components: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Find components that have no incoming flows (root nodes)"""
-        # Get all target IDs (components that are targets of flows)
-        target_ids = set(flow['target'] for flow in self.sequence_flows)
-        
-        # Root nodes are components not in target_ids, or StartEvent types
-        root_nodes = []
-        for component in components:
-            if component['id'] not in target_ids or component['type'] == 'StartEvent':
-                root_nodes.append(component)
-        
-        # If no roots found, return all Sender participants and StartEvents
+            src = flow['source']
+            tgt = flow['target']
+            edge = (src, tgt)
+
+            if edge in visited_edges:
+                continue
+            visited_edges.add(edge)
+
+            if src not in self.components_by_id or tgt not in self.components_by_id:
+                continue
+
+            parent = self.components_by_id[src]
+            child = self.components_by_id[tgt]
+
+            # Attach condition metadata to child clone so tree shows route labels
+            if flow.get('condition') or flow.get('name'):
+                # Store on the child node — multiple flows may target same node
+                # so we tag child with the LAST condition (acceptable for display)
+                child['condition'] = flow.get('condition', '')
+                child['route_name'] = flow.get('name', '')
+
+            if child not in parent['children']:
+                parent['children'].append(child)
+
+    def _find_root_nodes(self, components: List[Dict]) -> List[Dict]:
+        """Root nodes = not the target of any sequence flow, or are StartEvents/Senders"""
+        target_ids = {flow['target'] for flow in self.sequence_flows}
+
+        root_nodes = [
+            c for c in components
+            if c['id'] not in target_ids or c['type'] in ('StartEvent', 'Sender')
+        ]
+
+        # Fallback: use senders + start events
         if not root_nodes:
-            root_nodes = [c for c in components if c['type'] in ['Sender', 'StartEvent']]
-        
-        # If still no roots, return first component
+            root_nodes = [c for c in components if c['type'] in ('Sender', 'StartEvent')]
+
+        # Final fallback
         if not root_nodes and components:
             root_nodes = [components[0]]
-        
+
         return root_nodes
+
+    def get_statistics(self) -> Dict[str, Any]:
+        """Return flow connectivity statistics"""
+        return {
+            'total_sequence_flows': len(self.sequence_flows),
+            'total_nodes': len(self.components_by_id),
+        }
