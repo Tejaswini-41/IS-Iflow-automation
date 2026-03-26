@@ -322,13 +322,22 @@ class ComponentExtractor:
                 pass
 
         body_type = props.get('bodyType', '')
-        message_body = props.get('messageBody', '')
+        message_body = (
+            props.get('messageBody', '')
+            or props.get('wrapContent', '')
+            or props.get('bodyExpression', '')
+            or props.get('body', '')
+        )
         if body_type or message_body:
             body_modified = True
             if body_type == 'constant':
                 body_description = 'Sets body to constant value'
             elif body_type == 'expression':
-                body_description = 'Sets body via expression/XPath'
+                if message_body:
+                    preview = (message_body[:120] + '…') if len(message_body) > 120 else message_body
+                    body_description = f'Sets body via expression/XPath: {preview}'
+                else:
+                    body_description = 'Sets body via expression/XPath'
             else:
                 preview = (message_body[:120] + '…') if len(message_body) > 120 else message_body
                 body_description = f'Body: {preview}'

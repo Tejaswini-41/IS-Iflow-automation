@@ -41,6 +41,7 @@ class HTMLGenerator:
                 'complexity': complexity_report or {},
                 'flow_tree': flow_tree,
                 'processes': raw_data.get('processes', []),
+                'message_flows': raw_data.get('message_flows', []),
             },
             indent=2,
             default=str,

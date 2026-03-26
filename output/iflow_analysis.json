@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-03-23T14:03:27.347593",
+    "generated_at": "2026-03-26T13:19:58.191405",
     "filename": "API_CreateGrower.iflw",
     "iflow_name": "Default Collaboration",
     "iflow_description": "",
@@ -273,8 +273,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -520,8 +520,8 @@
                             ],
                             "bodyModified": true,
                             "bodyType": "expression",
-                            "bodyDescription": "Sets body via expression/XPath",
-                            "messageBody": ""
+                            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+                            "messageBody": "${property.InputPayload}"
                           },
                           "children": [
                             {
@@ -810,8 +810,8 @@
                                                         ],
                                                         "bodyModified": true,
                                                         "bodyType": "expression",
-                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                        "messageBody": ""
+                                                        "bodyDescription": "Sets body via expression/XPath: ${property.formattedInputBody}",
+                                                        "messageBody": "${property.formattedInputBody}"
                                                       },
                                                       "children": [
                                                         {
@@ -1105,8 +1105,8 @@
                                                                                         ],
                                                                                         "bodyModified": true,
                                                                                         "bodyType": "expression",
-                                                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                                                        "messageBody": ""
+                                                                                        "bodyDescription": "Sets body via expression/XPath: <root>\n${property.InputPayload}\n${property.sfresponse}\n</root>",
+                                                                                        "messageBody": "<root>\n${property.InputPayload}\n${property.sfresponse}\n</root>"
                                                                                       },
                                                                                       "children": [
                                                                                         {
@@ -1750,8 +1750,8 @@
                                                                                         ],
                                                                                         "bodyModified": true,
                                                                                         "bodyType": "expression",
-                                                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                                                        "messageBody": ""
+                                                                                        "bodyDescription": "Sets body via expression/XPath: <root>\n${property.InputPayload}\n${property.sfresponse}\n</root>",
+                                                                                        "messageBody": "<root>\n${property.InputPayload}\n${property.sfresponse}\n</root>"
                                                                                       },
                                                                                       "children": [
                                                                                         {
@@ -2262,8 +2262,8 @@
                                                         ],
                                                         "bodyModified": true,
                                                         "bodyType": "expression",
-                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                        "messageBody": ""
+                                                        "bodyDescription": "Sets body via expression/XPath: ${property.formattedInputBody}",
+                                                        "messageBody": "${property.formattedInputBody}"
                                                       },
                                                       "children": [
                                                         {
@@ -2557,8 +2557,8 @@
                                                                                         ],
                                                                                         "bodyModified": true,
                                                                                         "bodyType": "expression",
-                                                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                                                        "messageBody": ""
+                                                                                        "bodyDescription": "Sets body via expression/XPath: <root>\n${property.InputPayload}\n${property.sfresponse}\n</root>",
+                                                                                        "messageBody": "<root>\n${property.InputPayload}\n${property.sfresponse}\n</root>"
                                                                                       },
                                                                                       "children": [
                                                                                         {
@@ -3202,8 +3202,8 @@
                                                                                         ],
                                                                                         "bodyModified": true,
                                                                                         "bodyType": "expression",
-                                                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                                                        "messageBody": ""
+                                                                                        "bodyDescription": "Sets body via expression/XPath: <root>\n${property.InputPayload}\n${property.sfresponse}\n</root>",
+                                                                                        "messageBody": "<root>\n${property.InputPayload}\n${property.sfresponse}\n</root>"
                                                                                       },
                                                                                       "children": [
                                                                                         {
@@ -3588,7 +3588,7 @@
                 "bodyModified": true,
                 "bodyType": "constant",
                 "bodyDescription": "Sets body to constant value",
-                "messageBody": ""
+                "messageBody": "{\n  \"status\": \"FAILED\",\n  \"message\": \"null\",\n  \"errMessage\": \"Invalid HTTP Method\"\n}"
               },
               "children": [
                 {
@@ -3672,8 +3672,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -3790,8 +3790,8 @@
                 ],
                 "bodyModified": true,
                 "bodyType": "expression",
-                "bodyDescription": "Sets body via expression/XPath",
-                "messageBody": ""
+                "bodyDescription": "Sets body via expression/XPath: {\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"SOQLQuery\": \"select account__r.GLN__c from SAP_Attributes__c where (EBID_Numbe\u2026",
+                "messageBody": "{\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"SOQLQuery\": \"select account__r.GLN__c from SAP_Attributes__c where (EBID_Number__c in (${property.Partner}) Or account__r.gln__c in (${property.Partner})) and account__r.isActive__c =true\"\n}"
               },
               "children": [
                 {
@@ -4039,8 +4039,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -4198,8 +4198,8 @@
                     ],
                     "bodyModified": true,
                     "bodyType": "expression",
-                    "bodyDescription": "Sets body via expression/XPath",
-                    "messageBody": ""
+                    "bodyDescription": "Sets body via expression/XPath: ${property.setErrorList}",
+                    "messageBody": "${property.setErrorList}"
                   },
                   "children": [
                     {
@@ -4405,8 +4405,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -4551,8 +4551,8 @@
                     ],
                     "bodyModified": true,
                     "bodyType": "expression",
-                    "bodyDescription": "Sets body via expression/XPath",
-                    "messageBody": ""
+                    "bodyDescription": "Sets body via expression/XPath: {\n    \"SFDCOrg\": \"${property.SFDC_Org}\",\n    \"requestPayload\": {\n        \"allOrNone\": \"false\",\n        \"collateSubreques\u2026",
+                    "messageBody": "{\n    \"SFDCOrg\": \"${property.SFDC_Org}\",\n    \"requestPayload\": {\n        \"allOrNone\": \"false\",\n        \"collateSubrequests\": \"false\",\n        \"compositeRequest\": [\n            {\n                \"method\": \"POST\",\n                \"url\": \"/services/data/v43.0/sobjects/GrowerQLMessageQueue__c\",\n        \u2026"
                   },
                   "children": [
                     {
@@ -4585,8 +4585,8 @@
                             ],
                             "bodyModified": true,
                             "bodyType": "expression",
-                            "bodyDescription": "Sets body via expression/XPath",
-                            "messageBody": ""
+                            "bodyDescription": "Sets body via expression/XPath: ${in.body}",
+                            "messageBody": "${in.body}"
                           },
                           "children": [
                             {
@@ -4709,8 +4709,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -4958,8 +4958,8 @@
                             ],
                             "bodyModified": true,
                             "bodyType": "expression",
-                            "bodyDescription": "Sets body via expression/XPath",
-                            "messageBody": ""
+                            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+                            "messageBody": "${property.InputPayload}"
                           },
                           "children": [
                             {
@@ -5213,8 +5213,8 @@
                                                     ],
                                                     "bodyModified": true,
                                                     "bodyType": "expression",
-                                                    "bodyDescription": "Sets body via expression/XPath",
-                                                    "messageBody": ""
+                                                    "bodyDescription": "Sets body via expression/XPath: ${property.formattedInputBody}",
+                                                    "messageBody": "${property.formattedInputBody}"
                                                   },
                                                   "children": [
                                                     {
@@ -5492,8 +5492,8 @@
                                                                                 ],
                                                                                 "bodyModified": true,
                                                                                 "bodyType": "expression",
-                                                                                "bodyDescription": "Sets body via expression/XPath",
-                                                                                "messageBody": ""
+                                                                                "bodyDescription": "Sets body via expression/XPath: <root>\n${property.InputPayload}\n${property.sfresponse}\n</root>",
+                                                                                "messageBody": "<root>\n${property.InputPayload}\n${property.sfresponse}\n</root>"
                                                                               },
                                                                               "children": [
                                                                                 {
@@ -5800,8 +5800,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -5879,8 +5879,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: {\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\"\u2026",
+            "messageBody": "{\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\",\n    \"compositeRequest\": [\n      {\n            \"method\": \"GET\",\n            \"referenceId\": \"buyer\",\n            \"url\": \"/services/data/v46.0/query/?q=SELECT Id, FSAP_id__c, Name F\u2026"
           },
           "children": [
             {
@@ -6189,8 +6189,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -6688,8 +6688,8 @@
                                                         ],
                                                         "bodyModified": true,
                                                         "bodyType": "expression",
-                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                        "messageBody": ""
+                                                        "bodyDescription": "Sets body via expression/XPath: {\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\"\u2026",
+                                                        "messageBody": "{\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\",\n    \"compositeRequest\":[\n      {\n         \"method\":\"GET\",\n         \"referenceId\":\"reseller\",\n         \"url\":\"/services/data/v48.0/query/?q=SELECT id, FSAP_ID__C FROM Account WHER\u2026"
                                                       },
                                                       "children": [
                                                         {
@@ -6784,8 +6784,8 @@
                                                                         ],
                                                                         "bodyModified": true,
                                                                         "bodyType": "expression",
-                                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                                        "messageBody": ""
+                                                                        "bodyDescription": "Sets body via expression/XPath: {\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\"\u2026",
+                                                                        "messageBody": "{\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\",\n    \n   \"compositeRequest\":[\n      {\n         \"method\":\"GET\",\n         \"referenceId\":\"productGTIN\",\n         \"url\":\"/services/data/v48.0/query/?q=SELECT id, EAN_GTIN__c, Brand_US\u2026"
                                                                       },
                                                                       "children": [
                                                                         {
@@ -7325,8 +7325,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -8102,8 +8102,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: {\n        \"faultcode\": \"soapenv:Client\",\n        \"faultstring\": \"Unable to Process Request\",\n        \"reason\": \"Unable t\u2026",
+            "messageBody": "{\n        \"faultcode\": \"soapenv:Client\",\n        \"faultstring\": \"Unable to Process Request\",\n        \"reason\": \"Unable to Process Request\",\n        \"node\":\"Received response code 500 from backend server\",\n        \"path\": \"request-pipeline\"\n}"
           },
           "children": [
             {
@@ -8205,8 +8205,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -8446,8 +8446,8 @@
                                 ],
                                 "bodyModified": true,
                                 "bodyType": "expression",
-                                "bodyDescription": "Sets body via expression/XPath",
-                                "messageBody": ""
+                                "bodyDescription": "Sets body via expression/XPath: {\n        \"faultcode\": \"soapenv:Client\",\n        \"faultstring\": \"Unable to Process Request\",\n        \"reason\": \"Invalid \u2026",
+                                "messageBody": "{\n        \"faultcode\": \"soapenv:Client\",\n        \"faultstring\": \"Unable to Process Request\",\n        \"reason\": \"Invalid Business Process Requested.\",\n        \"node\":\"Received response code 500 from backend server\",\n        \"path\": \"request-pipeline\"\n}"
                               },
                               "children": [
                                 {
@@ -8705,8 +8705,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -8922,8 +8922,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -9030,8 +9030,8 @@
                 ],
                 "bodyModified": true,
                 "bodyType": "expression",
-                "bodyDescription": "Sets body via expression/XPath",
-                "messageBody": ""
+                "bodyDescription": "Sets body via expression/XPath: {\n\t\"syt__Message__c\": \"${property.RequiredFiled}\",\n\t\"syt__Source__c\": \"Mulesoft\",\n\t\"syt__Category__c\": \"CropEdge\",\n  \t\"s\u2026",
+                "messageBody": "{\n\t\"syt__Message__c\": \"${property.RequiredFiled}\",\n\t\"syt__Source__c\": \"Mulesoft\",\n\t\"syt__Category__c\": \"CropEdge\",\n  \t\"syt__subcategory__c\": \"M2M\"\n}"
               },
               "children": [
                 {
@@ -9135,8 +9135,8 @@
                         ],
                         "bodyModified": true,
                         "bodyType": "expression",
-                        "bodyDescription": "Sets body via expression/XPath",
-                        "messageBody": ""
+                        "bodyDescription": "Sets body via expression/XPath: ${in.body}",
+                        "messageBody": "${in.body}"
                       },
                       "children": [
                         {
@@ -9204,8 +9204,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -9347,8 +9347,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -9545,8 +9545,8 @@
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -9671,8 +9671,8 @@
                 ],
                 "bodyModified": true,
                 "bodyType": "expression",
-                "bodyDescription": "Sets body via expression/XPath",
-                "messageBody": ""
+                "bodyDescription": "Sets body via expression/XPath: {\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\"\u2026",
+                "messageBody": "{\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\",\n    \"compositeRequest\": [\n      {\n            \"method\": \"GET\",\n            \"referenceId\": \"reseller\",\n            \"url\": \"/services/data/v48.0/query/?q=SELECT id, FSAP_ID__C FROM\u2026"
               },
               "children": [
                 {

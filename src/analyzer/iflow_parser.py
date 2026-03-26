@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from typing import Dict, List, Any
 import zipfile
 from pathlib import Path
+import html as html_module
 
 
 class IFlowParser:
@@ -103,7 +104,7 @@ class IFlowParser:
                     val_e = prop.find('value')
                     if key_e is not None and val_e is not None:
                         k = key_e.text or ''
-                        v = val_e.text or ''
+                        v = self._extract_value_content(val_e)
                         if k:
                             meta[k] = v
         return meta
@@ -127,7 +128,7 @@ class IFlowParser:
                     val_e = prop.find('value')
                     if key_e is not None and val_e is not None:
                         k = key_e.text or ''
-                        v = val_e.text or ''
+                        v = self._extract_value_content(val_e)
                         if k:
                             properties[k] = v
 
@@ -224,10 +225,27 @@ class IFlowParser:
                 value_elem = prop.find('value')
                 if key_elem is not None and value_elem is not None:
                     key = key_elem.text or ''
-                    value = value_elem.text or ''
+                    value = self._extract_value_content(value_elem)
                     if key:
                         properties[key] = value
         return properties
+
+    def _extract_value_content(self, value_elem: ET.Element) -> str:
+        """Extract property value preserving plain text, CDATA, and nested XML."""
+        if value_elem is None:
+            return ''
+
+        text_value = (value_elem.text or '').strip()
+        if text_value:
+            return html_module.unescape(text_value)
+
+        if list(value_elem):
+            parts = []
+            for child in value_elem:
+                parts.append(ET.tostring(child, encoding='unicode', method='xml'))
+            return html_module.unescape(''.join(parts).strip())
+
+        return ''
 
     def _extract_event_definitions(self, element: ET.Element) -> List[str]:
         """Extract event definition types (error, timer, message, escalation, etc.)"""
@@ -273,7 +291,7 @@ class IFlowParser:
                     value_elem = prop.find('value')
                     if key_elem is not None and value_elem is not None:
                         key = key_elem.text or ''
-                        value = value_elem.text or ''
+                        value = self._extract_value_content(value_elem)
                         if key:
                             properties[key] = value
 

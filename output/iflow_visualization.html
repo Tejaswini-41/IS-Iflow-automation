@@ -159,7 +159,7 @@
             <input
               id="component-search"
               class="w-full bg-slate-100/50 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-sap-blue/20 transition-all placeholder:text-slate-400"
-              placeholder="Search components..."
+              placeholder="Search all extracted data (nodes, variables, flows, connections)..."
               type="text"
             />
             <span
@@ -630,14 +630,23 @@ def Message processData(Message message) {
         const processList = Array.isArray(payload.processes)
           ? payload.processes
           : [];
+        const messageFlowList = Array.isArray(payload.message_flows)
+          ? payload.message_flows
+          : [];
         const processById = new Map(
           processList.map((p) => [p.id, p.name || p.id || "Unnamed Process"])
         );
         const elementToProcess = new Map();
+        const processElementById = new Map();
         processList.forEach((p) => {
           (p.elements || []).forEach((el) => {
             if (el && el.id) {
               elementToProcess.set(el.id, p.id);
+              processElementById.set(el.id, {
+                ...el,
+                processId: p.id,
+                processName: p.name || p.id || "Unnamed Process",
+              });
             }
           });
         });
@@ -693,6 +702,28 @@ def Message processData(Message message) {
             .replace(/>/g, "&gt;")
             .replace(/\"/g, "&quot;")
             .replace(/'/g, "&#39;");
+        }
+        function escapeRegExp(value) {
+          return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        }
+
+        function highlightMatch(value, query = searchQuery) {
+          const safe = escapeHtml(value ?? "");
+          if (!query) {
+            return safe;
+          }
+          const pattern = escapeRegExp(query);
+          if (!pattern) {
+            return safe;
+          }
+          try {
+            return safe.replace(
+              new RegExp(`(${pattern})`, "ig"),
+              '<mark class="bg-yellow-200 text-slate-900 px-0.5 rounded">$1</mark>'
+            );
+          } catch (_) {
+            return safe;
+          }
         }
 
         function flattenTree(nodes, parentId = null, depth = 0, list = []) {
@@ -771,6 +802,32 @@ def Message processData(Message message) {
           );
         }
 
+        function collectSearchTokens(value, bucket = []) {
+          if (value === null || value === undefined) {
+            return bucket;
+          }
+          if (typeof value === "string" || typeof value === "number") {
+            bucket.push(String(value));
+            return bucket;
+          }
+          if (typeof value === "boolean") {
+            bucket.push(value ? "true" : "false");
+            return bucket;
+          }
+          if (Array.isArray(value)) {
+            value.forEach((item) => collectSearchTokens(item, bucket));
+            return bucket;
+          }
+          if (typeof value === "object") {
+            Object.entries(value).forEach(([key, val]) => {
+              bucket.push(String(key));
+              collectSearchTokens(val, bucket);
+            });
+            return bucket;
+          }
+          return bucket;
+        }
+
         function extractTargetProcessId(node) {
           const details = node.details || {};
           const props = details.properties || {};
@@ -788,6 +845,7 @@ def Message processData(Message message) {
         }
 
         const allNodes = flattenTree(roots);
+        const nodeById = new Map(allNodes.map((n) => [n.id, n]));
         let filteredNodes = allNodes;
         let selectedId = allNodes[0]?.id || null;
         let manualExplorerState = null;
@@ -798,6 +856,9 @@ def Message processData(Message message) {
         let selectedSubflowFilter = "all";
         let selectedCall = null;
         let selectedFlowKey = null;
+        let searchQuery = "";
+        let searchMatches = [];
+        let currentSearchMatchIndex = -1;
         const collapsedSubflows = new Set();
 
         const parentToChildren = new Map();
@@ -811,6 +872,182 @@ def Message processData(Message message) {
             childToParent.set(n.id, n.parentId);
           }
         });
+
+        function resolveRefName(refId) {
+          if (!refId) {
+            return "Unknown";
+          }
+          const node = nodeById.get(refId);
+          if (node) {
+            return node.name || refId;
+          }
+          const processEl = processElementById.get(refId);
+          if (processEl) {
+            return processEl.name || processEl.id || refId;
+          }
+          return processById.get(refId) || refId;
+        }
+
+        function buildNodeSearchIndex() {
+          return allNodes.map((node) => {
+            const processEl = processElementById.get(node.id) || {};
+            const tokens = [];
+            collectSearchTokens(node, tokens);
+            collectSearchTokens(processEl, tokens);
+            tokens.push(subflowName(node.subflowKey || "main"));
+            return {
+              node,
+              searchText: tokens.join(" ").toLowerCase(),
+            };
+          });
+        }
+
+        function buildConnectionSearchIndex() {
+          const sequenceEntries = processList.flatMap((process) =>
+            (process.sequence_flows || []).map((flow) => {
+              const source = flow.source || "";
+              const target = flow.target || "";
+              const fromSubflow =
+                elementToProcess.get(source) || process.id || "main";
+              const toSubflow =
+                elementToProcess.get(target) || process.id || "main";
+              const sourceName = resolveRefName(source);
+              const targetName = resolveRefName(target);
+              const tokens = [];
+              collectSearchTokens(flow, tokens);
+              tokens.push(process.name || process.id || "Unnamed Process");
+              tokens.push(sourceName);
+              tokens.push(targetName);
+              return {
+                kind: "sequence",
+                id: flow.id || `${source}->${target}`,
+                name: flow.name || "Sequence Flow",
+                source,
+                target,
+                sourceName,
+                targetName,
+                fromSubflow,
+                toSubflow,
+                flowLabel: process.name || process.id || "Unnamed Process",
+                searchText: tokens.join(" ").toLowerCase(),
+              };
+            })
+          );
+
+          const messageEntries = messageFlowList.map((flow) => {
+            const source = flow.source || "";
+            const target = flow.target || "";
+            const fromSubflow = elementToProcess.get(source) || "main";
+            const toSubflow = elementToProcess.get(target) || "main";
+            const sourceName = resolveRefName(source);
+            const targetName = resolveRefName(target);
+            const tokens = [];
+            collectSearchTokens(flow, tokens);
+            tokens.push(sourceName);
+            tokens.push(targetName);
+            return {
+              kind: "message",
+              id: flow.id || `${source}->${target}`,
+              name: flow.name || "Message Flow",
+              source,
+              target,
+              sourceName,
+              targetName,
+              fromSubflow,
+              toSubflow,
+              flowLabel: "Message Flow",
+              searchText: tokens.join(" ").toLowerCase(),
+            };
+          });
+
+          return [...sequenceEntries, ...messageEntries];
+        }
+
+        const nodeSearchIndex = buildNodeSearchIndex();
+        const connectionSearchIndex = buildConnectionSearchIndex();
+
+        function applySearch(rawQuery) {
+          searchQuery = String(rawQuery || "")
+            .trim()
+            .toLowerCase();
+
+          if (!searchQuery) {
+            filteredNodes = allNodes;
+            searchMatches = [];
+            currentSearchMatchIndex = -1;
+            return;
+          }
+
+          const matchedNodeEntries = nodeSearchIndex.filter((entry) =>
+            entry.searchText.includes(searchQuery)
+          );
+          const matchedConnectionEntries = connectionSearchIndex.filter(
+            (entry) => entry.searchText.includes(searchQuery)
+          );
+
+          const matchedNodeIds = new Set(
+            matchedNodeEntries.map((entry) => entry.node.id)
+          );
+          matchedConnectionEntries.forEach((entry) => {
+            if (entry.source && nodeById.has(entry.source)) {
+              matchedNodeIds.add(entry.source);
+            }
+            if (entry.target && nodeById.has(entry.target)) {
+              matchedNodeIds.add(entry.target);
+            }
+          });
+
+          filteredNodes = allNodes.filter((node) =>
+            matchedNodeIds.has(node.id)
+          );
+
+          const nodeMatches = matchedNodeEntries.slice(0, 40).map((entry) => ({
+            kind: "node",
+            id: entry.node.id,
+            title: `${entry.node.name} (${entry.node.type})`,
+            subtitle: `Flow: ${subflowName(entry.node.subflowKey || "main")}`,
+            nodeId: entry.node.id,
+          }));
+
+          const connectionMatches = matchedConnectionEntries
+            .slice(0, 40)
+            .map((entry) => ({
+              kind: entry.kind,
+              id: entry.id,
+              title: `${entry.sourceName} -> ${entry.targetName}`,
+              subtitle: `${entry.name} | ${subflowName(
+                entry.fromSubflow
+              )} -> ${subflowName(entry.toSubflow)}`,
+              nodeId: entry.source || entry.target || "",
+              sourceSubflow: entry.fromSubflow,
+              targetSubflow: entry.toSubflow,
+            }));
+
+          searchMatches = [...nodeMatches, ...connectionMatches].slice(0, 80);
+          if (!searchMatches.length) {
+            currentSearchMatchIndex = -1;
+          } else if (currentSearchMatchIndex >= searchMatches.length) {
+            currentSearchMatchIndex = 0;
+          }
+        }
+
+        function activateSearchMatch(index) {
+          if (!explorerContent || !searchMatches.length) {
+            return;
+          }
+          const buttons = Array.from(
+            explorerContent.querySelectorAll(".search-match")
+          );
+          if (!buttons.length) {
+            return;
+          }
+          const safeIndex =
+            ((index % buttons.length) + buttons.length) % buttons.length;
+          currentSearchMatchIndex = safeIndex;
+          const targetBtn = buttons[safeIndex];
+          targetBtn.scrollIntoView({ block: "nearest" });
+          targetBtn.click();
+        }
 
         function updateZoomLabel() {
           if (zoomLabel) {
@@ -999,20 +1236,26 @@ def Message processData(Message message) {
           }
 
           detailTypeBadge.textContent = node.type;
-          detailNodeName.textContent = node.name;
+          detailNodeName.innerHTML = highlightMatch(node.name);
           const flowLabel = subflowName(node.subflowKey);
           const targetProcessId = extractTargetProcessId(node);
           const callLabel = targetProcessId
             ? ` | Calls -> ${subflowName(targetProcessId)}`
             : "";
-          detailNodeSummary.textContent = `${flowLabel} | ${
-            node.summary ||
-            metadata.iflow_description ||
-            metadata.filename ||
-            ""
-          }${callLabel}`;
-          detailAdapter.textContent = node.details.adapterType || "N/A";
-          detailEndpoint.textContent = endpointFromDetails(node.details);
+          detailNodeSummary.innerHTML = highlightMatch(
+            `${flowLabel} | ${
+              node.summary ||
+              metadata.iflow_description ||
+              metadata.filename ||
+              ""
+            }${callLabel}`
+          );
+          detailAdapter.innerHTML = highlightMatch(
+            node.details.adapterType || "N/A"
+          );
+          detailEndpoint.innerHTML = highlightMatch(
+            endpointFromDetails(node.details)
+          );
 
           const entries = Object.entries(node.details || {})
             .filter(
@@ -1033,12 +1276,14 @@ def Message processData(Message message) {
             detailParams.innerHTML = entries
               .map(
                 ([k, v]) =>
-                  `\n                  <div class="py-3 flex justify-between items-center gap-4">\n                    <span class="text-sm text-slate-500">${escapeHtml(
-                    k
-                  )}</span>\n                    <span class="text-sm font-semibold text-slate-800 text-right break-all">${escapeHtml(
+                  `\n                  <div class="py-3 flex justify-between items-center gap-4">\n                    <span class="text-sm text-slate-500">${highlightMatch(
+                    k,
+                    searchQuery
+                  )}</span>\n                    <span class="text-sm font-semibold text-slate-800 text-right break-all">${highlightMatch(
                     Array.isArray(v)
                       ? v.join(", ")
-                      : JSON.stringify(v).replace(/^\"|\"$/g, "")
+                      : JSON.stringify(v).replace(/^\"|\"$/g, ""),
+                    searchQuery
                   )}</span>\n                  </div>`
               )
               .join("");
@@ -1095,9 +1340,9 @@ def Message processData(Message message) {
                         <span class="w-1.5 h-1.5 rounded-full ${
                           active ? "bg-sap-blue" : "bg-slate-300"
                         }"></span>
-                        ${escapeHtml(node.name)}
+                        ${highlightMatch(node.name)}
                       </span>
-                      <span class="text-[10px] text-slate-400">${escapeHtml(
+                      <span class="text-[10px] text-slate-400">${highlightMatch(
                         node.type
                       )}</span>
                     </button>`;
@@ -1159,16 +1404,47 @@ def Message processData(Message message) {
                       ? "bg-orange-50 border border-orange-200"
                       : "hover:bg-slate-50"
                   }">
-                  <span class="font-semibold text-slate-700">${escapeHtml(
+                  <span class="font-semibold text-slate-700">${highlightMatch(
                     r.sourceNodeName
                   )}</span>
-                  <span class="text-slate-500 block">${escapeHtml(
+                  <span class="text-slate-500 block">${highlightMatch(
                     subflowName(r.fromSubflow)
-                  )} -> ${escapeHtml(subflowName(r.toSubflow))}</span>
+                  )} -> ${highlightMatch(subflowName(r.toSubflow))}</span>
                 </button>`
                 )
                 .join("")
             : '<p class="text-xs text-slate-400 px-2 py-1">No subflow calls detected in this view.</p>';
+
+          const searchHtml = searchQuery
+            ? searchMatches.length
+              ? searchMatches
+                  .map(
+                    (match, index) => `
+                <button class="search-match w-full text-left p-2 rounded-lg border ${
+                  currentSearchMatchIndex === index
+                    ? "bg-yellow-50 border-yellow-300"
+                    : "border-transparent hover:bg-slate-50 hover:border-slate-200"
+                }"
+                  data-match-index="${index}"
+                  data-match-kind="${escapeHtml(match.kind)}"
+                  data-node-id="${escapeHtml(match.nodeId || "")}"
+                  data-source-subflow="${escapeHtml(
+                    match.sourceSubflow || ""
+                  )}" 
+                  data-target-subflow="${escapeHtml(
+                    match.targetSubflow || ""
+                  )}">
+                  <span class="text-xs font-semibold text-slate-700">${highlightMatch(
+                    match.title
+                  )}</span>
+                  <span class="text-[10px] text-slate-500 block">${highlightMatch(
+                    match.subtitle
+                  )}</span>
+                </button>`
+                  )
+                  .join("")
+              : '<p class="text-xs text-slate-400 px-2 py-1">No extracted data matched this search.</p>'
+            : '<p class="text-xs text-slate-400 px-2 py-1">Type in search to find variables, properties, sequence/message flows, and nodes.</p>';
 
           explorerContent.innerHTML = `
             <div>
@@ -1208,6 +1484,10 @@ def Message processData(Message message) {
             <div>
               <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-3">Flow Calls</p>
               <div class="space-y-1 max-h-52 overflow-auto hide-scrollbar">${relationHtml}</div>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-3">Search Matches</p>
+              <div class="space-y-1 max-h-52 overflow-auto hide-scrollbar">${searchHtml}</div>
             </div>
           `;
 
@@ -1269,6 +1549,55 @@ def Message processData(Message message) {
               renderExplorer();
               renderCanvas();
               renderDetails(allNodes.find((x) => x.id === selectedId));
+            });
+          });
+
+          explorerContent.querySelectorAll(".search-match").forEach((el) => {
+            el.addEventListener("click", () => {
+              currentSearchMatchIndex = Number(
+                el.getAttribute("data-match-index") || -1
+              );
+              const kind = el.getAttribute("data-match-kind") || "node";
+              const nodeId = el.getAttribute("data-node-id") || "";
+              const sourceSubflow =
+                el.getAttribute("data-source-subflow") || "";
+              const targetSubflow =
+                el.getAttribute("data-target-subflow") || "";
+
+              if (sourceSubflow && targetSubflow) {
+                selectedCall = {
+                  fromSubflow: sourceSubflow,
+                  toSubflow: targetSubflow,
+                };
+                selectedFlowKey = null;
+              } else {
+                selectedCall = null;
+              }
+
+              if (kind !== "node" && sourceSubflow) {
+                selectedSubflowFilter = sourceSubflow;
+                if (subflowFilter) {
+                  subflowFilter.value = selectedSubflowFilter;
+                }
+              }
+
+              if (nodeId && nodeById.has(nodeId)) {
+                selectedId = nodeId;
+              } else if (targetSubflow) {
+                const firstInTarget = filteredNodes.find(
+                  (n) => (n.subflowKey || "main") === targetSubflow
+                );
+                if (firstInTarget) {
+                  selectedId = firstInTarget.id;
+                }
+              }
+
+              renderExplorer();
+              renderCanvas();
+              renderDetails(
+                filteredNodes.find((x) => x.id === selectedId) ||
+                  allNodes.find((x) => x.id === selectedId)
+              );
             });
           });
         }
@@ -1483,7 +1812,7 @@ def Message processData(Message message) {
                   <p class="text-[11px] uppercase tracking-wide ${textSubClass}">Call Level ${
                   entry.level
                 }</p>
-                  <p class="text-2xl font-bold leading-tight mt-1">${escapeHtml(
+                  <p class="text-2xl font-bold leading-tight mt-1">${highlightMatch(
                     subflowName(key)
                   )}</p>
                   <p class="mt-2 text-sm ${textSubClass}">Components: ${count}</p>
@@ -1684,8 +2013,8 @@ def Message processData(Message message) {
               const pos = positions.get(node.id);
               const active = node.id === selectedId;
               const style = styleForType(node.type);
-              const title = escapeHtml(node.type);
-              const summary = escapeHtml(node.summary || "No summary");
+              const title = node.type;
+              const summary = node.summary || "No summary";
               return `
                 <div class="absolute" style="left:${pos.x}px; top:${pos.y}px;">
                   <button data-node-id="${escapeHtml(node.id)}"
@@ -1704,10 +2033,12 @@ def Message processData(Message message) {
                     <div class="text-center">
                       <p class="text-xs font-bold ${
                         active ? "text-white" : "text-slate-700"
-                      }">${title}</p>
+                      }">${highlightMatch(title)}</p>
                       <p class="text-[10px] ${
                         active ? "text-white/70" : "text-slate-400"
-                      } uppercase font-medium line-clamp-2">${summary}</p>
+                      } uppercase font-medium line-clamp-2">${highlightMatch(
+                summary
+              )}</p>
                     </div>
                   </button>
                 </div>`;
@@ -1756,17 +2087,8 @@ def Message processData(Message message) {
 
         if (searchInput) {
           searchInput.addEventListener("input", (e) => {
-            const query = String(e.target.value || "")
-              .trim()
-              .toLowerCase();
-            filteredNodes = !query
-              ? allNodes
-              : allNodes.filter(
-                  (node) =>
-                    node.name.toLowerCase().includes(query) ||
-                    node.type.toLowerCase().includes(query) ||
-                    node.summary.toLowerCase().includes(query)
-                );
+            currentSearchMatchIndex = -1;
+            applySearch(e.target.value || "");
 
             if (!filteredNodes.some((x) => x.id === selectedId)) {
               selectedId = filteredNodes[0]?.id || null;
@@ -1779,8 +2101,28 @@ def Message processData(Message message) {
                 allNodes.find((x) => x.id === selectedId)
             );
           });
+
+          searchInput.addEventListener("keydown", (e) => {
+            if (e.key !== "Enter") {
+              return;
+            }
+            if (!searchQuery || !searchMatches.length) {
+              return;
+            }
+
+            e.preventDefault();
+            const step = e.shiftKey ? -1 : 1;
+            const nextIndex =
+              currentSearchMatchIndex < 0
+                ? step > 0
+                  ? 0
+                  : searchMatches.length - 1
+                : currentSearchMatchIndex + step;
+            activateSearchMatch(nextIndex);
+          });
         }
 
+        applySearch("");
         refreshSubflowFilterOptions();
         updateSelectedCallByNodeId(selectedId);
         renderExplorer();
@@ -2080,8 +2422,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -2327,8 +2669,8 @@ def Message processData(Message message) {
                             ],
                             "bodyModified": true,
                             "bodyType": "expression",
-                            "bodyDescription": "Sets body via expression/XPath",
-                            "messageBody": ""
+                            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+                            "messageBody": "${property.InputPayload}"
                           },
                           "children": [
                             {
@@ -2617,8 +2959,8 @@ def Message processData(Message message) {
                                                         ],
                                                         "bodyModified": true,
                                                         "bodyType": "expression",
-                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                        "messageBody": ""
+                                                        "bodyDescription": "Sets body via expression/XPath: ${property.formattedInputBody}",
+                                                        "messageBody": "${property.formattedInputBody}"
                                                       },
                                                       "children": [
                                                         {
@@ -2912,8 +3254,8 @@ def Message processData(Message message) {
                                                                                         ],
                                                                                         "bodyModified": true,
                                                                                         "bodyType": "expression",
-                                                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                                                        "messageBody": ""
+                                                                                        "bodyDescription": "Sets body via expression/XPath: <root>\n${property.InputPayload}\n${property.sfresponse}\n<\/root>",
+                                                                                        "messageBody": "<root>\n${property.InputPayload}\n${property.sfresponse}\n<\/root>"
                                                                                       },
                                                                                       "children": [
                                                                                         {
@@ -3557,8 +3899,8 @@ def Message processData(Message message) {
                                                                                         ],
                                                                                         "bodyModified": true,
                                                                                         "bodyType": "expression",
-                                                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                                                        "messageBody": ""
+                                                                                        "bodyDescription": "Sets body via expression/XPath: <root>\n${property.InputPayload}\n${property.sfresponse}\n<\/root>",
+                                                                                        "messageBody": "<root>\n${property.InputPayload}\n${property.sfresponse}\n<\/root>"
                                                                                       },
                                                                                       "children": [
                                                                                         {
@@ -4069,8 +4411,8 @@ def Message processData(Message message) {
                                                         ],
                                                         "bodyModified": true,
                                                         "bodyType": "expression",
-                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                        "messageBody": ""
+                                                        "bodyDescription": "Sets body via expression/XPath: ${property.formattedInputBody}",
+                                                        "messageBody": "${property.formattedInputBody}"
                                                       },
                                                       "children": [
                                                         {
@@ -4364,8 +4706,8 @@ def Message processData(Message message) {
                                                                                         ],
                                                                                         "bodyModified": true,
                                                                                         "bodyType": "expression",
-                                                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                                                        "messageBody": ""
+                                                                                        "bodyDescription": "Sets body via expression/XPath: <root>\n${property.InputPayload}\n${property.sfresponse}\n<\/root>",
+                                                                                        "messageBody": "<root>\n${property.InputPayload}\n${property.sfresponse}\n<\/root>"
                                                                                       },
                                                                                       "children": [
                                                                                         {
@@ -5009,8 +5351,8 @@ def Message processData(Message message) {
                                                                                         ],
                                                                                         "bodyModified": true,
                                                                                         "bodyType": "expression",
-                                                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                                                        "messageBody": ""
+                                                                                        "bodyDescription": "Sets body via expression/XPath: <root>\n${property.InputPayload}\n${property.sfresponse}\n<\/root>",
+                                                                                        "messageBody": "<root>\n${property.InputPayload}\n${property.sfresponse}\n<\/root>"
                                                                                       },
                                                                                       "children": [
                                                                                         {
@@ -5395,7 +5737,7 @@ def Message processData(Message message) {
                 "bodyModified": true,
                 "bodyType": "constant",
                 "bodyDescription": "Sets body to constant value",
-                "messageBody": ""
+                "messageBody": "{\n  \"status\": \"FAILED\",\n  \"message\": \"null\",\n  \"errMessage\": \"Invalid HTTP Method\"\n}"
               },
               "children": [
                 {
@@ -5479,8 +5821,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -5597,8 +5939,8 @@ def Message processData(Message message) {
                 ],
                 "bodyModified": true,
                 "bodyType": "expression",
-                "bodyDescription": "Sets body via expression/XPath",
-                "messageBody": ""
+                "bodyDescription": "Sets body via expression/XPath: {\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"SOQLQuery\": \"select account__r.GLN__c from SAP_Attributes__c where (EBID_Numbe\u2026",
+                "messageBody": "{\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"SOQLQuery\": \"select account__r.GLN__c from SAP_Attributes__c where (EBID_Number__c in (${property.Partner}) Or account__r.gln__c in (${property.Partner})) and account__r.isActive__c =true\"\n}"
               },
               "children": [
                 {
@@ -5846,8 +6188,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -6005,8 +6347,8 @@ def Message processData(Message message) {
                     ],
                     "bodyModified": true,
                     "bodyType": "expression",
-                    "bodyDescription": "Sets body via expression/XPath",
-                    "messageBody": ""
+                    "bodyDescription": "Sets body via expression/XPath: ${property.setErrorList}",
+                    "messageBody": "${property.setErrorList}"
                   },
                   "children": [
                     {
@@ -6212,8 +6554,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -6358,8 +6700,8 @@ def Message processData(Message message) {
                     ],
                     "bodyModified": true,
                     "bodyType": "expression",
-                    "bodyDescription": "Sets body via expression/XPath",
-                    "messageBody": ""
+                    "bodyDescription": "Sets body via expression/XPath: {\n    \"SFDCOrg\": \"${property.SFDC_Org}\",\n    \"requestPayload\": {\n        \"allOrNone\": \"false\",\n        \"collateSubreques\u2026",
+                    "messageBody": "{\n    \"SFDCOrg\": \"${property.SFDC_Org}\",\n    \"requestPayload\": {\n        \"allOrNone\": \"false\",\n        \"collateSubrequests\": \"false\",\n        \"compositeRequest\": [\n            {\n                \"method\": \"POST\",\n                \"url\": \"/services/data/v43.0/sobjects/GrowerQLMessageQueue__c\",\n        \u2026"
                   },
                   "children": [
                     {
@@ -6392,8 +6734,8 @@ def Message processData(Message message) {
                             ],
                             "bodyModified": true,
                             "bodyType": "expression",
-                            "bodyDescription": "Sets body via expression/XPath",
-                            "messageBody": ""
+                            "bodyDescription": "Sets body via expression/XPath: ${in.body}",
+                            "messageBody": "${in.body}"
                           },
                           "children": [
                             {
@@ -6516,8 +6858,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -6765,8 +7107,8 @@ def Message processData(Message message) {
                             ],
                             "bodyModified": true,
                             "bodyType": "expression",
-                            "bodyDescription": "Sets body via expression/XPath",
-                            "messageBody": ""
+                            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+                            "messageBody": "${property.InputPayload}"
                           },
                           "children": [
                             {
@@ -7020,8 +7362,8 @@ def Message processData(Message message) {
                                                     ],
                                                     "bodyModified": true,
                                                     "bodyType": "expression",
-                                                    "bodyDescription": "Sets body via expression/XPath",
-                                                    "messageBody": ""
+                                                    "bodyDescription": "Sets body via expression/XPath: ${property.formattedInputBody}",
+                                                    "messageBody": "${property.formattedInputBody}"
                                                   },
                                                   "children": [
                                                     {
@@ -7299,8 +7641,8 @@ def Message processData(Message message) {
                                                                                 ],
                                                                                 "bodyModified": true,
                                                                                 "bodyType": "expression",
-                                                                                "bodyDescription": "Sets body via expression/XPath",
-                                                                                "messageBody": ""
+                                                                                "bodyDescription": "Sets body via expression/XPath: <root>\n${property.InputPayload}\n${property.sfresponse}\n<\/root>",
+                                                                                "messageBody": "<root>\n${property.InputPayload}\n${property.sfresponse}\n<\/root>"
                                                                               },
                                                                               "children": [
                                                                                 {
@@ -7607,8 +7949,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -7686,8 +8028,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: {\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\"\u2026",
+            "messageBody": "{\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\",\n    \"compositeRequest\": [\n      {\n            \"method\": \"GET\",\n            \"referenceId\": \"buyer\",\n            \"url\": \"/services/data/v46.0/query/?q=SELECT Id, FSAP_id__c, Name F\u2026"
           },
           "children": [
             {
@@ -7996,8 +8338,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -8495,8 +8837,8 @@ def Message processData(Message message) {
                                                         ],
                                                         "bodyModified": true,
                                                         "bodyType": "expression",
-                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                        "messageBody": ""
+                                                        "bodyDescription": "Sets body via expression/XPath: {\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\"\u2026",
+                                                        "messageBody": "{\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\",\n    \"compositeRequest\":[\n      {\n         \"method\":\"GET\",\n         \"referenceId\":\"reseller\",\n         \"url\":\"/services/data/v48.0/query/?q=SELECT id, FSAP_ID__C FROM Account WHER\u2026"
                                                       },
                                                       "children": [
                                                         {
@@ -8591,8 +8933,8 @@ def Message processData(Message message) {
                                                                         ],
                                                                         "bodyModified": true,
                                                                         "bodyType": "expression",
-                                                                        "bodyDescription": "Sets body via expression/XPath",
-                                                                        "messageBody": ""
+                                                                        "bodyDescription": "Sets body via expression/XPath: {\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\"\u2026",
+                                                                        "messageBody": "{\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\",\n    \n   \"compositeRequest\":[\n      {\n         \"method\":\"GET\",\n         \"referenceId\":\"productGTIN\",\n         \"url\":\"/services/data/v48.0/query/?q=SELECT id, EAN_GTIN__c, Brand_US\u2026"
                                                                       },
                                                                       "children": [
                                                                         {
@@ -9132,8 +9474,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -9909,8 +10251,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: {\n        \"faultcode\": \"soapenv:Client\",\n        \"faultstring\": \"Unable to Process Request\",\n        \"reason\": \"Unable t\u2026",
+            "messageBody": "{\n        \"faultcode\": \"soapenv:Client\",\n        \"faultstring\": \"Unable to Process Request\",\n        \"reason\": \"Unable to Process Request\",\n        \"node\":\"Received response code 500 from backend server\",\n        \"path\": \"request-pipeline\"\n}"
           },
           "children": [
             {
@@ -10012,8 +10354,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -10253,8 +10595,8 @@ def Message processData(Message message) {
                                 ],
                                 "bodyModified": true,
                                 "bodyType": "expression",
-                                "bodyDescription": "Sets body via expression/XPath",
-                                "messageBody": ""
+                                "bodyDescription": "Sets body via expression/XPath: {\n        \"faultcode\": \"soapenv:Client\",\n        \"faultstring\": \"Unable to Process Request\",\n        \"reason\": \"Invalid \u2026",
+                                "messageBody": "{\n        \"faultcode\": \"soapenv:Client\",\n        \"faultstring\": \"Unable to Process Request\",\n        \"reason\": \"Invalid Business Process Requested.\",\n        \"node\":\"Received response code 500 from backend server\",\n        \"path\": \"request-pipeline\"\n}"
                               },
                               "children": [
                                 {
@@ -10512,8 +10854,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -10729,8 +11071,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -10837,8 +11179,8 @@ def Message processData(Message message) {
                 ],
                 "bodyModified": true,
                 "bodyType": "expression",
-                "bodyDescription": "Sets body via expression/XPath",
-                "messageBody": ""
+                "bodyDescription": "Sets body via expression/XPath: {\n\t\"syt__Message__c\": \"${property.RequiredFiled}\",\n\t\"syt__Source__c\": \"Mulesoft\",\n\t\"syt__Category__c\": \"CropEdge\",\n  \t\"s\u2026",
+                "messageBody": "{\n\t\"syt__Message__c\": \"${property.RequiredFiled}\",\n\t\"syt__Source__c\": \"Mulesoft\",\n\t\"syt__Category__c\": \"CropEdge\",\n  \t\"syt__subcategory__c\": \"M2M\"\n}"
               },
               "children": [
                 {
@@ -10942,8 +11284,8 @@ def Message processData(Message message) {
                         ],
                         "bodyModified": true,
                         "bodyType": "expression",
-                        "bodyDescription": "Sets body via expression/XPath",
-                        "messageBody": ""
+                        "bodyDescription": "Sets body via expression/XPath: ${in.body}",
+                        "messageBody": "${in.body}"
                       },
                       "children": [
                         {
@@ -11011,8 +11353,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -11154,8 +11496,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -11352,8 +11694,8 @@ def Message processData(Message message) {
             ],
             "bodyModified": true,
             "bodyType": "expression",
-            "bodyDescription": "Sets body via expression/XPath",
-            "messageBody": ""
+            "bodyDescription": "Sets body via expression/XPath: ${property.InputPayload}",
+            "messageBody": "${property.InputPayload}"
           },
           "children": [
             {
@@ -11478,8 +11820,8 @@ def Message processData(Message message) {
                 ],
                 "bodyModified": true,
                 "bodyType": "expression",
-                "bodyDescription": "Sets body via expression/XPath",
-                "messageBody": ""
+                "bodyDescription": "Sets body via expression/XPath: {\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\"\u2026",
+                "messageBody": "{\n  \"SFDCOrg\": \"${property.SFDC_Org}\",\n  \"requestPayload\": {\n    \"allOrNone\": \"false\",\n    \"collateSubrequests\": \"false\",\n    \"compositeRequest\": [\n      {\n            \"method\": \"GET\",\n            \"referenceId\": \"reseller\",\n            \"url\": \"/services/data/v48.0/query/?q=SELECT id, FSAP_ID__C FROM\u2026"
               },
               "children": [
                 {
@@ -23373,6 +23715,825 @@ def Message processData(Message message) {
           "condition": ""
         }
       ]
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "MessageFlow_96162217",
+      "name": "JMS",
+      "source": "ServiceTask_96162213",
+      "target": "Participant_96162216",
+      "properties": {
+        "ComponentType": "JMS",
+        "Description": "",
+        "ComponentNS": "sap",
+        "componentVersion": "1.5",
+        "UseMessageCompression": "{{CSM1}}",
+        "Name": "JMS",
+        "TransportProtocolVersion": "1.5.0",
+        "ComponentSWCVName": "external",
+        "QueueName_outbound": "{{queuename1}}",
+        "system": "JMS_Async",
+        "EncryptMessage": "{{ESM1}}",
+        "RetentionThresholdAlerting": "{{RTA1}}",
+        "ExpirationPeriod": "{{EP1}}",
+        "TransportProtocol": "Not Applicable",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::sap:JMS/tp::Not Applicable/mp::Not Applicable/direction::Receiver/version::1.5.0",
+        "TransferExchangeProperties": "{{TEP1}}",
+        "MessageProtocol": "Not Applicable",
+        "MessageProtocolVersion": "1.5.0",
+        "ComponentSWCVId": "1.5.0",
+        "direction": "Receiver"
+      }
+    },
+    {
+      "id": "MessageFlow_79626390",
+      "name": "Salesforce",
+      "source": "ServiceTask_79626386",
+      "target": "Participant_79626389",
+      "properties": {
+        "jobResultType": "none",
+        "orderId": "",
+        "sObjectQuery": "",
+        "treatNumericAsString": "false",
+        "processAllBatches": "false",
+        "operationNameRest": "getVersions",
+        "filterFields": "0",
+        "apexMethod": "post",
+        "apiVersion": "51.0",
+        "uploadFromAttachment": "0",
+        "operationNameJobBulk2": "insert",
+        "streamType": "pushTopic",
+        "operationNameSObjectsColletion": "create",
+        "autoPagination": "false",
+        "ComponentSWCVId": "1.0.15",
+        "sObjectName": "AcceptedEventRelation",
+        "queryJobId": "",
+        "channelNameGenericEvents": "",
+        "audience": "",
+        "sObjectBlobFieldName": "Attachment",
+        "channelNamePlatform": "",
+        "expirationJWT": "360",
+        "apiVersionsObjectCollection": "51.0",
+        "componentVersion": "1.0",
+        "customReplay": "",
+        "customUrl": "",
+        "system": "cropEdge2",
+        "externalIdFieldNameCreateJobBulk": "",
+        "sObjectIdName": "",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::Salesforce/vendor::rojoconsultancy.com/tp::HTTPS/mp::REST/direction::Receiver/version::1.0.2",
+        "MessageProtocolVersion": "1.0.15",
+        "responseTimeOut": "60000",
+        "object": "",
+        "Description": "",
+        "operationNameRestBulk": "getJob",
+        "filterName": "",
+        "invalidReplyIdApproach": "none",
+        "payloadFormat": "JSON",
+        "channelNameChangeDataCapture": "",
+        "ComponentSWCVName": "external",
+        "customResponseFormat": "application/xml;charset=utf-8",
+        "sObjectFieldsTable": "",
+        "waitTimeStream": "30000",
+        "maxMssageEvent": "10",
+        "sObjectIdValue": "",
+        "contentTypeBulk2": "CSV",
+        "customSObjectName": "",
+        "contentTypeBulkQueryCreate": "XML",
+        "resolveQueryproperty": "false",
+        "connectionTimeOut": "60000",
+        "apiVersionBulkApi": "51.0",
+        "issuerAlias": "",
+        "operationNameStreamingReceiver": "eventPolling",
+        "listsObjects": "",
+        "Name": "Salesforce",
+        "TransportProtocolVersion": "1.0.15",
+        "apiVersionBulkApiForJobs2": "51.0",
+        "basicCredentialName": "{{BCredential}}",
+        "lazyLogin": "true",
+        "queryLocator": "",
+        "contentType": "XML",
+        "customPayloadFormat": "application/xml;charset=utf-8",
+        "customizedRequestHeader": "",
+        "accountType": "oauthClientCredentials",
+        "sObjectId": "",
+        "jobId": "",
+        "nextRecordsUrl": "",
+        "oauthCredentialName": "{{OCredential}}",
+        "sObjectSearch": "",
+        "filterValue": "",
+        "pkChunkingEnabled": "0",
+        "keystoreAlias": "",
+        "assignmentRuleId": "",
+        "TransportProtocol": "HTTPS",
+        "restAPIType": "apiRestApex",
+        "queryResultsMaxRecords": "2000",
+        "customMethod": "get",
+        "columnDelimiterJobBulk2": "COMMA",
+        "handleXMLNULL": "false",
+        "ComponentNS": "sap",
+        "operationNameRestBulk2": "getJob",
+        "operationNamePlaceOrder": "addContractOrdersToAccount",
+        "uploadJobDataFromBody": "false",
+        "batchId": "",
+        "queryAll": "false",
+        "lineEndingBulkJob2": "LF",
+        "apexUrl": "{{ReSource}}",
+        "apiVersionPlaceOrderApi": "51.0",
+        "apiVersionStreaming": "51.0",
+        "loginUrl": "{{Address123}}",
+        "subjectAlias": "",
+        "jobType": "V2Ingest",
+        "channelNamePushTopic": "",
+        "MessageProtocol": "REST",
+        "direction": "Receiver",
+        "ComponentType": "Salesforce",
+        "prettyPrint": "0",
+        "resultId": "",
+        "Vendor": "rojoconsultancy.com",
+        "securityToken": "{{SecurityToken}}",
+        "allOrNone": "false",
+        "advanceJobProperties": "false",
+        "operationNameQueryJob2": "query",
+        "contractId": "",
+        "attachmentName": "",
+        "apiVersionBulkApiForQuery2": "51.0"
+      }
+    },
+    {
+      "id": "MessageFlow_79626273",
+      "name": "HTTP",
+      "source": "ServiceTask_79626268",
+      "target": "Participant_79626271",
+      "properties": {
+        "Description": "",
+        "methodSourceExpression": "",
+        "ComponentNS": "sap",
+        "privateKeyAlias": "",
+        "httpMethod": "GET",
+        "allowedResponseHeaders": "*",
+        "Name": "HTTP",
+        "TransportProtocolVersion": "1.15.0",
+        "ComponentSWCVName": "external",
+        "proxyPort": "",
+        "enableMPLAttachments": "true",
+        "httpAddressQuery": "",
+        "httpRequestTimeout": "60000",
+        "MessageProtocol": "None",
+        "ComponentSWCVId": "1.15.0",
+        "allowedRequestHeaders": "",
+        "direction": "Receiver",
+        "ComponentType": "HTTP",
+        "httpShouldSendBody": "true",
+        "throwExceptionOnFailure": "true",
+        "proxyType": "default",
+        "componentVersion": "1.15",
+        "retryIteration": "1",
+        "proxyHost": "",
+        "retryOnConnectionFailure": "false",
+        "system": "AGIIS",
+        "authenticationMethod": "OAuth2 Client Credentials",
+        "locationID": "",
+        "retryInterval": "5",
+        "TransportProtocol": "HTTP",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::sap:HTTP/tp::HTTP/mp::None/direction::Receiver/version::1.15.0",
+        "credentialName": "{{credential}}",
+        "httpErrorResponseCodes": "",
+        "MessageProtocolVersion": "1.15.0",
+        "httpAddressWithoutQuery": "{{address}}"
+      }
+    },
+    {
+      "id": "MessageFlow_96162221",
+      "name": "ProcessDirect",
+      "source": "Participant_96162218",
+      "target": "StartEvent_96162198",
+      "properties": {
+        "ComponentType": "ProcessDirect",
+        "Description": "",
+        "address": "/PB/CreateGrower/v2",
+        "ComponentNS": "sap",
+        "Vendor": "SAP",
+        "componentVersion": "1.1",
+        "Name": "ProcessDirect",
+        "TransportProtocolVersion": "1.1.2",
+        "ComponentSWCVName": "external",
+        "system": "JMSCommonflow",
+        "TransportProtocol": "Not Applicable",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::ProcessDirect/vendor::SAP/tp::Not Applicable/mp::Not Applicable/direction::Sender/version::1.1.2",
+        "MessageProtocol": "Not Applicable",
+        "MessageProtocolVersion": "1.1.2",
+        "ComponentSWCVId": "1.1.2",
+        "direction": "Sender"
+      }
+    },
+    {
+      "id": "MessageFlow_62520193",
+      "name": "ProcessDirect",
+      "source": "ServiceTask_62520188",
+      "target": "Participant_62520191",
+      "properties": {
+        "ComponentType": "ProcessDirect",
+        "Description": "",
+        "address": "/dynamicsoql/query/v3",
+        "ComponentNS": "sap",
+        "Vendor": "SAP",
+        "componentVersion": "1.1",
+        "Name": "ProcessDirect",
+        "TransportProtocolVersion": "1.1.2",
+        "ComponentSWCVName": "external",
+        "system": "SalesforceQuery",
+        "TransportProtocol": "Not Applicable",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::ProcessDirect/vendor::SAP/tp::Not Applicable/mp::Not Applicable/direction::Receiver/version::1.1.1",
+        "MessageProtocol": "Not Applicable",
+        "MessageProtocolVersion": "1.1.2",
+        "ComponentSWCVId": "1.1.2",
+        "direction": "Receiver"
+      }
+    },
+    {
+      "id": "MessageFlow_79626289",
+      "name": "Salesforce",
+      "source": "ServiceTask_79626285",
+      "target": "Participant_79626288",
+      "properties": {
+        "jobResultType": "none",
+        "orderId": "",
+        "sObjectQuery": "",
+        "treatNumericAsString": "false",
+        "processAllBatches": "false",
+        "operationNameRest": "getVersions",
+        "filterFields": "0",
+        "apexMethod": "post",
+        "apiVersion": "51.0",
+        "uploadFromAttachment": "0",
+        "operationNameJobBulk2": "insert",
+        "streamType": "pushTopic",
+        "operationNameSObjectsColletion": "create",
+        "autoPagination": "false",
+        "ComponentSWCVId": "1.0.15",
+        "sObjectName": "AcceptedEventRelation",
+        "queryJobId": "",
+        "channelNameGenericEvents": "",
+        "audience": "",
+        "sObjectBlobFieldName": "Attachment",
+        "channelNamePlatform": "",
+        "expirationJWT": "360",
+        "apiVersionsObjectCollection": "51.0",
+        "componentVersion": "1.0",
+        "customReplay": "",
+        "customUrl": "",
+        "system": "CropEdge",
+        "externalIdFieldNameCreateJobBulk": "",
+        "sObjectIdName": "",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::Salesforce/vendor::rojoconsultancy.com/tp::HTTPS/mp::REST/direction::Receiver/version::1.0.2",
+        "MessageProtocolVersion": "1.0.15",
+        "responseTimeOut": "60000",
+        "object": "",
+        "Description": "",
+        "operationNameRestBulk": "getJob",
+        "filterName": "",
+        "invalidReplyIdApproach": "none",
+        "payloadFormat": "JSON",
+        "channelNameChangeDataCapture": "",
+        "ComponentSWCVName": "external",
+        "customResponseFormat": "application/xml;charset=utf-8",
+        "sObjectFieldsTable": "",
+        "waitTimeStream": "30000",
+        "maxMssageEvent": "10",
+        "sObjectIdValue": "",
+        "contentTypeBulk2": "CSV",
+        "customSObjectName": "",
+        "contentTypeBulkQueryCreate": "XML",
+        "resolveQueryproperty": "false",
+        "connectionTimeOut": "60000",
+        "apiVersionBulkApi": "51.0",
+        "issuerAlias": "",
+        "operationNameStreamingReceiver": "eventPolling",
+        "listsObjects": "",
+        "Name": "Salesforce",
+        "TransportProtocolVersion": "1.0.15",
+        "apiVersionBulkApiForJobs2": "51.0",
+        "basicCredentialName": "{{BCredential}}",
+        "lazyLogin": "true",
+        "queryLocator": "",
+        "contentType": "XML",
+        "customPayloadFormat": "application/xml;charset=utf-8",
+        "customizedRequestHeader": "",
+        "accountType": "oauthClientCredentials",
+        "sObjectId": "",
+        "jobId": "",
+        "nextRecordsUrl": "",
+        "oauthCredentialName": "{{OCredential}}",
+        "sObjectSearch": "",
+        "filterValue": "",
+        "pkChunkingEnabled": "0",
+        "keystoreAlias": "",
+        "assignmentRuleId": "",
+        "TransportProtocol": "HTTPS",
+        "restAPIType": "apiRestApex",
+        "queryResultsMaxRecords": "2000",
+        "customMethod": "get",
+        "columnDelimiterJobBulk2": "COMMA",
+        "handleXMLNULL": "false",
+        "ComponentNS": "sap",
+        "operationNameRestBulk2": "getJob",
+        "operationNamePlaceOrder": "addContractOrdersToAccount",
+        "uploadJobDataFromBody": "false",
+        "batchId": "",
+        "queryAll": "false",
+        "lineEndingBulkJob2": "LF",
+        "apexUrl": "{{URL}}",
+        "apiVersionPlaceOrderApi": "51.0",
+        "apiVersionStreaming": "51.0",
+        "loginUrl": "{{SAddress}}",
+        "subjectAlias": "",
+        "jobType": "V2Ingest",
+        "channelNamePushTopic": "",
+        "MessageProtocol": "REST",
+        "direction": "Receiver",
+        "ComponentType": "Salesforce",
+        "prettyPrint": "0",
+        "resultId": "",
+        "Vendor": "rojoconsultancy.com",
+        "securityToken": "{{SecurityToken}}",
+        "allOrNone": "false",
+        "advanceJobProperties": "false",
+        "operationNameQueryJob2": "query",
+        "contractId": "",
+        "attachmentName": "",
+        "apiVersionBulkApiForQuery2": "51.0"
+      }
+    },
+    {
+      "id": "MessageFlow_96162325",
+      "name": "ProcessDirect",
+      "source": "ServiceTask_96162322",
+      "target": "Participant_96162321",
+      "properties": {
+        "ComponentType": "ProcessDirect",
+        "Description": "",
+        "address": "/emailnotification/v1",
+        "ComponentNS": "sap",
+        "Vendor": "SAP",
+        "componentVersion": "1.1",
+        "Name": "ProcessDirect",
+        "TransportProtocolVersion": "1.1.2",
+        "ComponentSWCVName": "external",
+        "system": "SFDCMailReceiver",
+        "TransportProtocol": "Not Applicable",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::ProcessDirect/vendor::SAP/tp::Not Applicable/mp::Not Applicable/direction::Receiver/version::1.1.1",
+        "MessageProtocol": "Not Applicable",
+        "MessageProtocolVersion": "1.1.2",
+        "ComponentSWCVId": "1.1.2",
+        "direction": "Receiver"
+      }
+    },
+    {
+      "id": "MessageFlow_96162257",
+      "name": "ProcessDirect",
+      "source": "Participant_96162254",
+      "target": "StartEvent_96162255",
+      "properties": {
+        "ComponentType": "ProcessDirect",
+        "Description": "",
+        "address": "/PB/CreateGrowerv2/Error",
+        "ComponentNS": "sap",
+        "Vendor": "SAP",
+        "componentVersion": "1.1",
+        "Name": "ProcessDirect",
+        "TransportProtocolVersion": "1.1.2",
+        "ComponentSWCVName": "external",
+        "system": "JMScommonflow_2",
+        "TransportProtocol": "Not Applicable",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::ProcessDirect/vendor::SAP/tp::Not Applicable/mp::Not Applicable/direction::Sender/version::1.1.2",
+        "MessageProtocol": "Not Applicable",
+        "MessageProtocolVersion": "1.1.2",
+        "ComponentSWCVId": "1.1.2",
+        "direction": "Sender"
+      }
+    },
+    {
+      "id": "MessageFlow_96162269",
+      "name": "Salesforce",
+      "source": "ServiceTask_96162265",
+      "target": "Participant_96162268",
+      "properties": {
+        "jobResultType": "none",
+        "orderId": "",
+        "sObjectQuery": "",
+        "treatNumericAsString": "false",
+        "processAllBatches": "false",
+        "operationNameRest": "getVersions",
+        "filterFields": "0",
+        "apexMethod": "post",
+        "apiVersion": "51.0",
+        "uploadFromAttachment": "0",
+        "operationNameJobBulk2": "insert",
+        "streamType": "pushTopic",
+        "operationNameSObjectsColletion": "create",
+        "autoPagination": "false",
+        "ComponentSWCVId": "1.0.15",
+        "sObjectName": "AcceptedEventRelation",
+        "queryJobId": "",
+        "channelNameGenericEvents": "",
+        "audience": "",
+        "sObjectBlobFieldName": "Attachment",
+        "channelNamePlatform": "",
+        "expirationJWT": "360",
+        "apiVersionsObjectCollection": "51.0",
+        "componentVersion": "1.0",
+        "customReplay": "",
+        "customUrl": "",
+        "system": "calltoapex",
+        "externalIdFieldNameCreateJobBulk": "",
+        "sObjectIdName": "",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::Salesforce/vendor::rojoconsultancy.com/tp::HTTPS/mp::REST/direction::Receiver/version::1.0.2",
+        "MessageProtocolVersion": "1.0.15",
+        "responseTimeOut": "60000",
+        "object": "",
+        "Description": "",
+        "operationNameRestBulk": "getJob",
+        "filterName": "",
+        "invalidReplyIdApproach": "none",
+        "payloadFormat": "JSON",
+        "channelNameChangeDataCapture": "",
+        "ComponentSWCVName": "external",
+        "customResponseFormat": "application/xml;charset=utf-8",
+        "sObjectFieldsTable": "",
+        "waitTimeStream": "30000",
+        "maxMssageEvent": "10",
+        "sObjectIdValue": "",
+        "contentTypeBulk2": "CSV",
+        "customSObjectName": "",
+        "contentTypeBulkQueryCreate": "XML",
+        "resolveQueryproperty": "false",
+        "connectionTimeOut": "60000",
+        "apiVersionBulkApi": "51.0",
+        "issuerAlias": "",
+        "operationNameStreamingReceiver": "eventPolling",
+        "listsObjects": "",
+        "Name": "Salesforce",
+        "TransportProtocolVersion": "1.0.15",
+        "apiVersionBulkApiForJobs2": "51.0",
+        "basicCredentialName": "{{BCredential}}",
+        "lazyLogin": "true",
+        "queryLocator": "",
+        "contentType": "XML",
+        "customPayloadFormat": "application/xml;charset=utf-8",
+        "customizedRequestHeader": "",
+        "accountType": "oauthClientCredentials",
+        "sObjectId": "",
+        "jobId": "",
+        "nextRecordsUrl": "",
+        "oauthCredentialName": "{{OCredential}}",
+        "sObjectSearch": "",
+        "filterValue": "",
+        "pkChunkingEnabled": "0",
+        "keystoreAlias": "",
+        "assignmentRuleId": "",
+        "TransportProtocol": "HTTPS",
+        "restAPIType": "apiRestApex",
+        "queryResultsMaxRecords": "2000",
+        "customMethod": "get",
+        "columnDelimiterJobBulk2": "COMMA",
+        "handleXMLNULL": "false",
+        "ComponentNS": "sap",
+        "operationNameRestBulk2": "getJob",
+        "operationNamePlaceOrder": "addContractOrdersToAccount",
+        "uploadJobDataFromBody": "false",
+        "batchId": "",
+        "queryAll": "false",
+        "lineEndingBulkJob2": "LF",
+        "apexUrl": "{{reResource2}}",
+        "apiVersionPlaceOrderApi": "51.0",
+        "apiVersionStreaming": "51.0",
+        "loginUrl": "{{Address123}}",
+        "subjectAlias": "",
+        "jobType": "V2Ingest",
+        "channelNamePushTopic": "",
+        "MessageProtocol": "REST",
+        "direction": "Receiver",
+        "ComponentType": "Salesforce",
+        "prettyPrint": "0",
+        "resultId": "",
+        "Vendor": "rojoconsultancy.com",
+        "securityToken": "{{SecurityToken}}",
+        "allOrNone": "false",
+        "advanceJobProperties": "false",
+        "operationNameQueryJob2": "query",
+        "contractId": "",
+        "attachmentName": "",
+        "apiVersionBulkApiForQuery2": "51.0"
+      }
+    },
+    {
+      "id": "MessageFlow_96162121",
+      "name": "Salesforce",
+      "source": "ServiceTask_79626503",
+      "target": "Participant_96162120",
+      "properties": {
+        "jobResultType": "none",
+        "orderId": "",
+        "sObjectQuery": "",
+        "treatNumericAsString": "false",
+        "processAllBatches": "false",
+        "operationNameRest": "getVersions",
+        "filterFields": "0",
+        "apexMethod": "post",
+        "apiVersion": "51.0",
+        "uploadFromAttachment": "0",
+        "operationNameJobBulk2": "insert",
+        "streamType": "pushTopic",
+        "operationNameSObjectsColletion": "create",
+        "autoPagination": "false",
+        "ComponentSWCVId": "1.0.15",
+        "sObjectName": "AcceptedEventRelation",
+        "queryJobId": "",
+        "channelNameGenericEvents": "",
+        "audience": "",
+        "sObjectBlobFieldName": "Attachment",
+        "channelNamePlatform": "",
+        "expirationJWT": "360",
+        "apiVersionsObjectCollection": "51.0",
+        "componentVersion": "1.0",
+        "customReplay": "",
+        "customUrl": "",
+        "system": "cropedge4",
+        "externalIdFieldNameCreateJobBulk": "",
+        "sObjectIdName": "",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::Salesforce/vendor::rojoconsultancy.com/tp::HTTPS/mp::REST/direction::Receiver/version::1.0.2",
+        "MessageProtocolVersion": "1.0.15",
+        "responseTimeOut": "60000",
+        "object": "",
+        "Description": "",
+        "operationNameRestBulk": "getJob",
+        "filterName": "",
+        "invalidReplyIdApproach": "none",
+        "payloadFormat": "JSON",
+        "channelNameChangeDataCapture": "",
+        "ComponentSWCVName": "external",
+        "customResponseFormat": "application/xml;charset=utf-8",
+        "sObjectFieldsTable": "",
+        "waitTimeStream": "30000",
+        "maxMssageEvent": "10",
+        "sObjectIdValue": "",
+        "contentTypeBulk2": "CSV",
+        "customSObjectName": "",
+        "contentTypeBulkQueryCreate": "XML",
+        "resolveQueryproperty": "false",
+        "connectionTimeOut": "60000",
+        "apiVersionBulkApi": "51.0",
+        "issuerAlias": "",
+        "operationNameStreamingReceiver": "eventPolling",
+        "listsObjects": "",
+        "Name": "Salesforce",
+        "TransportProtocolVersion": "1.0.15",
+        "apiVersionBulkApiForJobs2": "51.0",
+        "basicCredentialName": "{{BCredential}}",
+        "lazyLogin": "true",
+        "queryLocator": "",
+        "contentType": "XML",
+        "customPayloadFormat": "application/xml;charset=utf-8",
+        "customizedRequestHeader": "",
+        "accountType": "oauthClientCredentials",
+        "sObjectId": "",
+        "jobId": "",
+        "nextRecordsUrl": "",
+        "oauthCredentialName": "{{OCredential}}",
+        "sObjectSearch": "",
+        "filterValue": "",
+        "pkChunkingEnabled": "0",
+        "keystoreAlias": "",
+        "assignmentRuleId": "",
+        "TransportProtocol": "HTTPS",
+        "restAPIType": "apiRestApex",
+        "queryResultsMaxRecords": "2000",
+        "customMethod": "get",
+        "columnDelimiterJobBulk2": "COMMA",
+        "handleXMLNULL": "false",
+        "ComponentNS": "sap",
+        "operationNameRestBulk2": "getJob",
+        "operationNamePlaceOrder": "addContractOrdersToAccount",
+        "uploadJobDataFromBody": "false",
+        "batchId": "",
+        "queryAll": "false",
+        "lineEndingBulkJob2": "LF",
+        "apexUrl": "{{ReSource}}",
+        "apiVersionPlaceOrderApi": "51.0",
+        "apiVersionStreaming": "51.0",
+        "loginUrl": "{{Address123}}",
+        "subjectAlias": "",
+        "jobType": "V2Ingest",
+        "channelNamePushTopic": "",
+        "MessageProtocol": "REST",
+        "direction": "Receiver",
+        "ComponentType": "Salesforce",
+        "prettyPrint": "0",
+        "resultId": "",
+        "Vendor": "rojoconsultancy.com",
+        "securityToken": "{{SecurityToken}}",
+        "allOrNone": "false",
+        "advanceJobProperties": "false",
+        "operationNameQueryJob2": "query",
+        "contractId": "",
+        "attachmentName": "",
+        "apiVersionBulkApiForQuery2": "51.0"
+      }
+    },
+    {
+      "id": "MessageFlow_96162252",
+      "name": "JMS",
+      "source": "ServiceTask_96162248",
+      "target": "Participant_96162251",
+      "properties": {
+        "ComponentType": "JMS",
+        "Description": "",
+        "ComponentNS": "sap",
+        "componentVersion": "1.5",
+        "UseMessageCompression": "{{CSM}}",
+        "Name": "JMS",
+        "TransportProtocolVersion": "1.5.0",
+        "ComponentSWCVName": "external",
+        "QueueName_outbound": "{{queuename}}",
+        "system": "JMS_Async",
+        "EncryptMessage": "{{ESM}}",
+        "RetentionThresholdAlerting": "{{RTA}}",
+        "ExpirationPeriod": "{{EP}}",
+        "TransportProtocol": "Not Applicable",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::sap:JMS/tp::Not Applicable/mp::Not Applicable/direction::Receiver/version::1.5.0",
+        "TransferExchangeProperties": "{{TEP}}",
+        "MessageProtocol": "Not Applicable",
+        "MessageProtocolVersion": "1.5.0",
+        "ComponentSWCVId": "1.5.0",
+        "direction": "Receiver"
+      }
+    },
+    {
+      "id": "MessageFlow_79626467",
+      "name": "Salesforce",
+      "source": "ServiceTask_79626463",
+      "target": "Participant_79626466",
+      "properties": {
+        "jobResultType": "none",
+        "orderId": "",
+        "sObjectQuery": "",
+        "treatNumericAsString": "false",
+        "processAllBatches": "false",
+        "operationNameRest": "getVersions",
+        "filterFields": "0",
+        "apexMethod": "post",
+        "apiVersion": "51.0",
+        "uploadFromAttachment": "0",
+        "operationNameJobBulk2": "insert",
+        "streamType": "pushTopic",
+        "operationNameSObjectsColletion": "create",
+        "autoPagination": "false",
+        "ComponentSWCVId": "1.0.15",
+        "sObjectName": "AcceptedEventRelation",
+        "queryJobId": "",
+        "channelNameGenericEvents": "",
+        "audience": "",
+        "sObjectBlobFieldName": "Attachment",
+        "channelNamePlatform": "",
+        "expirationJWT": "360",
+        "apiVersionsObjectCollection": "51.0",
+        "componentVersion": "1.0",
+        "customReplay": "",
+        "customUrl": "",
+        "system": "cropEdge3",
+        "externalIdFieldNameCreateJobBulk": "",
+        "sObjectIdName": "",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::Salesforce/vendor::rojoconsultancy.com/tp::HTTPS/mp::REST/direction::Receiver/version::1.0.2",
+        "MessageProtocolVersion": "1.0.15",
+        "responseTimeOut": "60000",
+        "object": "",
+        "Description": "",
+        "operationNameRestBulk": "getJob",
+        "filterName": "",
+        "invalidReplyIdApproach": "none",
+        "payloadFormat": "JSON",
+        "channelNameChangeDataCapture": "",
+        "ComponentSWCVName": "external",
+        "customResponseFormat": "application/xml;charset=utf-8",
+        "sObjectFieldsTable": "",
+        "waitTimeStream": "30000",
+        "maxMssageEvent": "10",
+        "sObjectIdValue": "",
+        "contentTypeBulk2": "CSV",
+        "customSObjectName": "",
+        "contentTypeBulkQueryCreate": "XML",
+        "resolveQueryproperty": "false",
+        "connectionTimeOut": "60000",
+        "apiVersionBulkApi": "51.0",
+        "issuerAlias": "",
+        "operationNameStreamingReceiver": "eventPolling",
+        "listsObjects": "",
+        "Name": "Salesforce",
+        "TransportProtocolVersion": "1.0.15",
+        "apiVersionBulkApiForJobs2": "51.0",
+        "basicCredentialName": "{{BCredential}}",
+        "lazyLogin": "true",
+        "queryLocator": "",
+        "contentType": "XML",
+        "customPayloadFormat": "application/xml;charset=utf-8",
+        "customizedRequestHeader": "",
+        "accountType": "oauthClientCredentials",
+        "sObjectId": "",
+        "jobId": "",
+        "nextRecordsUrl": "",
+        "oauthCredentialName": "{{OCredential}}",
+        "sObjectSearch": "",
+        "filterValue": "",
+        "pkChunkingEnabled": "0",
+        "keystoreAlias": "",
+        "assignmentRuleId": "",
+        "TransportProtocol": "HTTPS",
+        "restAPIType": "apiRestApex",
+        "queryResultsMaxRecords": "2000",
+        "customMethod": "get",
+        "columnDelimiterJobBulk2": "COMMA",
+        "handleXMLNULL": "false",
+        "ComponentNS": "sap",
+        "operationNameRestBulk2": "getJob",
+        "operationNamePlaceOrder": "addContractOrdersToAccount",
+        "uploadJobDataFromBody": "false",
+        "batchId": "",
+        "queryAll": "false",
+        "lineEndingBulkJob2": "LF",
+        "apexUrl": "{{ReSource}}",
+        "apiVersionPlaceOrderApi": "51.0",
+        "apiVersionStreaming": "51.0",
+        "loginUrl": "{{Address123}}",
+        "subjectAlias": "",
+        "jobType": "V2Ingest",
+        "channelNamePushTopic": "",
+        "MessageProtocol": "REST",
+        "direction": "Receiver",
+        "ComponentType": "Salesforce",
+        "prettyPrint": "0",
+        "resultId": "",
+        "Vendor": "rojoconsultancy.com",
+        "securityToken": "{{SecurityToken}}",
+        "allOrNone": "false",
+        "advanceJobProperties": "false",
+        "operationNameQueryJob2": "query",
+        "contractId": "",
+        "attachmentName": "",
+        "apiVersionBulkApiForQuery2": "51.0"
+      }
+    },
+    {
+      "id": "MessageFlow_4",
+      "name": "HTTPS",
+      "source": "Participant_1",
+      "target": "StartEvent_2",
+      "properties": {
+        "ComponentType": "HTTPS",
+        "Description": "",
+        "maximumBodySize": "40",
+        "ComponentNS": "sap",
+        "componentVersion": "1.5",
+        "urlPath": "/productbooking/creategrower/v2.0",
+        "Name": "HTTPS",
+        "TransportProtocolVersion": "1.5.1",
+        "ComponentSWCVName": "external",
+        "system": "External_call",
+        "xsrfProtection": "0",
+        "TransportProtocol": "HTTPS",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::sap:HTTPS/tp::HTTPS/mp::None/direction::Sender/version::1.5.1",
+        "userRole": "ESBMessaging.send",
+        "senderAuthType": "RoleBased",
+        "MessageProtocol": "None",
+        "MessageProtocolVersion": "1.5.1",
+        "ComponentSWCVId": "1.5.1",
+        "direction": "Sender",
+        "clientCertificates": ""
+      }
+    },
+    {
+      "id": "MessageFlow_62520223",
+      "name": "ProcessDirect",
+      "source": "ServiceTask_62520219",
+      "target": "Participant_62520222",
+      "properties": {
+        "ComponentType": "ProcessDirect",
+        "Description": "",
+        "address": "/dynamicsoql/executecompositerequest/v1",
+        "ComponentNS": "sap",
+        "Vendor": "SAP",
+        "componentVersion": "1.1",
+        "Name": "ProcessDirect",
+        "TransportProtocolVersion": "1.1.2",
+        "ComponentSWCVName": "external",
+        "system": "QueryStatusInSFDC",
+        "TransportProtocol": "Not Applicable",
+        "cmdVariantUri": "ctype::AdapterVariant/cname::ProcessDirect/vendor::SAP/tp::Not Applicable/mp::Not Applicable/direction::Receiver/version::1.1.1",
+        "MessageProtocol": "Not Applicable",
+        "MessageProtocolVersion": "1.1.2",
+        "ComponentSWCVId": "1.1.2",
+        "direction": "Receiver"
+      }
     }
   ]
 };</script>
