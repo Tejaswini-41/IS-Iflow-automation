@@ -1,0 +1,38 @@
+name: iFlow Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      iflow_path:
+        description: "Path to .zip or extracted iFlow folder in the repo"
+        required: true
+        default: "path/to/iflow.zip"
+      output_dir:
+        description: "Output directory"
+        required: true
+        default: "output"
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Generate iFlow reports
+        run: |
+          python src/ci_generate_report.py "${{ inputs.iflow_path }}" --output-dir "${{ inputs.output_dir }}"
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: iflow-reports
+          path: ${{ inputs.output_dir }}

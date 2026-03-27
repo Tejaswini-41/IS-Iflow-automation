@@ -84,6 +84,16 @@ python src/main.py ./extracted_src_folder --no-html --no-json --verbose
 
 ---
 
+## ✅ GitHub Actions (CI)
+
+This repository includes a workflow that runs the analyzer in GitHub Actions and uploads the generated reports as artifacts.
+
+1. Go to **Actions** tab and choose **iFlow Analysis**.
+2. Click **Run workflow** and provide the `iflow_path` to your `.zip` or extracted iFlow folder in the repo.
+3. Download the `iflow-reports` artifact to access the HTML dashboard and JSON/text outputs.
+
+---
+
 ## 📁 Architecture & Project Structure
 
 The project is built on a modular extractor-generator architecture:

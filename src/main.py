@@ -5,13 +5,7 @@ SAP CPI iFlow Analyzer - Main Entry Point
 import sys
 import argparse
 from pathlib import Path
-from analyzer.iflow_parser import IFlowParser
-from analyzer.component_extractor import ComponentExtractor
-from analyzer.flow_builder import FlowBuilder
-from analyzer.complexity_analyzer import ComplexityAnalyzer
-from generators.json_exporter import JSONExporter
-from generators.html_generator import HTMLGenerator
-from generators.text_generator import TextGenerator
+from iflow_runner import analyze_iflow
 
 
 def print_summary_table(complexity_report: dict, raw_data: dict):
@@ -75,77 +69,44 @@ Examples:
     print(f"   Output: {args.output_dir}")
     print("=" * 80)
 
-    # Step 1: Parse iFlow XML
-    print("\n📄 Step 1: Parsing iFlow XML...")
-    iflow_parser = IFlowParser()
     try:
-        raw_data = iflow_parser.parse(input_path)
+        result = analyze_iflow(
+            input_path,
+            output_dir=args.output_dir,
+            generate_html=not args.no_html,
+            generate_text=not args.no_text,
+            generate_json=not args.no_json,
+            logger=print,
+        )
     except ValueError as e:
         print(f"❌ Error: {e}")
         sys.exit(1)
 
-    print(f"   ✅ iFlow: {raw_data.get('iflow_name', raw_data.get('filename', ''))}")
-    print(f"   ✅ Processes  : {len(raw_data['processes'])}")
-    print(f"   ✅ Participants: {len(raw_data['participants'])}")
-    print(f"   ✅ Msg Flows  : {len(raw_data['message_flows'])}")
+    raw_data = result["raw_data"]
+    complexity_report = result["complexity_report"]
+    stats = result["stats"]
+    outputs = result["outputs"]
 
-    # Step 2: Load Groovy scripts (folder-based iFlows)
-    extractor = ComponentExtractor()
-    is_zip = input_path.endswith('.zip')
-    zip_path = input_path if is_zip else None
-
-    if not is_zip:
-        # Try loading scripts from folder
-        print("\n📜 Step 2a: Loading Groovy scripts from folder...")
-        extractor.load_scripts_from_folder(input_path)
-
-    # Step 2b: Extract components
-    print("\n🔧 Step 2: Extracting components...")
-    normalized_components = extractor.extract(raw_data, zip_path)
-    actual_comps = [c for c in normalized_components if c['type'] != 'SequenceFlow']
-    print(f"   ✅ {len(actual_comps)} components extracted")
-
-    # Step 3: Build flow tree
-    print("\n🌳 Step 3: Building flow tree...")
-    flow_builder = FlowBuilder()
-    flow_tree = flow_builder.build(normalized_components)
-    stats = flow_builder.get_statistics()
-    print(f"   ✅ {len(flow_tree)} root node(s), {stats['total_sequence_flows']} sequence flows")
-
-    # Step 4: Complexity analysis
-    print("\n📊 Step 4: Analyzing complexity...")
-    complexity_analyzer = ComplexityAnalyzer()
-    complexity_report = complexity_analyzer.analyze(flow_tree, raw_data.get('processes', []))
+    print(f"\n   ✅ iFlow: {raw_data.get('iflow_name', raw_data.get('filename', ''))}")
+    print(f"   ✅ Processes  : {len(raw_data.get('processes', []))}")
+    print(f"   ✅ Participants: {len(raw_data.get('participants', []))}")
+    print(f"   ✅ Msg Flows  : {len(raw_data.get('message_flows', []))}")
+    print(f"   ✅ {stats['actual_components']} components extracted")
+    print(f"   ✅ {stats['root_nodes']} root node(s), {stats['total_sequence_flows']} sequence flows")
     print(f"   ✅ Complexity: {complexity_report['label']} (score {complexity_report['score']}/100)")
 
-    # Step 5: Generate outputs
-    print("\n📝 Step 5: Generating outputs...")
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(exist_ok=True)
-
-    if not args.no_json:
-        json_output = output_dir / 'iflow_analysis.json'
-        json_exporter = JSONExporter()
-        json_exporter.export(flow_tree, str(json_output), raw_data, complexity_report)
-        print(f"   ✅ JSON  → {json_output}")
-
-    if not args.no_text:
-        text_output = output_dir / 'iflow_tree.txt'
-        text_generator = TextGenerator()
-        text_generator.generate(flow_tree, str(text_output))
-        print(f"   ✅ Text  → {text_output}")
-
-    if not args.no_html:
-        html_output = output_dir / 'iflow_visualization.html'
-        html_generator = HTMLGenerator()
-        html_generator.generate(flow_tree, raw_data, str(html_output), complexity_report)
-        print(f"   ✅ HTML  → {html_output}")
+    if "json" in outputs:
+        print(f"   ✅ JSON  → {outputs['json']}")
+    if "text" in outputs:
+        print(f"   ✅ Text  → {outputs['text']}")
+    if "html" in outputs:
+        print(f"   ✅ HTML  → {outputs['html']}")
 
     # Print summary table
     print_summary_table(complexity_report, raw_data)
 
-    if not args.no_html:
-        html_output = output_dir / 'iflow_visualization.html'
+    if "html" in outputs:
+        html_output = Path(outputs["html"])
         print(f"\n🌐 Open in browser: {html_output.absolute()}\n")
 
 
